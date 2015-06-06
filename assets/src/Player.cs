@@ -5,6 +5,7 @@ public class Player : MonoBehaviour {
 
 	Vector3 pos;
 	Quaternion rota;
+	Vector3 rota_euler;
 	Vector2 accel;
 	float angle = 90;
 	float angle_accel = 0;
@@ -21,6 +22,9 @@ public class Player : MonoBehaviour {
 	void Start() {
 		pos = transform.position;
 		rota = transform.rotation;
+		rota_euler.x = 90;
+		rota_euler.y = -90;
+		rota_euler.z = -90;
 		cam_pos = Camera.main.transform.position;
 	}
 
@@ -44,9 +48,14 @@ public class Player : MonoBehaviour {
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
 		angle_accel *= angle_friction;
 		angle += angle_accel;
+		rota.eulerAngles = rota_euler;
+		rota_euler.x -= angle_accel;
+		rota_euler.x = Mathf.Clamp(rota_euler.x, 45, 135);
+		rota_euler.x -= (rota_euler.x - 90) / 20.0f;
+		rota_euler.y -= angle_accel;
 
 		transform.position = pos;
-		transform.Rotate(0, 0, angle_accel);
+		transform.rotation = rota;
 
 		cam_pos.x -= (cam_pos.x - pos.x) / 10.0f;
 		cam_pos.z -= (cam_pos.z - pos.z) / 10.0f;
