@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
 	Vector3 cam_pos;
 
 	const float radians = Mathf.PI / 180.0f;
-	const float max_speed = .25f;
+	const float max_speed = .175f;
 	const float friction = .98f;
 	const float angle_accel_speed = .15f;
 	const float angle_friction = .95f;
@@ -57,8 +57,8 @@ public class Player : MonoBehaviour {
 		transform.position = pos;
 		transform.rotation = rota;
 
-		cam_pos.x -= (cam_pos.x - pos.x) / 10.0f;
-		cam_pos.z -= (cam_pos.z - pos.z) / 10.0f;
+		cam_pos.x -= (cam_pos.x - pos.x) / 20.0f;
+		cam_pos.z -= (cam_pos.z - pos.z) / 20.0f;
 		Camera.main.transform.position = cam_pos;
 	}
 }
