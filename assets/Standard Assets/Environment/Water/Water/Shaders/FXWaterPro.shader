@@ -3,7 +3,7 @@
 Shader "FX/Water (simple)" {
 Properties {
 	_horizonColor ("Horizon color", COLOR)  = ( .172 , .463 , .435 , 0)
-	_WaveScale ("Wave scale", Range (0.02,0.15)) = .07
+	_WaveScale ("Wave scale", Range (0.02,1)) = .07
 	_ColorControl ("Reflective color (RGB) fresnel (A) ", 2D) = "" { }
 	_ColorControlCube ("Reflective color cube (RGB) fresnel (A) ", Cube) = "" { TexGen CubeReflect }
 	_BumpMap ("Waves Normalmap ", 2D) = "" { }
@@ -21,9 +21,11 @@ Properties {
 Subshader {
 	Tags { "Queue"="Transparent" "RenderType"="Transparent" }
 	
+	Blend SrcAlpha OneMinusSrcAlpha
+	
 CGPROGRAM
-		#pragma surface surf SimpleSpecular vertex:vert
-
+		#pragma surface surf SimpleSpecular vertex:vert Lambert alpha
+		
 		uniform float4 _horizonColor;
 
 		uniform float4 WaveSpeed;
@@ -72,11 +74,10 @@ CGPROGRAM
 			half4 col;
 			col.rgb = lerp( water.rgb, _horizonColor.rgb, water.a );
 			col.a = _horizonColor.a;
-			col.a = .5;
 			
 			o.Normal = bump;
 			o.Albedo = col;
-			o.Alpha = .5;
+			o.Alpha = _horizonColor.a;
 			//o.Emission = col;
 		}
 		
@@ -91,7 +92,6 @@ CGPROGRAM
           half4 c;
           c.rgb = (s.Albedo * _LightColor0.rgb * diff + _LightColor0.rgb * spec) * (atten * 2) * _Specular;
           c.a = s.Alpha;
-          c.a = .5f;
           
           return c;
       }

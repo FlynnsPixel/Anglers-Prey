@@ -26,14 +26,14 @@
         v2f vert (appdata_base v) {
             v2f o;
             o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
-            v.texcoord.x += (cos(_Time.y) / 2) + .5;
             o.uv = TRANSFORM_TEX (v.texcoord, _MainTex);
+            o.uv.x += (cos(_Time.y * 2) / 2) + .5;
             return o;
         }
 
         fixed4 frag (v2f i) : SV_Target {
             fixed4 texcol = tex2D (_MainTex, i.uv);
-            texcol.rgb = i.uv.x - (clamp(i.uv.x, 0.0, 1.0));
+            texcol.rgb = clamp(i.uv.x, 0, 1) - (clamp(i.uv.x, 1, 2) - 1);
             texcol *= _Color;
             return texcol;
         }
