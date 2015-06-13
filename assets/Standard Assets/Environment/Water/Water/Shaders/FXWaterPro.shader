@@ -22,6 +22,7 @@ Subshader {
 	Tags { "Queue"="Transparent" "RenderType"="Transparent" }
 	
 	Blend SrcAlpha OneMinusSrcAlpha
+	Blend One SrcAlpha
 	
 CGPROGRAM
 		#pragma surface surf SimpleSpecular vertex:vert Lambert alpha
@@ -59,7 +60,7 @@ CGPROGRAM
 			o.bumpuv1 = temp.wz;
 			
 			// object space view direction
-			o.vDir = normalize( ObjSpaceViewDir(v.vertex) ).xzy;
+			o.vDir = normalize(ObjSpaceViewDir(v.vertex)).xzy;
 		}
 
 		void surf (Input IN, inout SurfaceOutput o) {
@@ -72,13 +73,11 @@ CGPROGRAM
 			half4 water = tex2D( _ColorControl, float2(fresnel,fresnel) );
 			
 			half4 col;
-			col.rgb = lerp( water.rgb, _horizonColor.rgb, water.a );
-			col.a = _horizonColor.a;
-			
+			col.rgb = lerp(water.rgb, _horizonColor.rgb, water.a);
+
 			o.Normal = bump;
 			o.Albedo = col;
 			o.Alpha = _horizonColor.a;
-			//o.Emission = col;
 		}
 		
 		half4 LightingSimpleSpecular (SurfaceOutput s, half3 lightDir, half3 viewDir, half atten) {
