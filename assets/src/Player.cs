@@ -10,6 +10,11 @@ public class Player : MonoBehaviour {
 	float angle = 90;
 	float angle_accel = 0;
 
+	GameObject map;
+	Mesh map_mesh;
+	Vector3[] map_vertices;
+	Rect map_bounds;
+
 	Vector3 cam_pos;
 
 	const float radians = Mathf.PI / 180.0f;
@@ -19,6 +24,8 @@ public class Player : MonoBehaviour {
 	const float angle_friction = .95f;
 	const float max_angle_accel = 4;
 
+	int timer = 0;
+
 	void Start() {
 		pos = transform.position;
 		rota = transform.rotation;
@@ -26,6 +33,24 @@ public class Player : MonoBehaviour {
 		rota_euler.y = -90;
 		rota_euler.z = -90;
 		cam_pos = Camera.main.transform.position;
+
+		map = GameObject.Find("map");
+		map_mesh = map.GetComponent<MeshFilter>().mesh;
+		map_bounds.x = map.transform.position.x;
+		map_bounds.y = map.transform.position.z;
+		map_bounds.width = map.transform.localScale.x;
+		map_bounds.height = map.transform.localScale.z;
+	}
+
+	void move_map(float x, float y) {
+		map_vertices = map_mesh.vertices;
+		for (int i = 0; i < map_mesh.vertexCount; ++i) {
+			map_vertices[i].x += x;
+			map_vertices[i].z += y;
+		}
+		map_mesh.vertices = map_vertices;
+		map_bounds.x += map_bounds.width * x;
+		map_bounds.y += map_bounds.height * y;
 	}
 
 	void Update() {
@@ -38,6 +63,17 @@ public class Player : MonoBehaviour {
 		accel *= friction;
 		pos.x += accel.x;
 		pos.z += accel.y;
+
+		Debug.Log(map_bounds);
+		if (accel.x > 0 && pos.x > map_bounds.x) {
+			move_map(1, 0);
+		}else if (accel.x < 0 && pos.x < map_bounds.x) {
+			move_map(-1, 0);
+		}else if (accel.y > 0 && pos.z > map_bounds.y) {
+			move_map(0, 1);
+		}else if (accel.y < 0 && pos.z < map_bounds.y) {
+			move_map(0, -1);
+		}
 
 		if (Input.GetKey(KeyCode.A)) {
 			angle_accel += angle_accel_speed;
