@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
 	GameObject map;
 	Mesh map_mesh;
 	Vector3[] map_vertices;
-	Rect map_bounds;
+	Rect map_rect;
 
 	Vector3 cam_pos;
 
@@ -36,21 +36,27 @@ public class Player : MonoBehaviour {
 
 		map = GameObject.Find("map");
 		map_mesh = map.GetComponent<MeshFilter>().mesh;
-		map_bounds.x = map.transform.position.x;
-		map_bounds.y = map.transform.position.z;
-		map_bounds.width = map.transform.localScale.x;
-		map_bounds.height = map.transform.localScale.z;
+		map_rect.x = map.transform.position.x;
+		map_rect.y = map.transform.position.z;
+		map_rect.width = map.transform.localScale.x;
+		map_rect.height = map.transform.localScale.z;
 	}
 
 	void move_map(float x, float y) {
+		//loop through all vertices in mesh and move by specified x and y
 		map_vertices = map_mesh.vertices;
 		for (int i = 0; i < map_mesh.vertexCount; ++i) {
 			map_vertices[i].x += x;
 			map_vertices[i].z += y;
 		}
 		map_mesh.vertices = map_vertices;
-		map_bounds.x += map_bounds.width * x;
-		map_bounds.y += map_bounds.height * y;
+
+		//move map rect x, y by the width/height scale
+		map_rect.x += map_rect.width * x;
+		map_rect.y += map_rect.height * y;
+
+		//recalculate mesh bounds with new vertex positions
+		map_mesh.RecalculateBounds();
 	}
 
 	void Update() {
@@ -64,14 +70,13 @@ public class Player : MonoBehaviour {
 		pos.x += accel.x;
 		pos.z += accel.y;
 
-		Debug.Log(map_bounds);
-		if (accel.x > 0 && pos.x > map_bounds.x) {
+		if (accel.x > 0 && pos.x > map_rect.x) {
 			move_map(1, 0);
-		}else if (accel.x < 0 && pos.x < map_bounds.x) {
+		}else if (accel.x < 0 && pos.x < map_rect.x) {
 			move_map(-1, 0);
-		}else if (accel.y > 0 && pos.z > map_bounds.y) {
+		}else if (accel.y > 0 && pos.z > map_rect.y) {
 			move_map(0, 1);
-		}else if (accel.y < 0 && pos.z < map_bounds.y) {
+		}else if (accel.y < 0 && pos.z < map_rect.y) {
 			move_map(0, -1);
 		}
 
