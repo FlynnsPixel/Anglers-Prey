@@ -29,7 +29,6 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
-		Debug.Log(angle_accel);
 		if (Input.GetKey(KeyCode.W)) {
 			accel.x -= Mathf.Cos(angle * radians) * .01f;
 			accel.y -= Mathf.Sin(angle * radians) * .01f;
