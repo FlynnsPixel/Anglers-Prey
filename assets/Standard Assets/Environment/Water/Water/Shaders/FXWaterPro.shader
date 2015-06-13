@@ -23,7 +23,7 @@ Subshader {
 	
 	Blend SrcAlpha OneMinusSrcAlpha
 	Blend One SrcAlpha
-	
+
 CGPROGRAM
 		#pragma surface surf SimpleSpecular vertex:vert Lambert alpha
 		
