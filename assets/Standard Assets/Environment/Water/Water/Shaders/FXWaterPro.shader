@@ -24,9 +24,11 @@ Subshader {
 	Blend SrcAlpha OneMinusSrcAlpha
 	Blend One SrcAlpha
 
-CGPROGRAM
-		#pragma surface surf SimpleSpecular vertex:vert Lambert alpha
-		
+	Pass {
+		CGPROGRAM
+		#pragma vertex vert
+		#pragma fragment frag
+
 		uniform float4 _horizonColor;
 
 		uniform float4 WaveSpeed;
@@ -41,15 +43,23 @@ CGPROGRAM
 
 		#include "UnityCG.cginc"
 
-		struct Input {
-			
-			float2 bumpuv0 : TEXCOORD0;
+		struct v2f {
+            float4 pos : SV_POSITION;
+            fixed3 colour : COLOR0;
+            float2 bumpuv0 : TEXCOORD0;
 			float2 bumpuv1 : TEXCOORD1;
 			float3 vDir : TEXCOORD2;
-		};
-		
-		void vert (inout appdata_full v, out Input o) {
-			float4 s;
+			float2 uv : TEXCOORD3;
+        };
+
+        float4 _BumpMap_ST;
+		float4 _ColorControl_ST;
+
+        v2f vert(appdata_base v) {
+            v2f o;
+        	o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+
+        	float4 s;
 
 			//o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
 
@@ -58,46 +68,33 @@ CGPROGRAM
 			temp.xyzw = v.vertex.xzxz * _WaveScale / 1.0 + _WaveOffset;
 			o.bumpuv0 = temp.xy * float2(.4, .45);
 			o.bumpuv1 = temp.wz;
-			
+			o.uv = v.vertex.zx * _WaveScale / 1.0;
+
 			// object space view direction
 			o.vDir = normalize(ObjSpaceViewDir(v.vertex)).xzy;
-		}
 
-		void surf (Input IN, inout SurfaceOutput o) {
-		
-			half3 bump1 = UnpackNormal(tex2D( _BumpMap, IN.bumpuv0 )).rgb;
-			half3 bump2 = UnpackNormal(tex2D( _BumpMap, IN.bumpuv1 )).rgb;
+            return o;
+        }
+
+        fixed4 frag(v2f i) : SV_Target {
+        	half3 bump1 = UnpackNormal(tex2D( _BumpMap, i.bumpuv0 )).rgb;
+			half3 bump2 = UnpackNormal(tex2D( _BumpMap, i.bumpuv1 )).rgb;
 			half3 bump = (bump1 + bump2) * 0.5;
 			
-			half fresnel = dot( IN.vDir, bump);
+			half fresnel = dot( i.vDir, bump);
 			half4 water = tex2D( _ColorControl, float2(fresnel,fresnel) );
 			
 			half4 col;
-			col.rgb = lerp(water.rgb, _horizonColor.rgb, water.a);
+			col.rgb = (water.rgb - _horizonColor.rgb) / water.a;
+        	//i.uv.x -= .5;
+        	//i.uv.y -= .5;
+        	//col.rgb -= 1;
+        	//col.r += (1 - sqrt(dot(i.uv * 2, i.uv * 2))) * 2;
 
-			o.Normal = bump;
-			o.Albedo = col;
-			o.Alpha = _horizonColor.a;
-		}
-		
-		half4 LightingSimpleSpecular (SurfaceOutput s, half3 lightDir, half3 viewDir, half atten) {
-          half3 h = normalize (lightDir + viewDir);
+            return col;
+        }
 
-          half diff = max (0, dot (s.Normal, lightDir));
-          
-          float nh = max (0, dot (s.Normal, h));
-          float spec = pow (nh, _Gloss);
-
-          half4 c;
-          c.rgb = (s.Albedo * _LightColor0.rgb * diff + _LightColor0.rgb * spec) * (atten * 2) * _Specular;
-          c.a = s.Alpha;
-          
-          return c;
-      }
 		ENDCG
+	}
 }
-
-// -----------------------------------------------------------
-//  Old cards
-
 }
