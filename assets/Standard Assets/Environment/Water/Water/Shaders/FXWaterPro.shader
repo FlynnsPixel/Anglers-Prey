@@ -85,7 +85,8 @@ Subshader {
 			half4 water = tex2D( _ColorControl, float2(fresnel,fresnel) );
 			
 			half4 col;
-			col.rgb = (water.rgb - _horizonColor.rgb) / water.a;
+			col.rgb = water.rgb;
+			
         	//i.uv.x -= .5;
         	//i.uv.y -= .5;
         	//col.rgb -= 1;

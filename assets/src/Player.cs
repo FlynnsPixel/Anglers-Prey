@@ -16,6 +16,7 @@ public class Player : MonoBehaviour {
 	Rect map_rect;
 
 	Vector3 cam_pos;
+	Camera cam;
 
 	bool mouse_touched = false;
 	Vector3 last_mouse_pos;
@@ -37,6 +38,7 @@ public class Player : MonoBehaviour {
 		rota_euler.y = -90;
 		rota_euler.z = -90;
 		cam_pos = Camera.main.transform.position;
+		cam = Camera.main;
 
 		map = GameObject.Find("map");
 		map_mesh = map.GetComponent<MeshFilter>().mesh;
@@ -73,13 +75,13 @@ public class Player : MonoBehaviour {
 			}
 			
 			if (mouse_touched) {
-				float a = Mathf.Atan2((Screen.height / 2) - Input.mousePosition.y, (Screen.width / 2) - Input.mousePosition.x) + (180 * radians);
+				Vector3 b = cam.WorldToScreenPoint(cam_pos + (transform.position - cam_pos));
+				float c_x = (Screen.width / 2) + transform.position.x, c_y = (Screen.height / 2) + transform.position.z;
+				float a = Mathf.Atan2(b.y - Input.mousePosition.y, b.x - Input.mousePosition.x) + (180 * radians);
 				float target = a / radians;
 				if (target < 170 && last_angle > 190) angle_offset += 360;
 				else if (target > 190 && last_angle < 170) angle_offset -= 360;
 				last_angle = target;
-
-				Debug.Log(angle_offset + ", angle: " + target);
 
 				angle -= (angle - (target + angle_offset)) / 10.0f;
 
@@ -130,6 +132,6 @@ public class Player : MonoBehaviour {
 
 		cam_pos.x -= (cam_pos.x - pos.x) / 20.0f;
 		cam_pos.z -= (cam_pos.z - pos.z) / 20.0f;
-		Camera.main.transform.position = cam_pos;
+		cam.transform.position = cam_pos;
 	}
 }
