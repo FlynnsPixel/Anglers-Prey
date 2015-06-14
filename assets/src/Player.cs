@@ -17,6 +17,9 @@ public class Player : MonoBehaviour {
 
 	Vector3 cam_pos;
 
+	bool mouse_touched = false;
+	Vector3 last_mouse_pos;
+
 	const float radians = Mathf.PI / 180.0f;
 	const float max_speed = .175f;
 	const float friction = .98f;
@@ -60,6 +63,31 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
+		//#IF UNITY_ANDROID
+			if (Input.GetMouseButtonDown(0)) {
+				mouse_touched = true;
+				last_mouse_pos = Input.mousePosition;
+			}else if (Input.GetMouseButtonUp(0)) {
+				mouse_touched = false;
+			}
+			
+			if (mouse_touched) {
+				float a = Mathf.Atan2((Screen.height / 2) - Input.mousePosition.y, (Screen.width / 2) - Input.mousePosition.x) + (180 * radians);
+				Debug.Log(a / radians);
+				float target = a / radians;
+				if (angle - target > 0) {
+					angle += target / 20.0f;
+				}else {
+					angle -= target / 20.0f;
+				}
+
+				accel.x -= Mathf.Cos(a) * .01f;
+				accel.y -= Mathf.Sin(a) * .01f;
+				accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
+				accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
+			}
+		//#endif
+
 		if (Input.GetKey(KeyCode.W)) {
 			accel.x -= Mathf.Cos(angle * radians) * .01f;
 			accel.y -= Mathf.Sin(angle * radians) * .01f;
@@ -88,11 +116,12 @@ public class Player : MonoBehaviour {
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
 		angle_accel *= angle_friction;
 		angle += angle_accel;
+
 		rota.eulerAngles = rota_euler;
 		rota_euler.x -= angle_accel;
 		rota_euler.x = Mathf.Clamp(rota_euler.x, 45, 135);
 		rota_euler.x -= (rota_euler.x - 90) / 20.0f;
-		rota_euler.y -= angle_accel;
+		rota_euler.y = -angle;
 
 		transform.position = pos;
 		transform.rotation = rota;
