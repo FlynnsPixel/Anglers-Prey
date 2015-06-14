@@ -27,7 +27,8 @@ public class Player : MonoBehaviour {
 	const float angle_friction = .95f;
 	const float max_angle_accel = 4;
 
-	int timer = 0;
+	float angle_offset = 0;
+	float last_angle = 0;
 
 	void Start() {
 		pos = transform.position;
@@ -73,16 +74,17 @@ public class Player : MonoBehaviour {
 			
 			if (mouse_touched) {
 				float a = Mathf.Atan2((Screen.height / 2) - Input.mousePosition.y, (Screen.width / 2) - Input.mousePosition.x) + (180 * radians);
-				Debug.Log(a / radians);
 				float target = a / radians;
-				if (angle - target > 0) {
-					angle += target / 20.0f;
-				}else {
-					angle -= target / 20.0f;
-				}
+				if (target < 170 && last_angle > 190) angle_offset += 360;
+				else if (target > 190 && last_angle < 170) angle_offset -= 360;
+				last_angle = target;
 
-				accel.x -= Mathf.Cos(a) * .01f;
-				accel.y -= Mathf.Sin(a) * .01f;
+				Debug.Log(angle_offset + ", angle: " + target);
+
+				angle -= (angle - (target + angle_offset)) / 10.0f;
+
+				accel.x -= Mathf.Cos(angle * radians) * .01f;
+				accel.y -= Mathf.Sin(angle * radians) * .01f;
 				accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 				accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
 			}
