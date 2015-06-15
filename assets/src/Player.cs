@@ -48,9 +48,13 @@ public class Player : MonoBehaviour {
 		map_rect.y = map.transform.position.z;
 		map_rect.width = map.transform.localScale.x;
 		map_rect.height = map.transform.localScale.z;
-		
-		light_data = new Texture2D(4, 1);
+
+		//width must be power of 2 or the point filter mode will get slightly interpolated
+		light_data = new Texture2D(64, 1);
+		//disable interpolation for the light data
 		light_data.filterMode = FilterMode.Point;
+		//clamp texture so it doesn't repeat
+		light_data.wrapMode = TextureWrapMode.Clamp;
 		create_light(256, 0, 1, 2.5f, 1, 0, 1, 1);
 
 		Color c = new Color();
@@ -61,10 +65,10 @@ public class Player : MonoBehaviour {
 		light_data.SetPixel(2, 0, c);
 		float x = 0;
 		float y = 20;
-		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * .85f;
-		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * .85f;
-		c.b = .25f;
-		c.a = 2.5f / 10.0f;
+		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * 2;
+		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * 2;
+		c.b = 1;
+		c.a = 4 / 10.0f;
 		light_data.SetPixel(3, 0, c);
 
 		light_data.Apply();
@@ -79,8 +83,8 @@ public class Player : MonoBehaviour {
 		c.b = b;
 		c.a = a;
 		light_data.SetPixel(0, 0, c);
-		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * .85f;
-		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * .85f;
+		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * 2;
+		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * 2;
 		Debug.Log(c.r + ", " + c.g);
 		c.b = size;
 		c.a = intensity / 10.0f;
@@ -105,7 +109,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
-		create_light(-transform.position.x, -transform.position.z, .25f, 1, 0, 1, 1, 1);
+		create_light(-transform.position.x, -transform.position.z, .75f, 2.5f, .15f, .5f, .75f, 1);
 		light_data.Apply();
 		map_material.SetTexture("light_data", light_data);
 
