@@ -20,9 +20,6 @@ Properties {
 
 Subshader {
 	Tags { "Queue"="Transparent" "RenderType"="Transparent" }
-	
-	Blend SrcAlpha OneMinusSrcAlpha
-	Blend One SrcAlpha
 
 	Pass {
 		CGPROGRAM
@@ -37,7 +34,11 @@ Subshader {
 		
 		uniform float _Specular;
 		uniform float _Gloss;
-		
+
+		uniform sampler2D light_data;
+		uniform int num_lights;
+		uniform int light_data_len;
+
 		sampler2D _BumpMap;
 		sampler2D _ColorControl;
 
@@ -93,44 +94,28 @@ Subshader {
         	col.rgb -= 1;
         	col.a = col.rgb;
 
-        	float r = 1;
-        	float g = .5;
-        	float b = 0;
+        	float2 light_uv;
+        	light_uv = 0;
+        	half2 origin_uv = i.uv;
+        	for (int n = 0; n < num_lights * light_data_len; n += light_data_len) {
+        		half4 attr1 = tex2D(light_data, light_uv);
+        		light_uv.x += 1.0 / (num_lights * light_data_len);
+        		half4 attr2 = tex2D(light_data, light_uv);
+        		light_uv.x += 1.0 / (num_lights * light_data_len);
 
-        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
-        	float size = .5;
-        	float intensity = 2.5;
-        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
-        	col.r += dist * r;
-        	col.g += dist * g;
-        	col.b += dist * b;
-        	col.a += dist * col.rgb;
+        		i.uv += attr2.rg;
 
-        	r = 0;
-        	g = .5;
-        	b = 1;
+	        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
+	        	float size = attr2.b;
+	        	float intensity = attr2.a * 10;
+	        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
+	        	col.r += dist * attr1.r;
+	        	col.g += dist * attr1.g;
+	        	col.b += dist * attr1.b;
+	        	col.a += dist * col.rgb;
 
-        	dist = sqrt(pow(i.uv.x + .4, 2) + pow(i.uv.y, 2));
-        	size = .5;
-        	intensity = 2.5;
-        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
-        	col.r += dist * r;
-        	col.g += dist * g;
-        	col.b += dist * b;
-        	col.a += dist * col.rgb;
-
-        	r = 0;
-        	g = 1;
-        	b = 0;
-
-        	dist = sqrt(pow(i.uv.x + .25, 2) + pow(i.uv.y + .4, 2));
-        	size = .4;
-        	intensity = 1.5;
-        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
-        	col.r += dist * r;
-        	col.g += dist * g;
-        	col.b += dist * b;
-        	col.a += dist * col.rgb;
+	        	i.uv = origin_uv;
+        	}
 
             return col;
         }
