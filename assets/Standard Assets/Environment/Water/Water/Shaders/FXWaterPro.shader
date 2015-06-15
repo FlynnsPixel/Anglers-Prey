@@ -103,8 +103,8 @@ Subshader {
         		half4 attr2 = tex2D(light_data, light_uv);
         		light_uv.x += 1.0 / (num_lights * light_data_len);
 
-        		i.uv += attr2.rg;
-
+        		i.uv += attr2.gr;
+        		
 	        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
 	        	float size = attr2.b;
 	        	float intensity = attr2.a * 10;

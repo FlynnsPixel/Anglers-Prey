@@ -15,6 +15,7 @@ public class Player : MonoBehaviour {
 	Vector3[] map_vertices;
 	Rect map_rect;
 	Material map_material;
+	Texture2D light_data;
 
 	Vector3 cam_pos;
 	Camera cam;
@@ -47,26 +48,29 @@ public class Player : MonoBehaviour {
 		map_rect.y = map.transform.position.z;
 		map_rect.width = map.transform.localScale.x;
 		map_rect.height = map.transform.localScale.z;
-
-		Texture2D light_data = new Texture2D(2, 1);
+		
+		light_data = new Texture2D(2, 1);
 		light_data.filterMode = FilterMode.Point;
-		Color c = new Color();
-		c.r = 1;
-		c.g = 1;
-		c.b = 0;
-		c.a = 1;
-		light_data.SetPixel(0, 0, c);
-		Color c2 = new Color();
-		c2.r = 0;
-		c2.g = 0;
-		c2.b = .25f;
-		c2.a = 2.5f / 10.0f;
-		light_data.SetPixel(1, 0, c2);
-		light_data.Apply();
+		create_light(256, 0, 1, 2.5f, 1, 0, 1, 1);
 
-		(map_material = map.GetComponent<Renderer>().material).SetTexture("light_data", light_data);
+		light_data.Apply();
+		map_material = map.GetComponent<Renderer>().material;
 		map_material.SetInt("num_lights", 1);
 		map_material.SetInt("light_data_len", 2);
+	}
+
+	void create_light(float x, float y, float size, float intensity, float r, float g, float b, float a) {
+		Color c = new Color();
+		c.r = r;
+		c.g = g;
+		c.b = b;
+		c.a = a;
+		light_data.SetPixel(0, 0, c);
+		c.r = x / 304;
+		c.g = y / 304;
+		c.b = size;
+		c.a = intensity / 10.0f;
+		light_data.SetPixel(1, 0, c);
 	}
 
 	void move_map(float x, float y) {
@@ -87,6 +91,11 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
+		Debug.Log(transform.position.x);
+		create_light(-transform.position.x, -transform.position.z, .5f, 2.5f, 1, 0, 1, 1);
+		light_data.Apply();
+		map_material.SetTexture("light_data", light_data);
+
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
 			last_mouse_pos = Input.mousePosition;
