@@ -60,10 +60,10 @@ public class Player : MonoBehaviour {
 		c.a = 1;
 		light_data.SetPixel(2, 0, c);
 		float x = 0;
-		float y = 0;
+		float y = 20;
 		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * .85f;
 		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * .85f;
-		c.b = .5f;
+		c.b = .25f;
 		c.a = 2.5f / 10.0f;
 		light_data.SetPixel(3, 0, c);
 
