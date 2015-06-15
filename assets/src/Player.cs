@@ -74,6 +74,7 @@ public class Player : MonoBehaviour {
 		light_data.Apply();
 		map_material = map.GetComponent<Renderer>().material;
 		map_material.SetInt("num_lights", 2);
+		map_material.SetFloat("next_light_uv", 1.0f / 64.0f);
 	}
 
 	void create_light(float x, float y, float size, float intensity, float r, float g, float b, float a) {
