@@ -77,20 +77,21 @@ Subshader {
         }
 
         fixed4 frag(v2f i) : SV_Target {
-        	half3 bump1 = UnpackNormal(tex2D( _BumpMap, i.bumpuv0 )).rgb;
-			half3 bump2 = UnpackNormal(tex2D( _BumpMap, i.bumpuv1 )).rgb;
+        	half3 bump1 = UnpackNormal(tex2D(_BumpMap, i.bumpuv0)).rgb;
+			half3 bump2 = UnpackNormal(tex2D(_BumpMap, i.bumpuv1)).rgb;
 			half3 bump = (bump1 + bump2) * 0.5;
 			
-			half fresnel = dot( i.vDir, bump);
-			half4 water = tex2D( _ColorControl, float2(fresnel,fresnel) );
-			
+			half fresnel = dot(i.vDir, bump);
+			half4 water = tex2D(_ColorControl, float2(fresnel, fresnel));
+
 			half4 col;
-			col.rgb = water.rgb;
-			
+			col.rgb = lerp(water.rgb, _horizonColor.rgb, water.rgb);
+			//col.a = col.rgb;
+
         	//i.uv.x -= .5;
         	//i.uv.y -= .5;
-        	//col.rgb -= 1;
-        	//col.r += (1 - sqrt(dot(i.uv * 2, i.uv * 2))) * 2;
+        	col.rgb -= 1;
+        	col.r += (1 - sqrt(dot(i.uv * 2, i.uv * 2))) * 2;
 
             return col;
         }
