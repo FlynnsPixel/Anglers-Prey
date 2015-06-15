@@ -91,7 +91,46 @@ Subshader {
         	//i.uv.x -= .5;
         	//i.uv.y -= .5;
         	col.rgb -= 1;
-        	col.r += (1 - sqrt(dot(i.uv * 2, i.uv * 2))) * 2;
+        	col.a = col.rgb;
+
+        	float r = 1;
+        	float g = .5;
+        	float b = 0;
+
+        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
+        	float size = .5;
+        	float intensity = 2.5;
+        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
+        	col.r += dist * r;
+        	col.g += dist * g;
+        	col.b += dist * b;
+        	col.a += dist * col.rgb;
+
+        	r = 0;
+        	g = .5;
+        	b = 1;
+
+        	dist = sqrt(pow(i.uv.x + .4, 2) + pow(i.uv.y, 2));
+        	size = .5;
+        	intensity = 2.5;
+        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
+        	col.r += dist * r;
+        	col.g += dist * g;
+        	col.b += dist * b;
+        	col.a += dist * col.rgb;
+
+        	r = 0;
+        	g = 1;
+        	b = 0;
+
+        	dist = sqrt(pow(i.uv.x + .25, 2) + pow(i.uv.y + .4, 2));
+        	size = .4;
+        	intensity = 1.5;
+        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
+        	col.r += dist * r;
+        	col.g += dist * g;
+        	col.b += dist * b;
+        	col.a += dist * col.rgb;
 
             return col;
         }
