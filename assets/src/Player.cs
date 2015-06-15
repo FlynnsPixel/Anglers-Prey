@@ -49,14 +49,27 @@ public class Player : MonoBehaviour {
 		map_rect.width = map.transform.localScale.x;
 		map_rect.height = map.transform.localScale.z;
 		
-		light_data = new Texture2D(2, 1);
+		light_data = new Texture2D(4, 1);
 		light_data.filterMode = FilterMode.Point;
 		create_light(256, 0, 1, 2.5f, 1, 0, 1, 1);
 
+		Color c = new Color();
+		c.r = 1;
+		c.g = .5f;
+		c.b = 0;
+		c.a = 1;
+		light_data.SetPixel(2, 0, c);
+		float x = 0;
+		float y = 0;
+		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * .85f;
+		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * .85f;
+		c.b = .5f;
+		c.a = 2.5f / 10.0f;
+		light_data.SetPixel(3, 0, c);
+
 		light_data.Apply();
 		map_material = map.GetComponent<Renderer>().material;
-		map_material.SetInt("num_lights", 1);
-		map_material.SetInt("light_data_len", 2);
+		map_material.SetInt("num_lights", 2);
 	}
 
 	void create_light(float x, float y, float size, float intensity, float r, float g, float b, float a) {
@@ -66,8 +79,9 @@ public class Player : MonoBehaviour {
 		c.b = b;
 		c.a = a;
 		light_data.SetPixel(0, 0, c);
-		c.r = x / 304;
-		c.g = y / 304;
+		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * .85f;
+		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * .85f;
+		Debug.Log(c.r + ", " + c.g);
 		c.b = size;
 		c.a = intensity / 10.0f;
 		light_data.SetPixel(1, 0, c);
@@ -91,8 +105,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
-		Debug.Log(transform.position.x);
-		create_light(-transform.position.x, -transform.position.z, .5f, 2.5f, 1, 0, 1, 1);
+		create_light(-transform.position.x, -transform.position.z, .25f, 1, 0, 1, 1, 1);
 		light_data.Apply();
 		map_material.SetTexture("light_data", light_data);
 
