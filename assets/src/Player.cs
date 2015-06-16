@@ -11,13 +11,12 @@ public class Player : MonoBehaviour {
 	Vector2 accel;
 	float angle = 90;
 	float angle_accel = 0;
-
-	GameObject map;
+	
+	public static GameObject map;
 	Mesh map_mesh;
 	Vector3[] map_vertices;
 	Rect map_rect;
-	Material map_material;
-	Texture2D light_data;
+	public static Material map_material;
 
 	Vector3 cam_pos;
 	Camera cam;
@@ -58,32 +57,11 @@ public class Player : MonoBehaviour {
 		map_rect.width = map.transform.localScale.x;
 		map_rect.height = map.transform.localScale.z;
 
-		//width must be power of 2 or the point filter mode will get slightly interpolated
-		light_data = new Texture2D(64, 1);
-		//disable interpolation for the light data
-		light_data.filterMode = FilterMode.Point;
-		//clamp texture so it doesn't repeat
-		light_data.wrapMode = TextureWrapMode.Clamp;
-		player_light = Light.create_light(0, 0, 1, 2.5f, 1, 0, 1, 1);
-
-		//Color c = new Color();
-		//c.r = 1;
-		//c.g = .5f;
-		//c.b = 0;
-		//c.a = 1;
-		//light_data.SetPixel(3, 0, c);
-		//float x = 0;
-		//float y = 20;
-		//c.r = (x / ((map_mesh.bounds.size.x * map_rect.width))) / 40.0f;
-		//c.g = (y / ((map_mesh.bounds.size.z * map_rect.height))) / 40.0f;
-		//c.b = 1;
-		//c.a = 4 / 10.0f;
-		//light_data.SetPixel(3, 0, c);
-
-		light_data.Apply();
 		map_material = map.GetComponent<Renderer>().material;
-		map_material.SetInt("num_lights", 1);
-		map_material.SetFloat("next_light_uv", 1.0f / 64.0f);
+
+		Light.init();
+		player_light = Light.create_light(0, 0, .4f, 2.5f, .15f, .5f, .75f, 1);
+		Light.lights.Add(player_light);
 	}
 
 	void move_map(float x, float y) {
@@ -104,9 +82,8 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
-		create_light(-transform.position.x, -transform.position.z, .4f, 2.5f, .15f, .5f, .75f, 1);
-		light_data.Apply();
-		map_material.SetTexture("light_data", light_data);
+		player_light.set_pos(-transform.position.x, -transform.position.z);
+		Light.update_all_lights();
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
