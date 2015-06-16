@@ -11,12 +11,6 @@ public class Player : MonoBehaviour {
 	Vector2 accel;
 	float angle = 90;
 	float angle_accel = 0;
-	
-	public static GameObject map;
-	Mesh map_mesh;
-	Vector3[] map_vertices;
-	Rect map_rect;
-	public static Material map_material;
 
 	Vector3 cam_pos;
 	Camera cam;
@@ -36,11 +30,6 @@ public class Player : MonoBehaviour {
 
 	Light player_light;
 
-	public static int map_width;
-	//(map_mesh.bounds.size.x * map_rect.width)
-	public static int map_height;
-	//(map_mesh.bounds.size.z * map_rect.height) 
-
 	void Start() {
 		pos = transform.position;
 		rota = transform.rotation;
@@ -50,40 +39,16 @@ public class Player : MonoBehaviour {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		map = GameObject.Find("map");
-		map_mesh = map.GetComponent<MeshFilter>().mesh;
-		map_rect.x = map.transform.position.x;
-		map_rect.y = map.transform.position.z;
-		map_rect.width = map.transform.localScale.x;
-		map_rect.height = map.transform.localScale.z;
-
-		map_material = map.GetComponent<Renderer>().material;
-
+		Map.init();
 		Light.init();
-		player_light = Light.create_light(0, 0, .4f, 2.5f, .15f, .5f, .75f, 1);
+
+		player_light = Light.create(0, 0, .4f, 2.5f, .15f, .5f, .75f, 1);
 		Light.lights.Add(player_light);
-	}
-
-	void move_map(float x, float y) {
-		//loop through all vertices in mesh and move by specified x and y
-		map_vertices = map_mesh.vertices;
-		for (int i = 0; i < map_mesh.vertexCount; ++i) {
-			map_vertices[i].x += x;
-			map_vertices[i].z += y;
-		}
-		map_mesh.vertices = map_vertices;
-
-		//move map rect x, y by the width/height scale
-		map_rect.x += map_rect.width * x;
-		map_rect.y += map_rect.height * y;
-
-		//recalculate mesh bounds with new vertex positions
-		map_mesh.RecalculateBounds();
 	}
 
 	void Update() {
 		player_light.set_pos(-transform.position.x, -transform.position.z);
-		Light.update_all_lights();
+		Light.update_all();
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
@@ -119,14 +84,14 @@ public class Player : MonoBehaviour {
 		pos.x += accel.x;
 		pos.z += accel.y;
 
-		if (accel.x > 0 && pos.x > map_rect.x) {
-			move_map(1, 0);
-		}else if (accel.x < 0 && pos.x < map_rect.x) {
-			move_map(-1, 0);
-		}else if (accel.y > 0 && pos.z > map_rect.y) {
-			move_map(0, 1);
-		}else if (accel.y < 0 && pos.z < map_rect.y) {
-			move_map(0, -1);
+		if (accel.x > 0 && pos.x > Map.rect.x) {
+			Map.scroll_vertices(1, 0);
+		}else if (accel.x < 0 && pos.x < Map.rect.x) {
+			Map.scroll_vertices(-1, 0);
+		}else if (accel.y > 0 && pos.z > Map.rect.y) {
+			Map.scroll_vertices(0, 1);
+		}else if (accel.y < 0 && pos.z < Map.rect.y) {
+			Map.scroll_vertices(0, -1);
 		}
 
 		if (Input.GetKey(KeyCode.A)) {
