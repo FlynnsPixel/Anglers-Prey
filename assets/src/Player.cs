@@ -57,23 +57,23 @@ public class Player : MonoBehaviour {
 		light_data.wrapMode = TextureWrapMode.Clamp;
 		create_light(256, 0, 1, 2.5f, 1, 0, 1, 1);
 
-		Color c = new Color();
-		c.r = 1;
-		c.g = .5f;
-		c.b = 0;
-		c.a = 1;
-		light_data.SetPixel(2, 0, c);
-		float x = 0;
-		float y = 20;
-		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * 2;
-		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * 2;
-		c.b = 1;
-		c.a = 4 / 10.0f;
-		light_data.SetPixel(3, 0, c);
+		//Color c = new Color();
+		//c.r = 1;
+		//c.g = .5f;
+		//c.b = 0;
+		//c.a = 1;
+		//light_data.SetPixel(3, 0, c);
+		//float x = 0;
+		//float y = 20;
+		//c.r = (x / ((map_mesh.bounds.size.x * map_rect.width))) / 40.0f;
+		//c.g = (y / ((map_mesh.bounds.size.z * map_rect.height))) / 40.0f;
+		//c.b = 1;
+		//c.a = 4 / 10.0f;
+		//light_data.SetPixel(3, 0, c);
 
 		light_data.Apply();
 		map_material = map.GetComponent<Renderer>().material;
-		map_material.SetInt("num_lights", 2);
+		map_material.SetInt("num_lights", 1);
 		map_material.SetFloat("next_light_uv", 1.0f / 64.0f);
 	}
 
@@ -84,12 +84,15 @@ public class Player : MonoBehaviour {
 		c.b = b;
 		c.a = a;
 		light_data.SetPixel(0, 0, c);
-		c.r = (x / ((map_mesh.bounds.size.x * map_rect.width) / 2)) * 2;
-		c.g = (y / ((map_mesh.bounds.size.z * map_rect.height) / 2)) * 2;
-		Debug.Log(c.r + ", " + c.g);
-		c.b = size;
-		c.a = intensity / 10.0f;
+		c.r = size;
+		c.g = intensity / 10.0f;
 		light_data.SetPixel(1, 0, c);
+		int uv_x = (int)((x / (map_mesh.bounds.size.x * map_rect.width) * 2.95f) * 256) + (256 * 127);
+		c.r = (uv_x >> 8) / 255.0f;
+		c.g = (uv_x % 256) / 255.0f;
+		c.b = (y / ((map_mesh.bounds.size.z * map_rect.height)));
+		Debug.Log((c.r * 256) + ", " + (c.g * 256) + ", " + uv_x);
+		light_data.SetPixel(2, 0, c);
 	}
 
 	void move_map(float x, float y) {
@@ -110,7 +113,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update() {
-		create_light(-transform.position.x, -transform.position.z, .75f, 2.5f, .15f, .5f, .75f, 1);
+		create_light(-transform.position.x, -transform.position.z, .4f, 2.5f, .15f, .5f, .75f, 1);
 		light_data.Apply();
 		map_material.SetTexture("light_data", light_data);
 
