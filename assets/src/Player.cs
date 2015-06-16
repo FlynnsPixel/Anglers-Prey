@@ -85,13 +85,17 @@ public class Player : MonoBehaviour {
 		c.a = a;
 		light_data.SetPixel(0, 0, c);
 		c.r = size;
-		c.g = intensity / 10.0f;
+		c.g = intensity / 64.0f;
 		light_data.SetPixel(1, 0, c);
-		int uv_x = (int)((x / (map_mesh.bounds.size.x * map_rect.width) * 2.95f) * 256) + (256 * 127);
+
+		int uv_x = (int)((x / (map_mesh.bounds.size.x * map_rect.width) * 2.98f) * 256) + (256 * 127);
 		c.r = (uv_x >> 8) / 255.0f;
 		c.g = (uv_x % 256) / 255.0f;
-		c.b = (y / ((map_mesh.bounds.size.z * map_rect.height)));
-		Debug.Log((c.r * 256) + ", " + (c.g * 256) + ", " + uv_x);
+
+		int uv_y = (int)((y / (map_mesh.bounds.size.z * map_rect.height) * 2.98f) * 256) + (256 * 127);
+		c.b = (uv_y >> 8) / 255.0f;
+		c.a = (uv_y % 256) / 255.0f;
+
 		light_data.SetPixel(2, 0, c);
 	}
 
