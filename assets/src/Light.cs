@@ -66,7 +66,7 @@ public class Light {
 	public static List<Light> lights = new List<Light>();	//a list of lights to be updated and rendered
 	public static Texture2D light_data;						//the texture data to send to the shader that contains all light information
 	public const int PIXEL_DATA_PER_LIGHT = 3;				//the number of pixels used per light
-	public const float MAX_NUM_PIXELS = 512.0f;				//the maximum number of pixels in the light texture
+	public const float MAX_NUM_PIXELS = 64.0f;				//the maximum number of pixels in the light texture
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
 	public static Vector3 start_cam_pos;

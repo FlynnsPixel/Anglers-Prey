@@ -80,11 +80,9 @@ Shader "Custom/Map" {
 	        		light_uv.x += next_light_uv;
 	        		half4 attr3 = tex2D(light_data, light_uv);
 	        		light_uv.x += next_light_uv;
-
-	        		float decode_x = ((attr3.r * 255) - 127) + attr3.g;
-	        		i.uv.y += decode_x;
-	        		float decode_y = ((attr3.b * 255) - 127) + attr3.a;
-	        		i.uv.x += decode_y;
+	        		
+	        		i.uv.y += ((attr3.r * 255) - 127) + attr3.g;
+	        		i.uv.x += ((attr3.b * 255) - 127) + attr3.a;
 
 		        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
 		        	float size = attr2.r;
