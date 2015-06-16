@@ -11,7 +11,7 @@ Shader "Custom/Map" {
 	Subshader {
 		Tags { "Queue" = "Transparent" "RenderType" = "Transparent" }
 
-		Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcColor SrcColor
 
 		Pass {
 			CGPROGRAM
@@ -26,7 +26,7 @@ Shader "Custom/Map" {
 			uniform float4 wave_offset;
 
 			uniform sampler2D light_data;
-			uniform int num_lights;
+			uniform int num_lights = 0;
 			uniform float next_light_uv;
 			
 			sampler2D bump_map;
@@ -68,10 +68,9 @@ Shader "Custom/Map" {
 				half fresnel = dot(i.v_dir, bump);
 				half4 water = tex2D(reflect_colour, float2(fresnel, fresnel));
 
-				half4 col = half4(lerp(water.rgb, colour_overlay.rgb, water.rgb) - 1, 1);
+				half4 col = half4(lerp(water.rgb, colour_overlay.rgb, water.rgb) - .2, 1);
 
-	        	float2 light_uv;
-	        	light_uv = 0;
+	        	float2 light_uv = 0;
 	        	half2 origin_uv = i.uv;
 	        	for (int n = 0; n < num_lights; ++n) {
 	        		half4 attr1 = tex2D(light_data, light_uv);
@@ -88,14 +87,11 @@ Shader "Custom/Map" {
 		        	float size = attr2.r;
 		        	float intensity = attr2.g * 64;
 		        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
-		        	col.r += dist * attr1.r;
-		        	col.g += dist * attr1.g;
-		        	col.b += dist * attr1.b;
-		        	col.a += dist * col.rgb / 10.0;
+		        	col.rgb += (dist * (attr1.rgb / 3)) * attr1.a;
 
 		        	i.uv = origin_uv;
 	        	}
-	        	
+
 	            return col;
 	        }
 

@@ -32,17 +32,19 @@ public class Player {
 	public void init() {
 		player = GameObject.Find("player");
 		pos = player.transform.position;
+		pos.y = -1.5f;
 		rota = player.transform.rotation;
-		rota_euler.x = 90;
-		rota_euler.y = -90;
-		rota_euler.z = -90;
+		rota_euler.x = 0;
+		rota_euler.y = 0;
+		rota_euler.z = 0;
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(50, 0, .7f, 2, .15f, .5f, .75f, 1);
+		player_light = Light.create(50, 0, .5f, 3, .4f, .5f, 1, 1);
 		Light.lights.Add(player_light);
+		Light.lights.Add(Light.create(2.5f, 17, .2f, 2.5f, .5f, 0, .75f, 1));
 
-		for (int n = 0; n < 18; ++n) {
+		for (int n = 0; n < 0; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
 				Random.Range(.1f, 1.25f), Random.Range(.2f, 2.0f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
@@ -69,6 +71,7 @@ public class Player {
 			last_angle = target;
 
 			angle -= (angle - (target + angle_offset)) / 10.0f;
+			angle_accel = -(angle - (target + angle_offset)) / 10.0f;
 
 			accel.x -= Mathf.Cos(angle * radians) * .01f;
 			accel.y -= Mathf.Sin(angle * radians) * .01f;

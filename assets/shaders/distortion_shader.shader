@@ -25,8 +25,8 @@
       	};
 
       	void vert (inout VertData v) {	
-      		v.vertex.x += cos(v.vertex.x - v.vertex.z + rand) / 4;
-      		v.vertex.z += sin(v.vertex.x - v.vertex.z + rand) / 4;
+      		v.vertex.x += cos(cos(_Time.y) + v.vertex.x - v.vertex.z + rand) / 4;
+      		v.vertex.z += sin(cos(_Time.y) + v.vertex.x - v.vertex.z + rand) / 4;
       	}
 
       	sampler2D tex;

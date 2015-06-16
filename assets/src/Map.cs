@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -45,5 +44,12 @@ public class Map {
 
 		//recalculate mesh bounds with new vertex positions
 		mesh.RecalculateBounds();
+
+		Random.seed = (int)((rect.x * 10) + rect.y);
+		float rand = Random.Range(0, 100);
+
+		if (rand >= .5f) {
+			//Light.lights.Add(Light.create(0, 0, 1, 2, 1, .5f, .25f, 1));
+		}
 	}
 }

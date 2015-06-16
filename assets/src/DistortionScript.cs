@@ -13,12 +13,6 @@ public class DistortionScript : MonoBehaviour {
 	}
 
 	void Update() {
-		++timer;
-		if (timer >= 200) {
-			timer = 0;
-			speed = Random.Range(-.05f, .05f);
-		}
-		rand += speed;
-		GetComponent<Renderer>().material.SetFloat("rand", rand);
+
 	}
 }
