@@ -39,12 +39,18 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, .4f, 2.5f, .15f, .5f, .75f, 1);
+		player_light = Light.create(0, 0, .7f, 2, .15f, .5f, .75f, 1);
 		Light.lights.Add(player_light);
+
+		for (int n = 0; n < 0; ++n) {
+			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
+				Random.Range(.1f, 1.25f), Random.Range(.2f, 2.0f), 
+				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
+		}
 	}
 
 	public void update() {
-		player_light.set_pos(-player.transform.position.x, -player.transform.position.z);
+		//player_light.set_pos(-player.transform.position.x, -player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
