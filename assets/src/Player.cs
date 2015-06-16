@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+namespace MapNS {
+
 public class Player : MonoBehaviour {
 
 	Vector3 pos;
@@ -33,6 +35,13 @@ public class Player : MonoBehaviour {
 	float angle_offset = 0;
 	float last_angle = 0;
 
+	Light player_light;
+
+	public static int map_width;
+	//(map_mesh.bounds.size.x * map_rect.width)
+	public static int map_height;
+	//(map_mesh.bounds.size.z * map_rect.height) 
+
 	void Start() {
 		pos = transform.position;
 		rota = transform.rotation;
@@ -55,7 +64,7 @@ public class Player : MonoBehaviour {
 		light_data.filterMode = FilterMode.Point;
 		//clamp texture so it doesn't repeat
 		light_data.wrapMode = TextureWrapMode.Clamp;
-		create_light(256, 0, 1, 2.5f, 1, 0, 1, 1);
+		player_light = Light.create_light(0, 0, 1, 2.5f, 1, 0, 1, 1);
 
 		//Color c = new Color();
 		//c.r = 1;
@@ -75,28 +84,6 @@ public class Player : MonoBehaviour {
 		map_material = map.GetComponent<Renderer>().material;
 		map_material.SetInt("num_lights", 1);
 		map_material.SetFloat("next_light_uv", 1.0f / 64.0f);
-	}
-
-	void create_light(float x, float y, float size, float intensity, float r, float g, float b, float a) {
-		Color c = new Color();
-		c.r = r;
-		c.g = g;
-		c.b = b;
-		c.a = a;
-		light_data.SetPixel(0, 0, c);
-		c.r = size;
-		c.g = intensity / 64.0f;
-		light_data.SetPixel(1, 0, c);
-
-		int uv_x = (int)((x / (map_mesh.bounds.size.x * map_rect.width) * 2.98f) * 256) + (256 * 127);
-		c.r = (uv_x >> 8) / 255.0f;
-		c.g = (uv_x % 256) / 255.0f;
-
-		int uv_y = (int)((y / (map_mesh.bounds.size.z * map_rect.height) * 2.98f) * 256) + (256 * 127);
-		c.b = (uv_y >> 8) / 255.0f;
-		c.a = (uv_y % 256) / 255.0f;
-
-		light_data.SetPixel(2, 0, c);
 	}
 
 	void move_map(float x, float y) {
@@ -187,4 +174,5 @@ public class Player : MonoBehaviour {
 		cam_pos.z -= (cam_pos.z - pos.z) / 20.0f;
 		cam.transform.position = cam_pos;
 	}
+}
 }
