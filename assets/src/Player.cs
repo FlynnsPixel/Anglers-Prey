@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace MapNS {
+public class Player {
 
-public class Player : MonoBehaviour {
-
+	GameObject player;
 	Vector3 pos;
 	Quaternion rota;
 	Vector3 rota_euler;
@@ -30,25 +29,22 @@ public class Player : MonoBehaviour {
 
 	Light player_light;
 
-	void Start() {
-		pos = transform.position;
-		rota = transform.rotation;
+	public void init() {
+		player = GameObject.Find("player");
+		pos = player.transform.position;
+		rota = player.transform.rotation;
 		rota_euler.x = 90;
 		rota_euler.y = -90;
 		rota_euler.z = -90;
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		Map.init();
-		Light.init();
-
 		player_light = Light.create(0, 0, .4f, 2.5f, .15f, .5f, .75f, 1);
 		Light.lights.Add(player_light);
 	}
 
-	void Update() {
-		player_light.set_pos(-transform.position.x, -transform.position.z);
-		Light.update_all();
+	public void update() {
+		player_light.set_pos(-player.transform.position.x, -player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
@@ -58,8 +54,8 @@ public class Player : MonoBehaviour {
 		}
 			
 		if (mouse_touched) {
-			Vector3 b = cam.WorldToScreenPoint(cam_pos + (transform.position - cam_pos));
-			float c_x = (Screen.width / 2) + transform.position.x, c_y = (Screen.height / 2) + transform.position.z;
+			Vector3 b = cam.WorldToScreenPoint(cam_pos + (player.transform.position - cam_pos));
+			float c_x = (Screen.width / 2) + player.transform.position.x, c_y = (Screen.height / 2) + player.transform.position.z;
 			float a = Mathf.Atan2(b.y - Input.mousePosition.y, b.x - Input.mousePosition.x) + (180 * radians);
 			float target = a / radians;
 			if (target < 170 && last_angle > 190) angle_offset += 360;
@@ -84,14 +80,14 @@ public class Player : MonoBehaviour {
 		pos.x += accel.x;
 		pos.z += accel.y;
 
-		if (accel.x > 0 && pos.x > Map.rect.x) {
-			Map.scroll_vertices(1, 0);
-		}else if (accel.x < 0 && pos.x < Map.rect.x) {
-			Map.scroll_vertices(-1, 0);
-		}else if (accel.y > 0 && pos.z > Map.rect.y) {
-			Map.scroll_vertices(0, 1);
-		}else if (accel.y < 0 && pos.z < Map.rect.y) {
-			Map.scroll_vertices(0, -1);
+		if (accel.x > 0 && pos.x > Glb.map.rect.x) {
+			Glb.map.scroll_vertices(1, 0);
+		}else if (accel.x < 0 && pos.x < Glb.map.rect.x) {
+			Glb.map.scroll_vertices(-1, 0);
+		}else if (accel.y > 0 && pos.z > Glb.map.rect.y) {
+			Glb.map.scroll_vertices(0, 1);
+		}else if (accel.y < 0 && pos.z < Glb.map.rect.y) {
+			Glb.map.scroll_vertices(0, -1);
 		}
 
 		if (Input.GetKey(KeyCode.A)) {
@@ -109,12 +105,11 @@ public class Player : MonoBehaviour {
 		rota_euler.x -= (rota_euler.x - 90) / 20.0f;
 		rota_euler.y = -angle;
 
-		transform.position = pos;
-		transform.rotation = rota;
+		player.transform.position = pos;
+		player.transform.rotation = rota;
 
 		cam_pos.x -= (cam_pos.x - pos.x) / 20.0f;
 		cam_pos.z -= (cam_pos.z - pos.z) / 20.0f;
 		cam.transform.position = cam_pos;
 	}
-}
 }
