@@ -50,13 +50,15 @@ public class Light {
 
 		v_pos.x = x;
 		v_pos.z = y;
-		v_pos_min.x = x - (attrib_size / 2);
-		v_pos_min.z = y - (attrib_size / 2);
-		v_pos_max.x = x + (attrib_size / 2);
-		v_pos_max.z = y + (attrib_size / 2);
+		v_pos_min.x = x - ((attrib_size * (Glb.map.width / 2)) / 2);
+		v_pos_min.z = y - ((attrib_size * (Glb.map.height / 2)) / 2);
+		v_pos_max.x = x + ((attrib_size * (Glb.map.width / 2)) / 2);
+		v_pos_max.z = y + ((attrib_size * (Glb.map.height / 2)) / 2);
 	}
 
 	public Vector3 get_pos() { return v_pos; }
+	public Vector3 get_min_pos() { return v_pos_min; }
+	public Vector3 get_max_pos() { return v_pos_max; }
 	public float get_size() { return attrib_size; }
 	public float get_intensity() { return attrib_intensity; }
 
@@ -67,6 +69,7 @@ public class Light {
 	public const float MAX_NUM_PIXELS = 512.0f;				//the maximum number of pixels in the light texture
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
+	public static Vector3 start_cam_pos;
 
 	public static void init() {
 		//width must be power of 2 or the point filter mode will get slightly interpolated
@@ -78,6 +81,8 @@ public class Light {
 
 		Glb.map.material.SetFloat("next_light_uv", 1.0f / (int)MAX_NUM_PIXELS);
 		update_all();
+
+		start_cam_pos = Camera.main.transform.position;
 	}
 
 	public static Light create(float x, float y, float size, float intensity, float r, float g, float b, float a) {
@@ -94,9 +99,12 @@ public class Light {
 
 		int offset_x = 0;
 		int render_count = 0;
+		Vector3 cam_pos = Camera.main.transform.position;
+		cam_pos.y = 0;
 		for (int n = 0; n < lights.Count; ++n) {
-			Vector3 c1 = Camera.main.WorldToScreenPoint(lights[n].get_pos());
-			if (enable_off_screen || (c.x < Screen.width && c.x > 0)) {
+			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (lights[n].get_min_pos() + cam_pos));
+			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (lights[n].get_max_pos() + cam_pos));
+			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				light_data.SetPixel(offset_x, 0, lights[n].colour);
 				light_data.SetPixel(offset_x + 1, 0, lights[n].attribs);
 				light_data.SetPixel(offset_x + 2, 0, lights[n].pos);

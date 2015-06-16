@@ -4,7 +4,7 @@ using System.Collections;
 public class Player {
 
 	GameObject player;
-	Vector3 pos;
+	public Vector3 pos;
 	Quaternion rota;
 	Vector3 rota_euler;
 	Vector2 accel;
@@ -39,10 +39,10 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, .7f, 2, .15f, .5f, .75f, 1);
+		player_light = Light.create(50, 0, .7f, 8, .15f, .5f, .75f, 1);
 		Light.lights.Add(player_light);
 
-		for (int n = 0; n < 0; ++n) {
+		for (int n = 0; n < 20; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
 				Random.Range(.1f, 1.25f), Random.Range(.2f, 2.0f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
