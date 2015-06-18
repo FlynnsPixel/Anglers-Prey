@@ -36,16 +36,22 @@ Shader "Custom/Map" {
 
 			struct v2f {
 	            float4 pos : SV_POSITION;
-	            fixed3 colour : COLOR0;
+	            float4 colour : COLOR;
 	            float2 bumpuv0 : TEXCOORD0;
 				float2 bumpuv1 : TEXCOORD1;
 				float3 v_dir : TEXCOORD2;
 				float2 uv : TEXCOORD3;
 	        };
 
-	        v2f vert(appdata_base v) {
+	        struct VertIn {
+            	float4 vertex : POSITION;
+            	float4 color : COLOR;
+         	};
+
+	        v2f vert(VertIn v) {
 	            v2f o;
 	        	o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+	        	o.colour = v.color;
 
 				//scroll bump waves
 				float4 temp;
@@ -91,6 +97,8 @@ Shader "Custom/Map" {
 
 		        	i.uv = origin_uv;
 	        	}
+
+	        	col = i.colour;
 
 	            return col;
 	        }

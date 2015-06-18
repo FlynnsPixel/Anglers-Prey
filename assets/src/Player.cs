@@ -42,7 +42,7 @@ public class Player {
 
 		player_light = Light.create(50, 0, .5f, 3, .4f, .5f, 1, 1);
 		Light.lights.Add(player_light);
-		Light.lights.Add(Light.create(2.5f, 17, .2f, 2.5f, .5f, 0, .75f, 1));
+		Light.lights.Add(Light.create(2.5f, 17, .25f, 3, .5f, 0, .75f, 1));
 
 		for (int n = 0; n < 0; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
@@ -70,8 +70,8 @@ public class Player {
 			else if (target > 190 && last_angle < 170) angle_offset -= 360;
 			last_angle = target;
 
-			angle -= (angle - (target + angle_offset)) / 10.0f;
-			angle_accel = -(angle - (target + angle_offset)) / 10.0f;
+			angle -= (angle - (target + angle_offset)) / 20.0f;
+			angle_accel = -(angle - (target + angle_offset)) / 20.0f;
 
 			accel.x -= Mathf.Cos(angle * radians) * .01f;
 			accel.y -= Mathf.Sin(angle * radians) * .01f;
@@ -90,13 +90,13 @@ public class Player {
 		pos.z += accel.y;
 
 		if (accel.x > 0 && pos.x > Glb.map.rect.x) {
-			Glb.map.scroll_vertices(1, 0);
+			//Glb.map.scroll_vertices(1, 0);
 		}else if (accel.x < 0 && pos.x < Glb.map.rect.x) {
-			Glb.map.scroll_vertices(-1, 0);
+			//Glb.map.scroll_vertices(-1, 0);
 		}else if (accel.y > 0 && pos.z > Glb.map.rect.y) {
-			Glb.map.scroll_vertices(0, 1);
+			//Glb.map.scroll_vertices(0, 1);
 		}else if (accel.y < 0 && pos.z < Glb.map.rect.y) {
-			Glb.map.scroll_vertices(0, -1);
+			//Glb.map.scroll_vertices(0, -1);
 		}
 
 		if (Input.GetKey(KeyCode.A)) {
