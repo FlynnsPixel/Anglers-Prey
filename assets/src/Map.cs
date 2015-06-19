@@ -40,11 +40,15 @@ public class Map {
 		vertices = new Vector3[size * size];
 		for (int y = 0; y < size; ++y) {
 			for (int x = 0; x < size; ++x) {
-				vertices[(y * size) + x].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
-				vertices[(y * size) + x].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
-				Debug.Log(vertices[(y * size) + x].x + ", " + vertices[(y * size) + x].z);
+				int index = (y * size) + x;
+				vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
+				vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
 			}
 		}
+
+		draw_vertex_light(0, 0, 1);
+		draw_vertex_light(4, 0, 4);
+
 		int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
 		int[] indices = new int[num_indices];
 		string temp = "";
@@ -61,17 +65,24 @@ public class Map {
 		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
 
 		Color[] colours = new Color[mesh.vertexCount];
-		int center = ((size * size) / 2) - (size / 2);
-		float angle = 0;
-		float p_x = 0;
-		float p_y = 0;
-		for (int i = 0; i < 10; ++i) {
-			if (i % 4 == 0 && i != 0) angle += 45;
-			p_x += Mathf.Cos(angle / (180.0f / Mathf.PI));
-			p_y += Mathf.Sin(angle / (180.0f / Mathf.PI));
-			colours[(int)(center + p_x + ((int)(p_y) * size))] = Color.red;
-		}
 		mesh.colors = colours;
+	}
+
+	public void draw_vertex_light(float v_x, float v_z, float radius) {
+		int size = 40;
+		for (int y = 0; y < size; ++y) {
+			for (int x = 0; x < size; ++x) {
+				int index = (y * size) + x;
+				if (vertices[index].x < 5 && vertices[index].x > -5 && vertices[index].z < 5 && vertices[index].z > -5) {
+					float dist = Mathf.Sqrt(Mathf.Pow(vertices[index].x + v_x, 2) + Mathf.Pow(vertices[index].z + v_z, 2));
+					if (dist < radius) {
+						float angle = Mathf.Atan2(vertices[index].z + v_z, vertices[index].x + v_x);
+						vertices[index].x = Mathf.Clamp(-v_x + (Mathf.Cos(angle) * radius), -5, 5);
+						vertices[index].z = Mathf.Clamp(-v_z + (Mathf.Sin(angle) * radius), -5, 5);
+					}
+				}
+			}
+		}
 	}
 
 	public void update() {
