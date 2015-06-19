@@ -25,50 +25,48 @@ public class Map {
 		height = mesh.bounds.size.z * rect.height;
 
 		vertices = mesh.vertices;
-		//float dist;
-		//float angle;
-		//for (int i = 0; i < mesh.vertexCount; ++i) {
-		//	if (vertices[i].x == 5 || vertices[i].x == -5 || vertices[i].z == 5 || vertices[i].z == -5) continue;
-		//	dist = Mathf.Sqrt(Mathf.Pow(vertices[i].x, 2) + Mathf.Pow(vertices[i].z, 2));
-		//	if (dist == 0) continue;
-		//	angle = Mathf.Atan2(vertices[i].z, vertices[i].x);
-		//	Debug.Log("angle: " + (angle/ (Mathf.PI / 180.0f)) + ", dist: " + dist + ", x: " + vertices[i].x + ", y: " + vertices[i].z);
-		//	vertices[i].x = Mathf.Cos(angle);
-		//	vertices[i].z = Mathf.Sin(angle);
+
+		//int size = 40;
+		//vertices = new Vector3[size * size];
+		//for (int y = 0; y < size; ++y) {
+		//	for (int x = 0; x < size; ++x) {
+		//		int index = (y * size) + x;
+		//		vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
+		//		vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
+		//	}
 		//}
-		int size = 40;
-		vertices = new Vector3[size * size];
-		for (int y = 0; y < size; ++y) {
-			for (int x = 0; x < size; ++x) {
-				int index = (y * size) + x;
-				vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
-				vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
-			}
-		}
 
-		draw_vertex_light(0, 0, 1);
-		draw_vertex_light(4, 0, 4);
+		//mesh.vertices = vertices;
+		//Color[] colours = new Color[size * size];
+		//mesh.colors = colours;
 
-		int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
-		int[] indices = new int[num_indices];
-		string temp = "";
-		for (int i = 0; i < num_indices; i += 6) {
-			int index = i / 6;
-			indices[i] = index;
-			indices[i + 1] = index + size;
-			indices[i + 2] = index + size + 1;
-			indices[i + 3] = index;
-			indices[i + 4] = index + size + 1;
-			indices[i + 5] = index + 1;
-		}
-		mesh.vertices = vertices;
-		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
+		//for (int y = 0; y < size; ++y) {
+		//	for (int x = 0; x < size; ++x) {
+		//		colours[(y * size) + x] = Color.black;
+		//	}
+		//}
 
-		Color[] colours = new Color[mesh.vertexCount];
-		mesh.colors = colours;
+		//draw_vertex_light(.1f, 0, .7f, Color.red);
+		////draw_vertex_light(4, 0, 4, Color.blue);
+
+		//int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
+		//int[] indices = new int[num_indices];
+		//string temp = "";
+		//for (int i = 0; i < num_indices; i += 6) {
+		//	int index = i / 6;
+		//	indices[i] = index;
+		//	indices[i + 1] = index + size;
+		//	indices[i + 2] = index + size + 1;
+		//	indices[i + 3] = index;
+		//	indices[i + 4] = index + size + 1;
+		//	indices[i + 5] = index + 1;
+		//}
+		//mesh.vertices = vertices;
+		//mesh.SetIndices(indices, MeshTopology.Triangles, 0);
 	}
 
-	public void draw_vertex_light(float v_x, float v_z, float radius) {
+	public void draw_vertex_light(float v_x, float v_z, float radius, Color colour) {
+		Color[] colours = mesh.colors;
 		int size = 40;
 		for (int y = 0; y < size; ++y) {
 			for (int x = 0; x < size; ++x) {
@@ -79,10 +77,12 @@ public class Map {
 						float angle = Mathf.Atan2(vertices[index].z + v_z, vertices[index].x + v_x);
 						vertices[index].x = Mathf.Clamp(-v_x + (Mathf.Cos(angle) * radius), -5, 5);
 						vertices[index].z = Mathf.Clamp(-v_z + (Mathf.Sin(angle) * radius), -5, 5);
+						if (dist < radius / 2.0f) colours[index] = colour;
 					}
 				}
 			}
 		}
+		mesh.colors = colours;
 	}
 
 	public void update() {
