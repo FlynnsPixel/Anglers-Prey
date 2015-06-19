@@ -27,7 +27,7 @@ public class Map {
 		width = mesh.bounds.size.x * rect.width;
 		height = mesh.bounds.size.z * rect.height;
 
-		resize_vertices(100);
+		resize_vertices(22);
 
 		Light.lights.Add(Light.create(10, 0, 1, 1, 1, 0, 0, 1));
 	}
@@ -76,12 +76,14 @@ public class Map {
 
 	public void scroll_vertices(float x, float y) {
 		//loop through all vertices in mesh and move by specified x and y
-		vertices = mesh.vertices;
-		for (int i = 0; i < mesh.vertexCount; ++i) {
-			vertices[i].x += x;
-			vertices[i].z += y;
-		}
-		mesh.vertices = vertices;
+		//this can be uncommented if need be, but for now moving the map's position works fine
+		//vertices = mesh.vertices;
+		//for (int i = 0; i < mesh.vertexCount; ++i) {
+			//vertices[i].x += x;
+			//vertices[i].z += y;
+		//}
+		//mesh.vertices = vertices;
+		map.transform.Translate((x / MAX_VERTEX_WIDTH) * width, 0, (y / MAX_VERTEX_HEIGHT) * height);
 
 		//move map rect x, y by the width/height scale
 		rect.x += rect.width * x;

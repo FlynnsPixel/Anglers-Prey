@@ -5,16 +5,19 @@ using UnityEngine;
 public class Light {
 
 	//light members and functions
+	public bool modified = false;
+	public bool first_update = true;
+
 	private Color colour;
-	private Color attribs;
-	private Color pos;
+	private Color pp_attribs;
+	private Color pp_pos;
 	private Vector3 v_pos_min;
 	private Vector3 v_pos_max;
 	private Vector3 v_pos;
 	private float attrib_size;
 	private float attrib_intensity;
+	private Vector3 prev_v_pos;
 	private LightType type;
-	public bool modified = false;
 
 	public void set_colour(float r, float g, float b, float a) {
 		colour.r = r;
@@ -25,30 +28,41 @@ public class Light {
 	
 	public void set_colour(Color c) {
 		colour = c;
+
+		modified = true;
 	}
 
 	public void set_attribs(float size, float intensity) {
-		attribs.r = size;
-		attribs.g = intensity / 64.0f;
+		if (type == Light.LightType.PER_PIXEL) {
+			pp_attribs.r = size;
+			pp_attribs.g = intensity / 64.0f;
+		}
 		attrib_size = size;
 		attrib_intensity = intensity;
+
+		modified = true;
 	}
 	
 	public void set_pos(float x, float y) {
-		//converts x, y to uv coordinates of the map and then multiplies by 256 to be able to get the high and low bytes
-		//the high byte and low bytes are then put in r, g, b, a respectively as a 0-1 range of 255 possible values per channel
-		//this allows 65536 possible uv coordinates and can overflow if the coordinate is very far away (but unlikely)
-		//the shader then decodes these values into uv coordinates
+		if (type == Light.LightType.PER_PIXEL) {
+			//converts x, y to uv coordinates of the map and then multiplies by 256 to be able to get the high and low bytes
+			//the high byte and low bytes are then put in r, g, b, a respectively as a 0-1 range of 255 possible values per channel
+			//this allows 65536 possible uv coordinates and can overflow if the coordinate is very far away (but unlikely)
+			//the shader then decodes these values into uv coordinates
 
-		float wave_scale = Glb.map.material.GetFloat("wave_scale") * 10.0f;
+			float wave_scale = Glb.map.material.GetFloat("wave_scale") * 10.0f;
 
-		int uv_x = (int)((x / (Glb.map.width / wave_scale)) * 256) + (256 * 127);
-		pos.r = (uv_x >> 8) / 255.0f;
-		pos.g = (uv_x % 256) / 255.0f;
+			int uv_x = (int)((x / (Glb.map.width / wave_scale)) * 256) + (256 * 127);
+			pp_pos.r = (uv_x >> 8) / 255.0f;
+			pp_pos.g = (uv_x % 256) / 255.0f;
 
-		int uv_y = (int)((y / (Glb.map.height / wave_scale)) * 256) + (256 * 127);
-		pos.b = (uv_y >> 8) / 255.0f;
-		pos.a = (uv_y % 256) / 255.0f;
+			int uv_y = (int)((y / (Glb.map.height / wave_scale)) * 256) + (256 * 127);
+			pp_pos.b = (uv_y >> 8) / 255.0f;
+			pp_pos.a = (uv_y % 256) / 255.0f;
+		}
+
+		prev_v_pos.x = v_pos.x;
+		prev_v_pos.z = v_pos.z;
 
 		v_pos.x = x;
 		v_pos.z = y;
@@ -56,6 +70,8 @@ public class Light {
 		v_pos_min.z = y - ((attrib_size * (Glb.map.height / 2)) / 2);
 		v_pos_max.x = x + ((attrib_size * (Glb.map.width / 2)) / 2);
 		v_pos_max.z = y + ((attrib_size * (Glb.map.height / 2)) / 2);
+
+		modified = true;
 	}
 
 	public void set_type(LightType t) {
@@ -111,51 +127,66 @@ public class Light {
 		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
 
+		enable_off_screen = true;
+
 		int offset_x = 0;
 		int render_count = 0;
 		int num_vertex_lights = 0;
 		int num_pixel_lights = 0;
 		Vector3 cam_pos = Camera.main.transform.position;
 		cam_pos.y = 0;
+		Color[] colours = Glb.map.mesh.colors;
 		foreach (Light light in lights) {
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
-					Color[] colours = Glb.map.mesh.colors;
-					float v_x = -(light.v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
-					float v_z = -(light.v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
+					if (light.modified) {
+						float v_x = -(light.v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
+						float v_z = -(light.v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
+						float prev_x = -(light.prev_v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
+						float prev_z = -(light.prev_v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
 
-					for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
-						for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
-							int index = (y * Glb.map.vertices_per_row) + x;
-							if (num_vertex_lights == 0) colours[index] = Color.black;
+						for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
+							for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
+								int index = (y * Glb.map.vertices_per_row) + x;
+								//if (num_vertex_lights == 0) colours[index] = Color.black;
 
-							float dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + v_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + v_z, 2));
-							if (dist < light.attrib_size) {
-								if (Glb.map.vertices[index].x < 5 && Glb.map.vertices[index].x > -5 && 
-									Glb.map.vertices[index].z < 5 && Glb.map.vertices[index].z > -5) {
+								float dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + v_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + v_z, 2));
+								if (dist < light.attrib_size) {
 									dist = Mathf.Clamp(light.attrib_intensity - 
 														(dist / (light.attrib_size / light.attrib_intensity)), 0, light.attrib_intensity);
-									//float v = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * light.attrib_size;
 									colours[index].r += dist * light.colour.r * light.colour.a;
 									colours[index].g += dist * light.colour.g * light.colour.a;
 									colours[index].b += dist * light.colour.b * light.colour.a;
 								}
+
+								if (!light.first_update) {
+									dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + prev_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + prev_z, 2));
+									if (dist < light.attrib_size) {
+										dist = Mathf.Clamp(light.attrib_intensity - 
+															(dist / (light.attrib_size / light.attrib_intensity)), 0, light.attrib_intensity);
+										colours[index].r -= dist * light.colour.r * light.colour.a;
+										colours[index].g -= dist * light.colour.g * light.colour.a;
+										colours[index].b -= dist * light.colour.b * light.colour.a;
+									}
+								}
 							}
 						}
+						++num_vertex_lights;
+						light.modified = false;
+						light.first_update = false;
 					}
-					Glb.map.mesh.colors = colours;
-					++num_vertex_lights;
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					light_data.SetPixel(offset_x, 0, light.colour);
-					light_data.SetPixel(offset_x + 1, 0, light.attribs);
-					light_data.SetPixel(offset_x + 2, 0, light.pos);
+					light_data.SetPixel(offset_x + 1, 0, light.pp_attribs);
+					light_data.SetPixel(offset_x + 2, 0, light.pp_pos);
 					offset_x += PIXEL_DATA_PER_LIGHT;
 					++num_pixel_lights;
 				}
 			}
 		}
+		Glb.map.mesh.colors = colours;
 
 		Glb.map.material.SetInt("num_lights", num_pixel_lights);
 		if (num_pixel_lights > 0) {
