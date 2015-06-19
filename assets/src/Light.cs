@@ -123,22 +123,24 @@ public class Light {
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
 					Color[] colours = Glb.map.mesh.colors;
-					int size = 100;
-					float v_x = -(light.v_pos.x / Glb.map.width) * Glb.map.vertex_width;
-					float v_z = -(light.v_pos.z / Glb.map.height) * Glb.map.vertex_height;
-					for (int y = 0; y < size; ++y) {
-						for (int x = 0; x < size; ++x) {
-							int index = (y * size) + x;
+					float v_x = -(light.v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
+					float v_z = -(light.v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
+
+					for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
+						for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
+							int index = (y * Glb.map.vertices_per_row) + x;
 							if (num_vertex_lights == 0) colours[index] = Color.black;
 
 							float dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + v_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + v_z, 2));
 							if (dist < light.attrib_size) {
 								if (Glb.map.vertices[index].x < 5 && Glb.map.vertices[index].x > -5 && 
 									Glb.map.vertices[index].z < 5 && Glb.map.vertices[index].z > -5) {
-									float v = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * light.attrib_size;
-									colours[index].r += v * light.colour.r * light.colour.a;
-									colours[index].g += v * light.colour.g * light.colour.a;
-									colours[index].b += v * light.colour.b * light.colour.a;
+									dist = Mathf.Clamp(light.attrib_intensity - 
+														(dist / (light.attrib_size / light.attrib_intensity)), 0, light.attrib_intensity);
+									//float v = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * light.attrib_size;
+									colours[index].r += dist * light.colour.r * light.colour.a;
+									colours[index].g += dist * light.colour.g * light.colour.a;
+									colours[index].b += dist * light.colour.b * light.colour.a;
 								}
 							}
 						}

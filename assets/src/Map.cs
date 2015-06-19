@@ -5,8 +5,9 @@ public class Map {
 
 	public float width;
 	public float height;
-	public float vertex_width = 11;
-	public float vertex_height = 11;
+	public const float MAX_VERTEX_WIDTH = 11;
+	public const float MAX_VERTEX_HEIGHT = 11;
+	public int vertices_per_row;
 
 	public GameObject map;
 	public Mesh mesh;
@@ -26,44 +27,47 @@ public class Map {
 		width = mesh.bounds.size.x * rect.width;
 		height = mesh.bounds.size.z * rect.height;
 
-		vertices = mesh.vertices;
+		resize_vertices(100);
 
-		int size = 100;
-		vertices = new Vector3[size * size];
-		for (int y = 0; y < size; ++y) {
-			for (int x = 0; x < size; ++x) {
-				int index = (y * size) + x;
-				vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
-				vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
+		Light.lights.Add(Light.create(10, 0, 1, 1, 1, 0, 0, 1));
+	}
+
+	public void resize_vertices(int row_size) {
+		vertices_per_row = row_size;
+
+		vertices = new Vector3[row_size * row_size];
+		for (int y = 0; y < row_size; ++y) {
+			for (int x = 0; x < row_size; ++x) {
+				int index = (y * row_size) + x;
+				vertices[index].x = ((float)x - (row_size / 2.0f)) / (row_size / 11.0f);
+				vertices[index].z = ((float)y - (row_size / 2.0f)) / (row_size / 11.0f);
 			}
 		}
 
 		mesh.vertices = vertices;
-		Color[] colours = new Color[size * size];
+		Color[] colours = new Color[row_size * row_size];
 		mesh.colors = colours;
 
-		for (int y = 0; y < size; ++y) {
-			for (int x = 0; x < size; ++x) {
-				colours[(y * size) + x] = Color.black;
+		for (int y = 0; y < row_size; ++y) {
+			for (int x = 0; x < row_size; ++x) {
+				colours[(y * row_size) + x] = Color.black;
 			}
 		}
 
-		int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
+		int num_indices = (((row_size - 1) * (row_size - 1)) + (row_size - 2)) * 6;
 		int[] indices = new int[num_indices];
 		string temp = "";
 		for (int i = 0; i < num_indices; i += 6) {
 			int index = i / 6;
 			indices[i] = index;
-			indices[i + 1] = index + size;
-			indices[i + 2] = index + size + 1;
+			indices[i + 1] = index + row_size;
+			indices[i + 2] = index + row_size + 1;
 			indices[i + 3] = index;
-			indices[i + 4] = index + size + 1;
+			indices[i + 4] = index + row_size + 1;
 			indices[i + 5] = index + 1;
 		}
 		mesh.vertices = vertices;
 		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
-
-		Light.lights.Add(Light.create(10, 0, 1, 1, 1, 0, 0, 1));
 	}
 
 	public void update() {
