@@ -40,8 +40,8 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		//player_light = Light.create(50, 0, 2, 2.5f, .4f, .5f, 1, 1);
-		//Light.lights.Add(player_light);
+		player_light = Light.create(50, 0, 2, 2.5f, .4f, .5f, 1, 1);
+		Light.lights.Add(player_light);
 		//Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1));
 
 		for (int n = 0; n < 0; ++n) {
@@ -53,9 +53,9 @@ public class Player {
 
 	public void update() {
 		for (int i = 0; i < Light.lights.Count; ++i) {
-			Light.lights[i].set_pos(Light.lights[i].get_pos().x, Light.lights[i].get_pos().z);
+			//Light.lights[i].set_pos(Light.lights[i].get_pos().x, Light.lights[i].get_pos().z);
 		}
-		//player_light.set_pos(player.transform.position.x, player.transform.position.z);
+		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;

@@ -7,28 +7,37 @@ public class Light {
 	//light members and functions
 	public bool modified = false;
 	public bool first_update = true;
+	public bool on_screen = true;
 
 	private Color colour;
 	private Color pp_attribs;
 	private Color pp_pos;
+
 	private Vector3 v_pos_min;
 	private Vector3 v_pos_max;
 	private Vector3 v_pos;
 	private float attrib_size;
 	private float attrib_intensity;
-	private Vector3 prev_v_pos;
 	private LightType type;
 
+	private Color prev_colour;
+	private float prev_attrib_size;
+	private float prev_attrib_intensity;
+	private Vector3 prev_v_pos;
+
 	public void set_colour(float r, float g, float b, float a) {
+		prev_colour = colour;
 		colour.r = r;
 		colour.g = g;
 		colour.b = b;
 		colour.a = a;
+		if (first_update) prev_colour = colour;
 	}
 	
 	public void set_colour(Color c) {
+		prev_colour = colour;
 		colour = c;
-
+		if (first_update) prev_colour = colour;
 		modified = true;
 	}
 
@@ -37,8 +46,16 @@ public class Light {
 			pp_attribs.r = size;
 			pp_attribs.g = intensity / 64.0f;
 		}
+		prev_attrib_size = attrib_size;
+		prev_attrib_intensity = attrib_intensity;
+
 		attrib_size = size;
 		attrib_intensity = intensity;
+
+		if (first_update) {
+			prev_attrib_size = attrib_size;
+			prev_attrib_intensity = attrib_intensity;
+		}
 
 		modified = true;
 	}
@@ -64,12 +81,20 @@ public class Light {
 		prev_v_pos.x = v_pos.x;
 		prev_v_pos.z = v_pos.z;
 
+		x = -x;
+		y = -y;
+
 		v_pos.x = x;
 		v_pos.z = y;
-		v_pos_min.x = x - ((attrib_size * (Glb.map.width / 2)) / 2);
-		v_pos_min.z = y - ((attrib_size * (Glb.map.height / 2)) / 2);
-		v_pos_max.x = x + ((attrib_size * (Glb.map.width / 2)) / 2);
-		v_pos_max.z = y + ((attrib_size * (Glb.map.height / 2)) / 2);
+		v_pos_min.x = x - ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
+		v_pos_min.z = y - ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
+		v_pos_max.x = x + ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
+		v_pos_max.z = y + ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
+
+		if (first_update) {
+			prev_v_pos.x = v_pos.x;
+			prev_v_pos.z = v_pos.z;
+		}
 
 		modified = true;
 	}
@@ -128,8 +153,8 @@ public class Light {
 	}
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
-		float v_x = ((pos.x / Glb.map.width) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_WIDTH;
-		float v_z = ((pos.z / Glb.map.height) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_HEIGHT;
+		float v_x = ((-pos.x / Glb.map.width) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_WIDTH;
+		float v_z = ((-pos.z / Glb.map.height) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_HEIGHT;
 
 		int r = 1;
 		float radius = 0;
@@ -181,16 +206,19 @@ public class Light {
 
 		foreach (Light light in lights) {
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
-			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
+			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_pos() + cam_pos));
+			Debug.Log(c1 + ", " + c2);
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.modified) {
 						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, false);
-						if (!light.first_update) draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.prev_v_pos, true);
-						
+						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
+																						light.prev_attrib_intensity, light.prev_v_pos, true);
+
 						++num_vertex_lights;
 						light.modified = false;
 						light.first_update = false;
+						light.on_screen = true;
 					}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					light_data.SetPixel(offset_x, 0, light.colour);
@@ -198,6 +226,17 @@ public class Light {
 					light_data.SetPixel(offset_x + 2, 0, light.pp_pos);
 					offset_x += PIXEL_DATA_PER_LIGHT;
 					++num_pixel_lights;
+				}
+			}else {
+				if (light.get_type() == LightType.VERTEX) {
+					if (light.on_screen) {
+						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
+																	light.prev_attrib_intensity, light.prev_v_pos, true);
+
+						light.modified = false;
+						light.first_update = false;
+						light.on_screen = false;
+					}
 				}
 			}
 		}
