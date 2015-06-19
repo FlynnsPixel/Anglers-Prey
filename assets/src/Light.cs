@@ -13,6 +13,7 @@ public class Light {
 	private Vector3 v_pos;
 	private float attrib_size;
 	private float attrib_intensity;
+	private LightType type;
 
 	public void set_colour(float r, float g, float b, float a) {
 		colour.r = r;
@@ -56,11 +57,18 @@ public class Light {
 		v_pos_max.z = y + ((attrib_size * (Glb.map.height / 2)) / 2);
 	}
 
+	public void set_type(LightType t) {
+		type = t;
+		set_attribs(attrib_size, attrib_intensity);
+		set_pos(v_pos);
+	}
+
 	public Vector3 get_pos() { return v_pos; }
 	public Vector3 get_min_pos() { return v_pos_min; }
 	public Vector3 get_max_pos() { return v_pos_max; }
 	public float get_size() { return attrib_size; }
 	public float get_intensity() { return attrib_intensity; }
+	public LightType get_light_type() { return type; }
 
 	//static variables and functions
 	public static List<Light> lights = new List<Light>();	//a list of lights to be updated and rendered
@@ -69,7 +77,11 @@ public class Light {
 	public const float MAX_NUM_PIXELS = 64.0f;				//the maximum number of pixels in the light texture
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
-	public static Vector3 start_cam_pos;
+
+	enum LightType {
+		PER_PIXEL, 
+		VERTEX
+	};
 
 	public static void init() {
 		//width must be power of 2 or the point filter mode will get slightly interpolated
@@ -85,7 +97,7 @@ public class Light {
 		start_cam_pos = Camera.main.transform.position;
 	}
 
-	public static Light create(float x, float y, float size, float intensity, float r, float g, float b, float a) {
+	public static Light create(float x, float y, float size, float intensity, float r, float g, float b, float a, LightType type = LightType.VERTEX) {
 		Light l = new Light();
 		l.set_colour(r, g, b, a);
 		l.set_attribs(size, intensity);
