@@ -128,11 +128,9 @@ public class Light {
 	}
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
-		float v_x = -(pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
-		float v_z = -(pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
+		float v_x = ((pos.x / Glb.map.width) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_WIDTH;
+		float v_z = ((pos.z / Glb.map.height) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_HEIGHT;
 
-		v_x += Map.MAX_VERTEX_WIDTH;
-		v_z += Map.MAX_VERTEX_HEIGHT;
 		int r = 1;
 		float radius = 0;
 		bool drawn = false;
@@ -145,14 +143,10 @@ public class Light {
 				int x = (int)Mathf.Round((Mathf.Cos(a / (180.0f / Mathf.PI)) * radius) + v_x);
 				int y = (int)Mathf.Round((Mathf.Sin(a / (180.0f / Mathf.PI)) * radius) + v_z);
 				int index = (y * Glb.map.vertices_per_row) + x;
-				//if (num_vertex_lights == 0) map_colours[index] = Color.black;
-
-				if (map_colours[index].a == unique_light_id) continue;
 
 				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2));
 				if (dist > size) { drawn = true; continue; }
-
-				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row) continue;
+				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row || map_colours[index].a == unique_light_id) continue;
 
 				dist = Mathf.Clamp(intensity - (dist / (size / intensity)), 0, intensity);
 				if (negate_colour) dist = -dist;
@@ -181,7 +175,6 @@ public class Light {
 		cam_pos.y = 0;
 
 		map_colours = Glb.map.mesh.colors;
-
 		for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
 			for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
 				map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
@@ -195,14 +188,14 @@ public class Light {
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
-					//if (light.modified) {
+					if (light.modified) {
 						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, false);
-						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.prev_v_pos, true);
+						if (!light.first_update) draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.prev_v_pos, true);
 						
 						++num_vertex_lights;
 						light.modified = false;
 						light.first_update = false;
-					//}
+					}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					light_data.SetPixel(offset_x, 0, light.colour);
 					light_data.SetPixel(offset_x + 1, 0, light.pp_attribs);

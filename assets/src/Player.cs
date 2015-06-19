@@ -44,15 +44,18 @@ public class Player {
 		Light.lights.Add(player_light);
 		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1));
 
-		for (int n = 0; n < 0; ++n) {
+		for (int n = 0; n < 40; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
-				Random.Range(.1f, 1.25f), Random.Range(.2f, 2.0f), 
+				Random.Range(.5f, 4), Random.Range(.2f, 2.0f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
 		}
 	}
 
 	public void update() {
-		player_light.set_pos(player.transform.position.x, player.transform.position.z);
+		for (int i = 0; i < Light.lights.Count; ++i) {
+			Light.lights[i].set_pos(Light.lights[i].get_pos().x + Mathf.Cos(Time.deltaTime / 10.0f) / 4.0f, Light.lights[i].get_pos().z);
+		}
+		//player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
