@@ -14,6 +14,7 @@ public class Light {
 	private float attrib_size;
 	private float attrib_intensity;
 	private LightType type;
+	public bool modified = false;
 
 	public void set_colour(float r, float g, float b, float a) {
 		colour.r = r;
@@ -60,15 +61,16 @@ public class Light {
 	public void set_type(LightType t) {
 		type = t;
 		set_attribs(attrib_size, attrib_intensity);
-		set_pos(v_pos);
+		set_pos(v_pos.x, v_pos.z);
 	}
 
+	public Color get_colour() { return colour; }
 	public Vector3 get_pos() { return v_pos; }
 	public Vector3 get_min_pos() { return v_pos_min; }
 	public Vector3 get_max_pos() { return v_pos_max; }
 	public float get_size() { return attrib_size; }
 	public float get_intensity() { return attrib_intensity; }
-	public LightType get_light_type() { return type; }
+	public LightType get_type() { return type; }
 
 	//static variables and functions
 	public static List<Light> lights = new List<Light>();	//a list of lights to be updated and rendered
@@ -77,8 +79,8 @@ public class Light {
 	public const float MAX_NUM_PIXELS = 64.0f;				//the maximum number of pixels in the light texture
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
-
-	enum LightType {
+	
+	public enum LightType {
 		PER_PIXEL, 
 		VERTEX
 	};
@@ -93,8 +95,6 @@ public class Light {
 
 		Glb.map.material.SetFloat("next_light_uv", 1.0f / (int)MAX_NUM_PIXELS);
 		update_all();
-
-		start_cam_pos = Camera.main.transform.position;
 	}
 
 	public static Light create(float x, float y, float size, float intensity, float r, float g, float b, float a, LightType type = LightType.VERTEX) {
@@ -102,30 +102,63 @@ public class Light {
 		l.set_colour(r, g, b, a);
 		l.set_attribs(size, intensity);
 		l.set_pos(x, y);
+		l.set_type(type);
 
 		return l;
 	}
 
 	public static void update_all() {
+		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
 
 		int offset_x = 0;
 		int render_count = 0;
+		int num_vertex_lights = 0;
+		int num_pixel_lights = 0;
 		Vector3 cam_pos = Camera.main.transform.position;
 		cam_pos.y = 0;
-		for (int n = 0; n < lights.Count; ++n) {
-			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (lights[n].get_min_pos() + cam_pos));
-			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (lights[n].get_max_pos() + cam_pos));
+		foreach (Light light in lights) {
+			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
+			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
-				light_data.SetPixel(offset_x, 0, lights[n].colour);
-				light_data.SetPixel(offset_x + 1, 0, lights[n].attribs);
-				light_data.SetPixel(offset_x + 2, 0, lights[n].pos);
-				offset_x += PIXEL_DATA_PER_LIGHT;
-				++render_count;
+				if (light.get_type() == LightType.VERTEX) {
+					Color[] colours = Glb.map.mesh.colors;
+					int size = 100;
+					float v_x = -(light.v_pos.x / Glb.map.width) * Glb.map.vertex_width;
+					float v_z = -(light.v_pos.z / Glb.map.height) * Glb.map.vertex_height;
+					for (int y = 0; y < size; ++y) {
+						for (int x = 0; x < size; ++x) {
+							int index = (y * size) + x;
+							if (num_vertex_lights == 0) colours[index] = Color.black;
+
+							float dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + v_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + v_z, 2));
+							if (dist < light.attrib_size) {
+								if (Glb.map.vertices[index].x < 5 && Glb.map.vertices[index].x > -5 && 
+									Glb.map.vertices[index].z < 5 && Glb.map.vertices[index].z > -5) {
+									float v = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * light.attrib_size;
+									colours[index].r += v * light.colour.r * light.colour.a;
+									colours[index].g += v * light.colour.g * light.colour.a;
+									colours[index].b += v * light.colour.b * light.colour.a;
+								}
+							}
+						}
+					}
+					Glb.map.mesh.colors = colours;
+					++num_vertex_lights;
+				}else if (light.get_type() == LightType.PER_PIXEL) {
+					light_data.SetPixel(offset_x, 0, light.colour);
+					light_data.SetPixel(offset_x + 1, 0, light.attribs);
+					light_data.SetPixel(offset_x + 2, 0, light.pos);
+					offset_x += PIXEL_DATA_PER_LIGHT;
+					++num_pixel_lights;
+				}
 			}
 		}
-		light_data.Apply();
-		Glb.map.material.SetInt("num_lights", render_count);
-		Glb.map.material.SetTexture("light_data", light_data);
+
+		Glb.map.material.SetInt("num_lights", num_pixel_lights);
+		if (num_pixel_lights > 0) {
+			light_data.Apply();
+			Glb.map.material.SetTexture("light_data", light_data);
+		}
 	}
 }

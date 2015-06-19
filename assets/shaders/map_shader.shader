@@ -86,8 +86,8 @@ Shader "Custom/Map" {
 	        		half4 attr3 = tex2D(light_data, light_uv);
 	        		light_uv.x += next_light_uv;
 	        		
-	        		i.uv.y += ((attr3.r * 255) - 127) + attr3.g;
-	        		i.uv.x += ((attr3.b * 255) - 127) + attr3.a;
+	        		i.uv.y -= ((attr3.r * 255) - 127) + attr3.g;
+	        		i.uv.x -= ((attr3.b * 255) - 127) + attr3.a;
 
 		        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
 		        	float size = attr2.r;
@@ -98,7 +98,7 @@ Shader "Custom/Map" {
 		        	i.uv = origin_uv;
 	        	}
 
-	        	col = i.colour;
+	        	col += i.colour;
 
 	            return col;
 	        }

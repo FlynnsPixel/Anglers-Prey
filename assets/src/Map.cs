@@ -5,6 +5,8 @@ public class Map {
 
 	public float width;
 	public float height;
+	public float vertex_width = 11;
+	public float vertex_height = 11;
 
 	public GameObject map;
 	public Mesh mesh;
@@ -61,32 +63,7 @@ public class Map {
 		mesh.vertices = vertices;
 		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
 
-		Light.create(0, 0, 1, 1, 1, 0, 0, 1);
-	}
-
-	public void draw_vertex_light(float v_x, float v_z, float radius, Color colour) {
-		Color[] colours = mesh.colors;
-		int size = 100;
-		for (int y = 0; y < size; ++y) {
-			for (int x = 0; x < size; ++x) {
-				int index = (y * size) + x;
-				//if (vertices[index].x < 5 && vertices[index].x > -5 && vertices[index].z < 5 && vertices[index].z > -5) {
-					float dist = Mathf.Sqrt(Mathf.Pow(vertices[index].x + v_x, 2) + Mathf.Pow(vertices[index].z + v_z, 2));
-					if (dist < radius) {
-						//dist = Mathf.Clamp(-dist + 5, 0, 10) / 4.0f;
-						//float angle = Mathf.Atan2(vertices[index].z + v_z, vertices[index].x + v_x);
-						//vertices[index].x += Mathf.Clamp((Mathf.Cos(-angle)), -5, 5);
-						//vertices[index].z += Mathf.Clamp((Mathf.Sin(-angle)), -5, 5);
-						float intensity = 1;
-						float r = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * intensity;
-						colours[index].r += r;
-						colours[index].g += r - 1;
-						colours[index].b += r - 1;
-					}
-				//}
-			}
-		}
-		mesh.colors = colours;
+		Light.lights.Add(Light.create(10, 0, 1, 1, 1, 0, 0, 1));
 	}
 
 	public void update() {
