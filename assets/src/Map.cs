@@ -29,7 +29,7 @@ public class Map {
 
 		resize_vertices(22);
 
-		Light.lights.Add(Light.create(10, 0, 1, 1, 1, 0, 0, 1));
+		Light.lights.Add(Light.create(10, 0, 4, 1, 1, 0, 0, 1));
 	}
 
 	public void resize_vertices(int row_size) {

@@ -96,6 +96,10 @@ public class Light {
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
 	
+	private static float unique_light_id;
+	private static float unique_id_dif;
+	private static Color[] map_colours;
+
 	public enum LightType {
 		PER_PIXEL, 
 		VERTEX
@@ -123,6 +127,46 @@ public class Light {
 		return l;
 	}
 
+	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
+		float v_x = -(pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
+		float v_z = -(pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
+
+		v_x += Map.MAX_VERTEX_WIDTH;
+		v_z += Map.MAX_VERTEX_HEIGHT;
+		int r = 1;
+		float radius = 0;
+		bool drawn = false;
+		while (!drawn) {
+			float p = 360.0f / r;
+			float a = 0;
+			for (int n = 0; n < r; ++n) {
+				a += p;
+
+				int x = (int)Mathf.Round((Mathf.Cos(a / (180.0f / Mathf.PI)) * radius) + v_x);
+				int y = (int)Mathf.Round((Mathf.Sin(a / (180.0f / Mathf.PI)) * radius) + v_z);
+				int index = (y * Glb.map.vertices_per_row) + x;
+				//if (num_vertex_lights == 0) map_colours[index] = Color.black;
+
+				if (map_colours[index].a == unique_light_id) continue;
+
+				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2));
+				if (dist > size) { drawn = true; continue; }
+
+				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row) continue;
+
+				dist = Mathf.Clamp(intensity - (dist / (size / intensity)), 0, intensity);
+				if (negate_colour) dist = -dist;
+				map_colours[index].r += dist * colour.r * colour.a;
+				map_colours[index].g += dist * colour.g * colour.a;
+				map_colours[index].b += dist * colour.b * colour.a;
+				map_colours[index].a = unique_light_id;
+			}
+			r += 8;
+			radius += .8f;
+		}
+		unique_light_id -= unique_id_dif;
+	}
+
 	public static void update_all() {
 		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
@@ -135,48 +179,30 @@ public class Light {
 		int num_pixel_lights = 0;
 		Vector3 cam_pos = Camera.main.transform.position;
 		cam_pos.y = 0;
-		Color[] colours = Glb.map.mesh.colors;
+
+		map_colours = Glb.map.mesh.colors;
+
+		for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
+			for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
+				map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
+			}
+		}
+		
+		unique_light_id = 1;
+		unique_id_dif = 1.0f / lights.Count;
 		foreach (Light light in lights) {
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
-					if (light.modified) {
-						float v_x = -(light.v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
-						float v_z = -(light.v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
-						float prev_x = -(light.prev_v_pos.x / Glb.map.width) * Map.MAX_VERTEX_WIDTH;
-						float prev_z = -(light.prev_v_pos.z / Glb.map.height) * Map.MAX_VERTEX_HEIGHT;
-
-						for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
-							for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
-								int index = (y * Glb.map.vertices_per_row) + x;
-								//if (num_vertex_lights == 0) colours[index] = Color.black;
-
-								float dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + v_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + v_z, 2));
-								if (dist < light.attrib_size) {
-									dist = Mathf.Clamp(light.attrib_intensity - 
-														(dist / (light.attrib_size / light.attrib_intensity)), 0, light.attrib_intensity);
-									colours[index].r += dist * light.colour.r * light.colour.a;
-									colours[index].g += dist * light.colour.g * light.colour.a;
-									colours[index].b += dist * light.colour.b * light.colour.a;
-								}
-
-								if (!light.first_update) {
-									dist = Mathf.Sqrt(Mathf.Pow(Glb.map.vertices[index].x + prev_x, 2) + Mathf.Pow(Glb.map.vertices[index].z + prev_z, 2));
-									if (dist < light.attrib_size) {
-										dist = Mathf.Clamp(light.attrib_intensity - 
-															(dist / (light.attrib_size / light.attrib_intensity)), 0, light.attrib_intensity);
-										colours[index].r -= dist * light.colour.r * light.colour.a;
-										colours[index].g -= dist * light.colour.g * light.colour.a;
-										colours[index].b -= dist * light.colour.b * light.colour.a;
-									}
-								}
-							}
-						}
+					//if (light.modified) {
+						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, false);
+						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.prev_v_pos, true);
+						
 						++num_vertex_lights;
 						light.modified = false;
 						light.first_update = false;
-					}
+					//}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					light_data.SetPixel(offset_x, 0, light.colour);
 					light_data.SetPixel(offset_x + 1, 0, light.pp_attribs);
@@ -186,7 +212,7 @@ public class Light {
 				}
 			}
 		}
-		Glb.map.mesh.colors = colours;
+		Glb.map.mesh.colors = map_colours;
 
 		Glb.map.material.SetInt("num_lights", num_pixel_lights);
 		if (num_pixel_lights > 0) {
