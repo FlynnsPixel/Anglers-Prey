@@ -96,8 +96,8 @@ public class Light {
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
 	
-	private static float unique_light_id;
-	private static float unique_id_dif;
+	private static float unique_light_id = 1;
+	private const float UNIQUE_ID_DIF = .01f;
 	private static Color[] map_colours;
 
 	public enum LightType {
@@ -136,12 +136,9 @@ public class Light {
 		bool drawn = false;
 		while (!drawn) {
 			float p = 360.0f / r;
-			float a = 0;
 			for (int n = 0; n < r; ++n) {
-				a += p;
-
-				int x = (int)Mathf.Round((Mathf.Cos(a / (180.0f / Mathf.PI)) * radius) + v_x);
-				int y = (int)Mathf.Round((Mathf.Sin(a / (180.0f / Mathf.PI)) * radius) + v_z);
+				int x = (int)Mathf.Round((Mathf.Cos((p * n) / (180.0f / Mathf.PI)) * radius) + v_x);
+				int y = (int)Mathf.Round((Mathf.Sin((p * n) / (180.0f / Mathf.PI)) * radius) + v_z);
 				int index = (y * Glb.map.vertices_per_row) + x;
 
 				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2));
@@ -158,14 +155,12 @@ public class Light {
 			r += 8;
 			radius += .8f;
 		}
-		unique_light_id -= unique_id_dif;
+		unique_light_id -= UNIQUE_ID_DIF;
 	}
 
 	public static void update_all() {
 		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
-
-		enable_off_screen = true;
 
 		int offset_x = 0;
 		int render_count = 0;
@@ -175,14 +170,15 @@ public class Light {
 		cam_pos.y = 0;
 
 		map_colours = Glb.map.mesh.colors;
-		for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
-			for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
-				map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
+		if (unique_light_id <= UNIQUE_ID_DIF * 2.5f) {
+			unique_light_id = 1;
+			for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
+				for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
+					map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
+				}
 			}
 		}
-		
-		unique_light_id = 1;
-		unique_id_dif = 1.0f / lights.Count;
+
 		foreach (Light light in lights) {
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_max_pos() + cam_pos));
