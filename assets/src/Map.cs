@@ -26,60 +26,64 @@ public class Map {
 
 		vertices = mesh.vertices;
 
-		//int size = 40;
-		//vertices = new Vector3[size * size];
-		//for (int y = 0; y < size; ++y) {
-		//	for (int x = 0; x < size; ++x) {
-		//		int index = (y * size) + x;
-		//		vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
-		//		vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
-		//	}
-		//}
+		int size = 100;
+		vertices = new Vector3[size * size];
+		for (int y = 0; y < size; ++y) {
+			for (int x = 0; x < size; ++x) {
+				int index = (y * size) + x;
+				vertices[index].x = ((float)x - (size / 2.0f)) / (size / 11.0f);
+				vertices[index].z = ((float)y - (size / 2.0f)) / (size / 11.0f);
+			}
+		}
 
-		//mesh.vertices = vertices;
-		//Color[] colours = new Color[size * size];
-		//mesh.colors = colours;
+		mesh.vertices = vertices;
+		Color[] colours = new Color[size * size];
+		mesh.colors = colours;
 
-		//for (int y = 0; y < size; ++y) {
-		//	for (int x = 0; x < size; ++x) {
-		//		colours[(y * size) + x] = Color.black;
-		//	}
-		//}
+		for (int y = 0; y < size; ++y) {
+			for (int x = 0; x < size; ++x) {
+				colours[(y * size) + x] = Color.black;
+			}
+		}
 
-		//draw_vertex_light(.1f, 0, .7f, Color.red);
-		////draw_vertex_light(4, 0, 4, Color.blue);
+		int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
+		int[] indices = new int[num_indices];
+		string temp = "";
+		for (int i = 0; i < num_indices; i += 6) {
+			int index = i / 6;
+			indices[i] = index;
+			indices[i + 1] = index + size;
+			indices[i + 2] = index + size + 1;
+			indices[i + 3] = index;
+			indices[i + 4] = index + size + 1;
+			indices[i + 5] = index + 1;
+		}
+		mesh.vertices = vertices;
+		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
 
-		//int num_indices = (((size - 1) * (size - 1)) + (size - 2)) * 6;
-		//int[] indices = new int[num_indices];
-		//string temp = "";
-		//for (int i = 0; i < num_indices; i += 6) {
-		//	int index = i / 6;
-		//	indices[i] = index;
-		//	indices[i + 1] = index + size;
-		//	indices[i + 2] = index + size + 1;
-		//	indices[i + 3] = index;
-		//	indices[i + 4] = index + size + 1;
-		//	indices[i + 5] = index + 1;
-		//}
-		//mesh.vertices = vertices;
-		//mesh.SetIndices(indices, MeshTopology.Triangles, 0);
+		Light.create(0, 0, 1, 1, 1, 0, 0, 1);
 	}
 
 	public void draw_vertex_light(float v_x, float v_z, float radius, Color colour) {
 		Color[] colours = mesh.colors;
-		int size = 40;
+		int size = 100;
 		for (int y = 0; y < size; ++y) {
 			for (int x = 0; x < size; ++x) {
 				int index = (y * size) + x;
-				if (vertices[index].x < 5 && vertices[index].x > -5 && vertices[index].z < 5 && vertices[index].z > -5) {
+				//if (vertices[index].x < 5 && vertices[index].x > -5 && vertices[index].z < 5 && vertices[index].z > -5) {
 					float dist = Mathf.Sqrt(Mathf.Pow(vertices[index].x + v_x, 2) + Mathf.Pow(vertices[index].z + v_z, 2));
 					if (dist < radius) {
-						float angle = Mathf.Atan2(vertices[index].z + v_z, vertices[index].x + v_x);
-						vertices[index].x = Mathf.Clamp(-v_x + (Mathf.Cos(angle) * radius), -5, 5);
-						vertices[index].z = Mathf.Clamp(-v_z + (Mathf.Sin(angle) * radius), -5, 5);
-						if (dist < radius / 2.0f) colours[index] = colour;
+						//dist = Mathf.Clamp(-dist + 5, 0, 10) / 4.0f;
+						//float angle = Mathf.Atan2(vertices[index].z + v_z, vertices[index].x + v_x);
+						//vertices[index].x += Mathf.Clamp((Mathf.Cos(-angle)), -5, 5);
+						//vertices[index].z += Mathf.Clamp((Mathf.Sin(-angle)), -5, 5);
+						float intensity = 1;
+						float r = Mathf.Clamp((1.0f / dist) / 10.0f, 0, .95f) * intensity;
+						colours[index].r += r;
+						colours[index].g += r - 1;
+						colours[index].b += r - 1;
 					}
-				}
+				//}
 			}
 		}
 		mesh.colors = colours;
