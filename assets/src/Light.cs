@@ -5,28 +5,28 @@ using UnityEngine;
 public class Light {
 
 	//light members and functions
-	public bool modified = false;
-	public bool first_update = true;
-	public bool on_screen = true;
+	public bool modified = false;			//defines whether any of the lights attribs have been changed and are ready for an update
+	public bool first_update = true;		//defines whether the light has had it's first update
+	public bool on_screen = true;			//defines whether or not the light is on screen or not
 
-	private Color colour;
-	private Color pp_attribs;
-	private Color pp_pos;
+	private Color colour;					//r, g, b, a colour of the light
+	private Color pp_attribs;				//per pixel encoded attribs of the light to send to the per pixel light shader
+	private Color pp_pos;					//per pixel encoded position of the light to send to the per pixel light shader
 
-	private Vector3 v_pos_min;
-	private Vector3 v_pos_max;
-	private Vector3 v_pos;
-	private Vector3 vcam_pos_min;
-	private Vector3 vcam_pos_max;
-	private Vector3 vcam_pos;
-	private float attrib_size;
-	private float attrib_intensity;
-	private LightType type;
+	private Vector3 v_pos_min;				//contains the minimum position of the light
+	private Vector3 v_pos_max;				//contains the maximum position of the light
+	private Vector3 v_pos;					//contains the position of the light
+	private Vector3 vcam_pos_min;			//contains the minimum negated position of the light used for camera screen space
+	private Vector3 vcam_pos_max;			//contains the maximum negated position of the light used for camera screen space
+	private Vector3 vcam_pos;				//contains the negated position of the light used for camera screen space
+	private float attrib_size;				//light size
+	private float attrib_intensity;			//light intensity
+	private LightType type;					//type of light: vertex or per pixel rendering
 
-	private Color prev_colour;
-	private float prev_attrib_size;
-	private float prev_attrib_intensity;
-	private Vector3 prev_v_pos;
+	private Color prev_colour;				//last updated colour of the light
+	private float prev_attrib_size;			//last updated attrib size of the light
+	private float prev_attrib_intensity;	//last updated attrib intensity of the light
+	private Vector3 prev_v_pos;				//last updated position of the light
 
 	public void set_colour(float r, float g, float b, float a) {
 		prev_colour = colour;
@@ -84,6 +84,7 @@ public class Light {
 		prev_v_pos.x = v_pos.x;
 		prev_v_pos.z = v_pos.z;
 
+		//calculates the light size to a world space size
 		float world_size_offset = (Glb.map.width / (Map.MAX_VERTEX_WIDTH * 2.0f)) * attrib_size;
 
 		v_pos.x = x;
@@ -159,23 +160,32 @@ public class Light {
 	}
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
+		//convert light world position to a center vertex position
 		float v_x = (((pos.x / Glb.map.width) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
 		float v_z = (((pos.z / Glb.map.height) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
 
+		//divide dist by vertices / 2 / 10 to make draw results the same over different amounts of vertices on the map
+		float dist_modifier = Glb.map.vertices_per_row / 20.0f;
+
+		//draw a circle and fill it in while applying colours to the vertex points the circle encounters
 		int r = 1;
 		float radius = 0;
 		bool drawn = false;
 		while (!drawn) {
 			float p = 360.0f / r;
 			for (int n = 0; n < r; ++n) {
+				//calculate the vertex x and y from the angle of the current rotation and radius
 				int x = (int)Mathf.Round((Mathf.Cos((p * n) / (180.0f / Mathf.PI)) * radius) + v_x);
 				int y = (int)Mathf.Round((Mathf.Sin((p * n) / (180.0f / Mathf.PI)) * radius) + v_z);
 				int index = (y * Glb.map.vertices_per_row) + x;
 
-				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2)) / (Glb.map.vertices_per_row / 20.0f);
+				//calculate distance from the current position to the light position
+				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2)) / dist_modifier;
 				if (dist > size) { drawn = true; continue; }
+				//if index out of bounds or the colour has been visited before during drawing, continue
 				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row || map_colours[index].a == unique_light_id) continue;
 
+				//use custom light formula to calculate the r, g, b, a light values with the light size, intensity and dist from center
 				dist = Mathf.Clamp(intensity - (dist / (size / intensity)), 0, intensity);
 				if (negate_colour) dist = -dist;
 				map_colours[index].r += dist * colour.r * colour.a;
@@ -193,14 +203,9 @@ public class Light {
 		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
 
-		int offset_x = 0;
-		int render_count = 0;
-		int num_vertex_lights = 0;
-		int num_pixel_lights = 0;
-		Vector3 cam_pos = Camera.main.transform.position;
-		cam_pos.y = 0;
-
 		map_colours = Glb.map.mesh.colors;
+		//check if the unique light id is near zero, and if it is then clear all vertex alpha colours
+		//alpha colours are used to determine if a colour has been already calculated when drawing vertex lights
 		if (unique_light_id <= UNIQUE_ID_DIF * 2.5f) {
 			unique_light_id = 1;
 			for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
@@ -210,13 +215,25 @@ public class Light {
 			}
 		}
 
+		int num_vertex_lights = 0;
+		int num_pixel_lights = 0;
+		Vector3 cam_pos = Camera.main.transform.position;
+		cam_pos.y = 0;
+
+		//loop through all the lights
+		//send per pixel light data to the shader for per pixel lights
+		//calculate vertex lights and apply them to the vertex colours of the map
 		foreach (Light light in lights) {
+			//calculates the light position in relation to the screen so lights will not update if they are off screen
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.modified) {
+						//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
 						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, false);
+						//draw the previous drawn vertex light but instead of adding the colour, subtract it instead
+						//this allows dynamic lights to be modified and static lights to be only modified once
 						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
 																						light.prev_attrib_intensity, light.prev_v_pos, true);
 
@@ -226,15 +243,18 @@ public class Light {
 						light.on_screen = true;
 					}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
-					light_data.SetPixel(offset_x, 0, light.colour);
-					light_data.SetPixel(offset_x + 1, 0, light.pp_attribs);
-					light_data.SetPixel(offset_x + 2, 0, light.pp_pos);
-					offset_x += PIXEL_DATA_PER_LIGHT;
+					//if the light is a per pixel light then set the light per pixel data
+					//to the light data texture
+					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT), 0, light.colour);
+					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 1, 0, light.pp_attribs);
+					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 2, 0, light.pp_pos);
 					++num_pixel_lights;
 				}
 			}else {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.on_screen) {
+						//the light is now off screen, so remove it's previous data from the vertex map only once
+						//until it is on screen again
 						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
 																	light.prev_attrib_intensity, light.prev_v_pos, true);
 
