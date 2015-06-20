@@ -40,21 +40,21 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(50, 0, 15, 2.5f, .4f, .5f, 1, 1);
+		player_light = Light.create(0, 0, 15, 2.5f, .4f, .5f, 1, 1);
 		Light.lights.Add(player_light);
 		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1));
 
-		for (int n = 0; n < 20; ++n) {
+		for (int n = 0; n < 40; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
-				Random.Range(1.0f, 20.0f), Random.Range(.2f, 2.0f), 
-				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.PER_PIXEL));
+				Random.Range(5.0f, 20.0f), Random.Range(.2f, 2.0f), 
+				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
 		}
 	}
 
 	public void update() {
 		for (int i = 0; i < Light.lights.Count; ++i) {
-			//Light.lights[i].set_pos(-Light.lights[i].get_pos().x + Mathf.Cos(Time.timeSinceLevelLoad) / 10.0f, Light.lights[i].get_pos().z);
-			Light.lights[i].set_attribs(Light.lights[i].get_size() + Mathf.Cos(Time.timeSinceLevelLoad) / 10.0f, Light.lights[i].get_intensity());
+			Light.lights[i].set_pos(Light.lights[i].get_pos().x + Mathf.Cos(Time.timeSinceLevelLoad) / 4.0f, Light.lights[i].get_pos().z);
+			//Light.lights[i].set_attribs(Light.lights[i].get_size() + Mathf.Cos(Time.timeSinceLevelLoad) / 10.0f, Light.lights[i].get_intensity());
 		}
 		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 

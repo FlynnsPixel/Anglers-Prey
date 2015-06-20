@@ -18,7 +18,6 @@ public class Light {
 	private Vector3 v_pos;					//contains the position of the light
 	private Vector3 vcam_pos_min;			//contains the minimum negated position of the light used for camera screen space
 	private Vector3 vcam_pos_max;			//contains the maximum negated position of the light used for camera screen space
-	private Vector3 vcam_pos;				//contains the negated position of the light used for camera screen space
 	private float attrib_size;				//light size
 	private float attrib_intensity;			//light intensity
 	private LightType type;					//type of light: vertex or per pixel rendering
@@ -64,13 +63,14 @@ public class Light {
 		attrib_intensity = intensity;
 
 		v_pos_min.x = v_pos.x - attrib_size;
-		v_pos_min.z = v_pos.y - attrib_size;
+		v_pos_min.z = v_pos.z - attrib_size;
 		v_pos_max.x = v_pos.x + attrib_size;
-		v_pos_max.z = v_pos.y + attrib_size;
+		v_pos_max.z = v_pos.z + attrib_size;
 
-		vcam_pos = -v_pos;
-		vcam_pos_min = -v_pos_max;
-		vcam_pos_max = -v_pos_min;
+		vcam_pos_min.x = -v_pos.x - attrib_size;
+		vcam_pos_min.z = -v_pos.z - attrib_size;
+		vcam_pos_max.x = -v_pos.x + attrib_size;
+		vcam_pos_max.z = -v_pos.z + attrib_size;
 
 		if (first_update) {
 			prev_attrib_size = attrib_size;
