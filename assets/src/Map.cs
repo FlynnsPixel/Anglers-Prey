@@ -14,6 +14,8 @@ public class Map {
 	public Material material;
 	public Vector3[] vertices;
 	public Rect rect;
+	public Vector3 offset;					//offset for when the map is shifted
+	public Vector3 prev_offset;
 
 	public void init() {
 		map = GameObject.Find("map");
@@ -71,19 +73,18 @@ public class Map {
 	}
 
 	public void update() {
-		Light.update_all();
+		prev_offset = offset;
 	}
 
-	public void scroll_vertices(float x, float y) {
+	public void shift_map(float x, float y) {
 		//loop through all vertices in mesh and move by specified x and y
 		//this can be uncommented if need be, but for now moving the map's position works fine
-		//vertices = mesh.vertices;
-		//for (int i = 0; i < mesh.vertexCount; ++i) {
-			//vertices[i].x += x;
-			//vertices[i].z += y;
-		//}
-		//mesh.vertices = vertices;
-		map.transform.Translate((x / MAX_VERTEX_WIDTH) * width, 0, (y / MAX_VERTEX_HEIGHT) * height);
+		vertices = mesh.vertices;
+		for (int i = 0; i < mesh.vertexCount; ++i) {
+			vertices[i].x += x;
+			vertices[i].z += y;
+		}
+		mesh.vertices = vertices;
 
 		//move map rect x, y by the width/height scale
 		rect.x += rect.width * x;
@@ -91,6 +92,15 @@ public class Map {
 
 		//recalculate mesh bounds with new vertex positions
 		mesh.RecalculateBounds();
+
+		//map.transform.Translate((x / MAX_VERTEX_WIDTH) * width, 0, (y / MAX_VERTEX_HEIGHT) * height);
+
+		prev_offset = offset;
+		offset.x -= (x / mesh.bounds.size.x) * width;
+		offset.z -= (y / mesh.bounds.size.z) * height;
+		foreach (Light light in Light.lights) {
+			light.modified = true;
+		}
 
 		Random.seed = (int)((rect.x * 10) + rect.y);
 		float rand = Random.Range(0, 100);

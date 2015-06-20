@@ -98,8 +98,8 @@ Shader "Custom/Map" {
 		        	i.uv = origin_uv;
 	        	}
 
-	        	col += i.colour;
-
+	        	col.rgb += i.colour.rgb;
+	        	
 	            return col;
 	        }
 

@@ -191,8 +191,10 @@ public class Light {
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
 		//convert light world position to a center vertex position
-		float v_x = (((pos.x / Glb.map.width) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
-		float v_z = (((pos.z / Glb.map.height) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
+		float v_x = ((((pos.x + (negate_colour ? Glb.map.prev_offset.x : Glb.map.offset.x)) / Glb.map.width) * 
+						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
+		float v_z = ((((pos.z + (negate_colour ? Glb.map.prev_offset.z : Glb.map.offset.z)) / Glb.map.height) * 
+						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
 
 		//divide dist by vertices / 2 / 10 to make draw results the same over different amounts of vertices on the map
 		float dist_modifier = Glb.map.vertices_per_row / 20.0f;
@@ -255,6 +257,8 @@ public class Light {
 		//send per pixel light data to the shader for per pixel lights
 		//calculate vertex lights and apply them to the vertex colours of the map
 		foreach (Light light in lights) {
+			if (light.get_type() == LightType.VERTEX && !light.modified) continue;
+
 			//calculates the light position in relation to the screen so lights will not update if they are off screen
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
@@ -268,13 +272,13 @@ public class Light {
 						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
 																					   light.prev_attrib_intensity, light.prev_v_pos, true);
 
-						++num_vertex_lights;
 						light.modified = false;
 						light.first_update = false;
 						light.on_screen = true;
 						light.updated_prev_colour = false;
 						light.updated_prev_attribs = false;
 						light.updated_prev_pos = false;
+						++num_vertex_lights;
 					}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					//if the light is a per pixel light then set the light per pixel data

@@ -18,6 +18,7 @@ public class StateManager : MonoBehaviour {
 
 	void Update() {
 		Glb.player.update();
+		Light.update_all();
 		Glb.map.update();
 	}
 }

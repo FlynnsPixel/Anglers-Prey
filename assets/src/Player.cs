@@ -40,22 +40,18 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, 15, 2.5f, .4f, .5f, 1, 1);
+		player_light = Light.create(0, 0, 10, 2, .4f, .5f, 1, 1);
 		Light.lights.Add(player_light);
 		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1));
 
-		for (int n = 0; n < 40; ++n) {
-			Light.lights.Add(Light.create(Random.Range(-25.0f, 25.0f), Random.Range(-25.0f, 25.0f), 
-				Random.Range(5.0f, 20.0f), Random.Range(.2f, 2.0f), 
+		for (int n = 0; n < 20; ++n) {
+			Light.lights.Add(Light.create(Random.Range(-40.0f, 40.0f), Random.Range(-40.0f, 40.0f), 
+				Random.Range(5.0f, 15.0f), Random.Range(.2f, 2.0f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
 		}
 	}
 
 	public void update() {
-		for (int i = 0; i < Light.lights.Count; ++i) {
-			Light.lights[i].set_pos(Light.lights[i].get_pos().x + Mathf.Cos(Time.timeSinceLevelLoad) / 4.0f, Light.lights[i].get_pos().z);
-			//Light.lights[i].set_attribs(Light.lights[i].get_size() + Mathf.Cos(Time.timeSinceLevelLoad) / 10.0f, Light.lights[i].get_intensity());
-		}
 		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
@@ -94,13 +90,13 @@ public class Player {
 		pos.z += accel.y;
 
 		if (accel.x > 0 && pos.x > Glb.map.rect.x) {
-			//Glb.map.scroll_vertices(1, 0);
+			Glb.map.shift_map(1, 0);
 		}else if (accel.x < 0 && pos.x < Glb.map.rect.x) {
-			//Glb.map.scroll_vertices(-1, 0);
+			Glb.map.shift_map(-1, 0);
 		}else if (accel.y > 0 && pos.z > Glb.map.rect.y) {
-			//Glb.map.scroll_vertices(0, 1);
+			Glb.map.shift_map(0, 1);
 		}else if (accel.y < 0 && pos.z < Glb.map.rect.y) {
-			//Glb.map.scroll_vertices(0, -1);
+			Glb.map.shift_map(0, -1);
 		}
 
 		if (Input.GetKey(KeyCode.A)) {
