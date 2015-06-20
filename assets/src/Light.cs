@@ -155,7 +155,9 @@ public class Light {
 	public const float MAX_NUM_PIXELS = 64.0f;				//the maximum number of pixels in the light texture
 	public const float MAX_NUM_LIGHTS = MAX_NUM_PIXELS / PIXEL_DATA_PER_LIGHT;	//the maximum number of lights that can be created
 	public static bool enable_off_screen = false;
-	
+	public static int num_vertex_lights = 0;
+	public static int num_pixel_lights = 0;
+
 	private static float unique_light_id = 1;
 	private const float UNIQUE_ID_DIF = .01f;
 	private static Color[] map_colours;
@@ -244,8 +246,8 @@ public class Light {
 			}
 		}
 
-		int num_vertex_lights = 0;
-		int num_pixel_lights = 0;
+		num_vertex_lights = 0;
+		num_pixel_lights = 0;
 		Vector3 cam_pos = Camera.main.transform.position;
 		cam_pos.y = 0;
 

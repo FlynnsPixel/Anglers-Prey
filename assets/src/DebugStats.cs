@@ -44,7 +44,8 @@ public class DebugStats : MonoBehaviour {
 		avg_ms += ms;
 		if (avg_ms_count > avg_ms_rate) { avg_ms_result = (int)(avg_ms / avg_ms_count); avg_ms_count = 0; avg_ms = 0; }
 
-		string text = avg_ms_result + " ms (" + avg_fps_result + " fps)";
+		string text = avg_ms_result + " ms (" + avg_fps_result + " fps)\n";
+		text += "Pixel lights: " + Light.num_pixel_lights + ", Vertex lights: " + Light.num_vertex_lights;
 		GUI.Label(debug_rect, text, debug_style);
 	}
 }
