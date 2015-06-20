@@ -27,7 +27,7 @@ public class Map {
 		width = mesh.bounds.size.x * rect.width;
 		height = mesh.bounds.size.z * rect.height;
 
-		resize_vertices(22);
+		resize_vertices(44);
 
 		Light.lights.Add(Light.create(10, 0, 4, 1, 1, 0, 0, 1));
 	}

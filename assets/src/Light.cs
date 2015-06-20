@@ -84,15 +84,12 @@ public class Light {
 		prev_v_pos.x = v_pos.x;
 		prev_v_pos.z = v_pos.z;
 
-		//calculates the light size to a world space size
-		float world_size_offset = (Glb.map.width / (Map.MAX_VERTEX_WIDTH * 2.0f)) * attrib_size;
-
 		v_pos.x = x;
 		v_pos.z = y;
-		v_pos_min.x = x - world_size_offset;
-		v_pos_min.z = y - world_size_offset;
-		v_pos_max.x = x + world_size_offset;
-		v_pos_max.z = y + world_size_offset;
+		v_pos_min.x = x - attrib_size;
+		v_pos_min.z = y - attrib_size;
+		v_pos_max.x = x + attrib_size;
+		v_pos_max.z = y + attrib_size;
 
 		vcam_pos = -v_pos;
 		vcam_pos_min = -v_pos_max;
@@ -166,6 +163,7 @@ public class Light {
 
 		//divide dist by vertices / 2 / 10 to make draw results the same over different amounts of vertices on the map
 		float dist_modifier = Glb.map.vertices_per_row / 20.0f;
+		float vertex_size = size / (Map.MAX_VERTEX_WIDTH / 2.0f);
 
 		//draw a circle and fill it in while applying colours to the vertex points the circle encounters
 		int r = 1;
@@ -181,12 +179,12 @@ public class Light {
 
 				//calculate distance from the current position to the light position
 				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2)) / dist_modifier;
-				if (dist > size) { drawn = true; continue; }
+				if (dist > vertex_size) { drawn = true; continue; }
 				//if index out of bounds or the colour has been visited before during drawing, continue
 				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row || map_colours[index].a == unique_light_id) continue;
 
 				//use custom light formula to calculate the r, g, b, a light values with the light size, intensity and dist from center
-				dist = Mathf.Clamp(intensity - (dist / (size / intensity)), 0, intensity);
+				dist = Mathf.Clamp(intensity - (dist / (vertex_size / intensity)), 0, intensity);
 				if (negate_colour) dist = -dist;
 				map_colours[index].r += dist * colour.r * colour.a;
 				map_colours[index].g += dist * colour.g * colour.a;
