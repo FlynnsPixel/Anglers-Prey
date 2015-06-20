@@ -5,30 +5,37 @@ using UnityEngine;
 public class Light {
 
 	//light members and functions
-	public bool modified = false;			//defines whether any of the lights attribs have been changed and are ready for an update
-	public bool first_update = true;		//defines whether the light has had it's first update
-	public bool on_screen = true;			//defines whether or not the light is on screen or not
+	public bool modified = false;				//defines whether any of the lights attribs have been changed and are ready for an update
+	public bool first_update = true;			//defines whether the light has had it's first update
+	public bool on_screen = true;				//defines whether or not the light is on screen or not
 
-	private Color colour;					//r, g, b, a colour of the light
-	private Color pp_attribs;				//per pixel encoded attribs of the light to send to the per pixel light shader
-	private Color pp_pos;					//per pixel encoded position of the light to send to the per pixel light shader
+	private Color colour;						//r, g, b, a colour of the light
+	private Color pp_attribs;					//per pixel encoded attribs of the light to send to the per pixel light shader
+	private Color pp_pos;						//per pixel encoded position of the light to send to the per pixel light shader
 
-	private Vector3 v_pos_min;				//contains the minimum position of the light
-	private Vector3 v_pos_max;				//contains the maximum position of the light
-	private Vector3 v_pos;					//contains the position of the light
-	private Vector3 vcam_pos_min;			//contains the minimum negated position of the light used for camera screen space
-	private Vector3 vcam_pos_max;			//contains the maximum negated position of the light used for camera screen space
-	private float attrib_size;				//light size
-	private float attrib_intensity;			//light intensity
-	private LightType type;					//type of light: vertex or per pixel rendering
+	private Vector3 v_pos_min;					//contains the minimum position of the light
+	private Vector3 v_pos_max;					//contains the maximum position of the light
+	private Vector3 v_pos;						//contains the position of the light
+	private Vector3 vcam_pos_min;				//contains the minimum negated position of the light used for camera screen space
+	private Vector3 vcam_pos_max;				//contains the maximum negated position of the light used for camera screen space
+	private float attrib_size;					//light size
+	private float attrib_intensity;				//light intensity
+	private LightType type;						//type of light: vertex or per pixel rendering
 
-	private Color prev_colour;				//last updated colour of the light
-	private float prev_attrib_size;			//last updated attrib size of the light
-	private float prev_attrib_intensity;	//last updated attrib intensity of the light
-	private Vector3 prev_v_pos;				//last updated position of the light
+	private Color prev_colour;					//last updated colour of the light
+	private float prev_attrib_size;				//last updated attrib size of the light
+	private float prev_attrib_intensity;		//last updated attrib intensity of the light
+	private Vector3 prev_v_pos;					//last updated position of the light
+
+	private bool updated_prev_colour = false;	//defines whether prev colours have been calculated already or not
+	private bool updated_prev_attribs = false;	//defines whether prev attribs have been calculated already or not
+	private bool updated_prev_pos = false;		//defines whether prev positions have been calculated already or not
 
 	public void set_colour(float r, float g, float b, float a) {
-		prev_colour = colour;
+		if (!updated_prev_colour) {
+			prev_colour = colour;
+			updated_prev_colour = true;
+		}
 		colour.r = r;
 		colour.g = g;
 		colour.b = b;
@@ -37,7 +44,10 @@ public class Light {
 	}
 	
 	public void set_colour(Color c) {
-		prev_colour = colour;
+		if (!updated_prev_colour) {
+			prev_colour = colour;
+			updated_prev_colour = true;
+		}
 		colour = c;
 		if (first_update) prev_colour = colour;
 		modified = true;
@@ -56,21 +66,16 @@ public class Light {
 			pp_attribs.g = (val % 255) / 255.0f;
 			pp_attribs.b = intensity / 64.0f;
 		}
-		prev_attrib_size = attrib_size;
-		prev_attrib_intensity = attrib_intensity;
+		if (!updated_prev_attribs) {
+			prev_attrib_size = attrib_size;
+			prev_attrib_intensity = attrib_intensity;
+			updated_prev_attribs = true;
+		}
 
 		attrib_size = size;
 		attrib_intensity = intensity;
 
-		v_pos_min.x = v_pos.x - attrib_size;
-		v_pos_min.z = v_pos.z - attrib_size;
-		v_pos_max.x = v_pos.x + attrib_size;
-		v_pos_max.z = v_pos.z + attrib_size;
-
-		vcam_pos_min.x = -v_pos.x - attrib_size;
-		vcam_pos_min.z = -v_pos.z - attrib_size;
-		vcam_pos_max.x = -v_pos.x + attrib_size;
-		vcam_pos_max.z = -v_pos.z + attrib_size;
+		calculate_min_max();
 
 		if (first_update) {
 			prev_attrib_size = attrib_size;
@@ -79,7 +84,7 @@ public class Light {
 
 		modified = true;
 	}
-	
+
 	public void set_pos(float x, float y) {
 		if (type == Light.LightType.PER_PIXEL) {
 			//converts x, y to uv coordinates of the map and then multiplies by 256 to be able to get the high and low bytes
@@ -98,13 +103,16 @@ public class Light {
 			pp_pos.a = (uv_y % 256) / 255.0f;
 		}
 
-		prev_v_pos.x = v_pos.x;
-		prev_v_pos.z = v_pos.z;
+		if (!updated_prev_pos) {
+			prev_v_pos.x = v_pos.x;
+			prev_v_pos.z = v_pos.z;
+			updated_prev_pos = true;
+		}
 
 		v_pos.x = x;
 		v_pos.z = y;
 
-		set_attribs(attrib_size, attrib_intensity);
+		calculate_min_max();
 
 		if (first_update) {
 			prev_v_pos.x = v_pos.x;
@@ -118,6 +126,18 @@ public class Light {
 		type = t;
 		set_attribs(attrib_size, attrib_intensity);
 		set_pos(v_pos.x, v_pos.z);
+	}
+
+	private void calculate_min_max() {
+		v_pos_min.x = v_pos.x - attrib_size;
+		v_pos_min.z = v_pos.z - attrib_size;
+		v_pos_max.x = v_pos.x + attrib_size;
+		v_pos_max.z = v_pos.z + attrib_size;
+
+		vcam_pos_min.x = -v_pos.x - attrib_size;
+		vcam_pos_min.z = -v_pos.z - attrib_size;
+		vcam_pos_max.x = -v_pos.x + attrib_size;
+		vcam_pos_max.z = -v_pos.z + attrib_size;
 	}
 
 	public Color get_colour() { return colour; }
@@ -244,12 +264,15 @@ public class Light {
 						//draw the previous drawn vertex light but instead of adding the colour, subtract it instead
 						//this allows dynamic lights to be modified and static lights to be only modified once
 						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
-																						light.prev_attrib_intensity, light.prev_v_pos, true);
+																					   light.prev_attrib_intensity, light.prev_v_pos, true);
 
 						++num_vertex_lights;
 						light.modified = false;
 						light.first_update = false;
 						light.on_screen = true;
+						light.updated_prev_colour = false;
+						light.updated_prev_attribs = false;
+						light.updated_prev_pos = false;
 					}
 				}else if (light.get_type() == LightType.PER_PIXEL) {
 					//if the light is a per pixel light then set the light per pixel data
@@ -270,6 +293,9 @@ public class Light {
 						light.modified = true;
 						light.first_update = false;
 						light.on_screen = false;
+						light.updated_prev_colour = false;
+						light.updated_prev_attribs = false;
+						light.updated_prev_pos = false;
 					}
 				}
 			}
