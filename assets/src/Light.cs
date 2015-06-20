@@ -51,8 +51,11 @@ public class Light {
 			//calculates the light size in uv coordinates by calculating max - min position in relation to the screen
 			float uv_size = (Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_max + cam_pos)) - 
 							 Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_min + cam_pos))).x;
-			pp_attribs.r = (uv_size / 4.0f) / 2.0f;
-			pp_attribs.g = intensity / 64.0f;
+			//calculates high byte and low byte for the uv_size
+			int val = (int)((uv_size / 2.0f) * 255);
+			pp_attribs.r = (val / 255) / 255.0f;
+			pp_attribs.g = (val % 255) / 255.0f;
+			pp_attribs.b = intensity / 64.0f;
 		}
 		prev_attrib_size = attrib_size;
 		prev_attrib_intensity = attrib_intensity;
