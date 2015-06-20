@@ -16,6 +16,9 @@ public class Light {
 	private Vector3 v_pos_min;
 	private Vector3 v_pos_max;
 	private Vector3 v_pos;
+	private Vector3 vcam_pos_min;
+	private Vector3 vcam_pos_max;
+	private Vector3 vcam_pos;
 	private float attrib_size;
 	private float attrib_intensity;
 	private LightType type;
@@ -81,15 +84,18 @@ public class Light {
 		prev_v_pos.x = v_pos.x;
 		prev_v_pos.z = v_pos.z;
 
-		x = -x;
-		y = -y;
+		float world_size_offset = (Glb.map.width / (Map.MAX_VERTEX_WIDTH * 2.0f)) * attrib_size;
 
 		v_pos.x = x;
 		v_pos.z = y;
-		v_pos_min.x = x - ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
-		v_pos_min.z = y - ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
-		v_pos_max.x = x + ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
-		v_pos_max.z = y + ((Glb.map.width / Glb.map.vertices_per_row) * (attrib_size * 2));
+		v_pos_min.x = x - world_size_offset;
+		v_pos_min.z = y - world_size_offset;
+		v_pos_max.x = x + world_size_offset;
+		v_pos_max.z = y + world_size_offset;
+
+		vcam_pos = -v_pos;
+		vcam_pos_min = -v_pos_max;
+		vcam_pos_max = -v_pos_min;
 
 		if (first_update) {
 			prev_v_pos.x = v_pos.x;
@@ -153,8 +159,8 @@ public class Light {
 	}
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
-		float v_x = ((-pos.x / Glb.map.width) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_WIDTH;
-		float v_z = ((-pos.z / Glb.map.height) * Glb.map.vertices_per_row) + Map.MAX_VERTEX_HEIGHT;
+		float v_x = (((pos.x / Glb.map.width) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
+		float v_z = (((pos.z / Glb.map.height) * Glb.map.vertices_per_row) * .9f) + (Glb.map.vertices_per_row / 2.0f);
 
 		int r = 1;
 		float radius = 0;
@@ -166,7 +172,7 @@ public class Light {
 				int y = (int)Mathf.Round((Mathf.Sin((p * n) / (180.0f / Mathf.PI)) * radius) + v_z);
 				int index = (y * Glb.map.vertices_per_row) + x;
 
-				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2));
+				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2)) / (Glb.map.vertices_per_row / 20.0f);
 				if (dist > size) { drawn = true; continue; }
 				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row || map_colours[index].a == unique_light_id) continue;
 
@@ -205,9 +211,8 @@ public class Light {
 		}
 
 		foreach (Light light in lights) {
-			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_min_pos() + cam_pos));
-			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.get_pos() + cam_pos));
-			Debug.Log(c1 + ", " + c2);
+			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
+			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
 			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.modified) {
@@ -233,7 +238,7 @@ public class Light {
 						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
 																	light.prev_attrib_intensity, light.prev_v_pos, true);
 
-						light.modified = false;
+						light.modified = true;
 						light.first_update = false;
 						light.on_screen = false;
 					}
