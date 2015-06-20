@@ -90,8 +90,8 @@ Shader "Custom/Map" {
 	        		i.uv.x -= ((attr3.b * 255) - 127) + attr3.a;
 
 		        	float dist = sqrt(pow(i.uv.x, 2) + pow(i.uv.y, 2));
-		        	float size = attr2.r;
-		        	float intensity = attr2.g * 64;
+		        	float size = attr2.r * 4;
+		        	float intensity = (attr2.g * 64) * 3;
 		        	dist = clamp(intensity - (dist / (size / intensity)), 0, intensity);
 		        	col.rgb += (dist * (attr1.rgb / 3)) * attr1.a;
 

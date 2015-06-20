@@ -46,7 +46,12 @@ public class Light {
 
 	public void set_attribs(float size, float intensity) {
 		if (type == Light.LightType.PER_PIXEL) {
-			pp_attribs.r = size;
+			Vector3 cam_pos = Camera.main.transform.position;
+			cam_pos.y = 0;
+			//calculates the light size in uv coordinates by calculating max - min position in relation to the screen
+			float uv_size = (Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_max + cam_pos)) - 
+							 Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_min + cam_pos))).x;
+			pp_attribs.r = (uv_size / 4.0f) / 2.0f;
 			pp_attribs.g = intensity / 64.0f;
 		}
 		prev_attrib_size = attrib_size;
@@ -54,6 +59,15 @@ public class Light {
 
 		attrib_size = size;
 		attrib_intensity = intensity;
+
+		v_pos_min.x = v_pos.x - attrib_size;
+		v_pos_min.z = v_pos.y - attrib_size;
+		v_pos_max.x = v_pos.x + attrib_size;
+		v_pos_max.z = v_pos.y + attrib_size;
+
+		vcam_pos = -v_pos;
+		vcam_pos_min = -v_pos_max;
+		vcam_pos_max = -v_pos_min;
 
 		if (first_update) {
 			prev_attrib_size = attrib_size;
@@ -86,14 +100,8 @@ public class Light {
 
 		v_pos.x = x;
 		v_pos.z = y;
-		v_pos_min.x = x - attrib_size;
-		v_pos_min.z = y - attrib_size;
-		v_pos_max.x = x + attrib_size;
-		v_pos_max.z = y + attrib_size;
 
-		vcam_pos = -v_pos;
-		vcam_pos_min = -v_pos_max;
-		vcam_pos_max = -v_pos_min;
+		set_attribs(attrib_size, attrib_intensity);
 
 		if (first_update) {
 			prev_v_pos.x = v_pos.x;
