@@ -54,18 +54,6 @@ public class Light {
 	}
 
 	public void set_attribs(float size, float intensity) {
-		if (type == Light.LightType.PER_PIXEL) {
-			Vector3 cam_pos = Camera.main.transform.position;
-			cam_pos.y = 0;
-			//calculates the light size in uv coordinates by calculating max - min position in relation to the screen
-			float uv_size = (Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_max + cam_pos)) - 
-							 Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_min + cam_pos))).x;
-			//calculates high byte and low byte for the uv_size
-			int val = (int)((uv_size / 2.0f) * 255);
-			pp_attribs.r = (val / 255) / 255.0f;
-			pp_attribs.g = (val % 255) / 255.0f;
-			pp_attribs.b = intensity / 64.0f;
-		}
 		if (!updated_prev_attribs) {
 			prev_attrib_size = attrib_size;
 			prev_attrib_intensity = attrib_intensity;
@@ -75,11 +63,24 @@ public class Light {
 		attrib_size = size;
 		attrib_intensity = intensity;
 
-		calculate_min_max();
-
 		if (first_update) {
 			prev_attrib_size = attrib_size;
 			prev_attrib_intensity = attrib_intensity;
+		}
+
+		calculate_min_max();
+
+		if (type == Light.LightType.PER_PIXEL) {
+			Vector3 cam_pos = Camera.main.transform.position;
+			cam_pos.y = 0;
+			//calculates the light size in uv coordinates by calculating max - min position in relation to the screen
+			float uv_size = (Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_max + cam_pos)) - 
+							 Camera.main.WorldToViewportPoint(cam_pos - (vcam_pos_min + cam_pos))).x;
+			//calculates high byte and low byte for the uv_size
+			int val = (int)(((uv_size / 2.0f) * 255) * (Map.MAX_VERTEX_WIDTH / 2.0f));
+			pp_attribs.r = (val / 255) / 255.0f;
+			pp_attribs.g = (val % 255) / 255.0f;
+			pp_attribs.b = intensity / 64.0f;
 		}
 
 		modified = true;
@@ -182,8 +183,9 @@ public class Light {
 	public static Light create(float x, float y, float size, float intensity, float r, float g, float b, float a, LightType type = LightType.VERTEX) {
 		Light l = new Light();
 		l.set_colour(r, g, b, a);
-		l.set_attribs(size, intensity);
+		l.attrib_size = size;
 		l.set_pos(x, y);
+		l.set_attribs(size, intensity);
 		l.set_type(type);
 
 		return l;
@@ -217,7 +219,7 @@ public class Light {
 				float dist = Mathf.Sqrt(Mathf.Pow(x - v_x, 2) + Mathf.Pow(y - v_z, 2)) / dist_modifier;
 				if (dist > vertex_size) { drawn = true; continue; }
 				//if index out of bounds or the colour has been visited before during drawing, continue
-				if (index < 0 || index >= Glb.map.vertices_per_row * Glb.map.vertices_per_row || map_colours[index].a == unique_light_id) continue;
+				if (x < 0 || x > Glb.map.vertices_per_row - 1 || y < 0 || y > Glb.map.vertices_per_row - 1 || map_colours[index].a == unique_light_id) continue;
 
 				//use custom light formula to calculate the r, g, b, a light values with the light size, intensity and dist from center
 				dist = Mathf.Clamp(intensity - (dist / (vertex_size / intensity)), 0, intensity);

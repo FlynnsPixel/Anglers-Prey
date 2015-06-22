@@ -40,14 +40,15 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, 10, 2, .4f, .5f, 1, 1);
+		player_light = Light.create(0, 0, 10, 0, .4f, .5f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
-		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1));
+		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1, Light.LightType.VERTEX));
 
+		Random.seed = 0;
 		for (int n = 0; n < 20; ++n) {
-			Light.lights.Add(Light.create(Random.Range(-40.0f, 40.0f), Random.Range(-40.0f, 40.0f), 
-				Random.Range(5.0f, 15.0f), Random.Range(.2f, 2.0f), 
-				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f));
+			Light.lights.Add(Light.create(Random.Range(-20.0f, 20.0f), Random.Range(-20.0f, 20.0f), 
+				Random.Range(5.0f, 40.0f), Random.Range(.2f, .75f), 
+				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.VERTEX));
 		}
 	}
 
