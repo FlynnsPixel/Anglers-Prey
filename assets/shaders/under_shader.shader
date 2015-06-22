@@ -2,33 +2,18 @@ Shader "Custom/UnderShader" {
 
 	Properties {
 		colour_overlay("Colour overlay", COLOR) = (0, 0, 0, 1)
-		wave_scale("Wave scale", Range (0.02,1)) = .3
-		reflect_colour("Reflective colour (RGB) fresnel (A) ", 2D) = "" { }
 		bump_map("Waves Normalmap ", 2D) = "" { }
-		wave_speed("Wave speed (map1 x,y; map2 x,y)", Vector) = (8, 8, 4, -8)
 	}
 
 	Subshader {
 		Tags { "Queue" = "Transparent" "RenderType" = "Transparent" }
-
-		Blend SrcAlpha OneMinusSrcAlpha
-
+		
 		Pass {
 			CGPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
 
-			uniform float4 colour_overlay;
-
-			uniform float4 wave_speed;
-			uniform float wave_scale;
-			uniform float4 wave_offset;
-
-			uniform sampler2D light_data;
-			uniform int num_lights = 0;
-			uniform float next_light_uv;
-			
 			sampler2D bump_map;
 			sampler2D reflect_colour;
 
@@ -60,7 +45,7 @@ Shader "Custom/UnderShader" {
 
 	        fixed4 frag(v2f i) : SV_Target {
 	        	half4 col = half4(1, 0, 0, 1);
-	        	
+
 	            return col;
 	        }
 

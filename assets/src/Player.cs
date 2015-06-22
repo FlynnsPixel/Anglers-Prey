@@ -40,14 +40,14 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, 10, 0, .4f, .5f, 1, 1, Light.LightType.VERTEX);
+		player_light = Light.create(0, 0, 10, 1, .4f, .5f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
 		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1, Light.LightType.VERTEX));
 
 		Random.seed = 0;
 		for (int n = 0; n < 20; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-20.0f, 20.0f), Random.Range(-20.0f, 20.0f), 
-				Random.Range(5.0f, 40.0f), Random.Range(.2f, .75f), 
+				Random.Range(5.0f, 15.0f), Random.Range(.2f, .75f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.VERTEX));
 		}
 	}
@@ -91,13 +91,13 @@ public class Player {
 		pos.z += accel.y;
 
 		if (accel.x > 0 && pos.x > Glb.map.rect.x) {
-			Glb.map.shift_map(1, 0);
+			//Glb.map.shift_map(1, 0);
 		}else if (accel.x < 0 && pos.x < Glb.map.rect.x) {
-			Glb.map.shift_map(-1, 0);
+			//Glb.map.shift_map(-1, 0);
 		}else if (accel.y > 0 && pos.z > Glb.map.rect.y) {
-			Glb.map.shift_map(0, 1);
+			//Glb.map.shift_map(0, 1);
 		}else if (accel.y < 0 && pos.z < Glb.map.rect.y) {
-			Glb.map.shift_map(0, -1);
+			//Glb.map.shift_map(0, -1);
 		}
 
 		if (Input.GetKey(KeyCode.A)) {
