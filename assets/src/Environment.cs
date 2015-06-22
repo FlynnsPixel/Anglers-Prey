@@ -43,9 +43,10 @@ public class Environment {
 	public void create_obj(EnvObj obj, Vector3 pos) {
 		GameObject new_obj = GameObject.Instantiate(obj.gobj);
 		new_obj.transform.position = pos;
-		new_obj.transform.localScale = new Vector3(Random.Range(obj.min_scale.x, obj.max_scale.x), 
-												   Random.Range(obj.min_scale.y, obj.max_scale.y), 
-												   Random.Range(obj.min_scale.z, obj.max_scale.z));
+		float m = Random.Range(0.0f, 1.0f);
+		new_obj.transform.localScale = new Vector3(obj.min_scale.x + ((obj.max_scale.x - obj.min_scale.x) * m),  
+												   obj.min_scale.y + ((obj.max_scale.y - obj.min_scale.y) * m),  
+												   obj.min_scale.z + ((obj.max_scale.z - obj.min_scale.z) * m));
 		new_obj.transform.Rotate(0, Random.Range(0, 360), 0);
 		spawned_objs.Add(new_obj);
 	}
