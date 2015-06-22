@@ -99,7 +99,10 @@ Shader "Custom/Map" {
 	        	}
 
 	        	col.rgb += i.colour.rgb;
-	        	
+	        	col.r = clamp(col.r, 0, .9);
+	        	col.g = clamp(col.g, 0, .9);
+				col.b = clamp(col.b, 0, .9);
+	            
 	            return col;
 	        }
 

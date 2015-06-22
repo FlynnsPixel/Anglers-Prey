@@ -5,6 +5,8 @@ public class Map {
 
 	public float width;
 	public float height;
+	public float half_width;
+	public float half_height;
 	public const float MAX_VERTEX_WIDTH = 11;
 	public const float MAX_VERTEX_HEIGHT = 11;
 	public int vertices_per_row;
@@ -28,6 +30,8 @@ public class Map {
 		material = map.GetComponent<Renderer>().material;
 		width = mesh.bounds.size.x * rect.width;
 		height = mesh.bounds.size.z * rect.height;
+		half_width = width / 2.0f;
+		half_height = height / 2.0f;
 
 		resize_vertices(44);
 
@@ -93,8 +97,6 @@ public class Map {
 		//recalculate mesh bounds with new vertex positions
 		mesh.RecalculateBounds();
 
-		//map.transform.Translate((x / MAX_VERTEX_WIDTH) * width, 0, (y / MAX_VERTEX_HEIGHT) * height);
-
 		prev_offset = offset;
 		offset.x -= (x / mesh.bounds.size.x) * width;
 		offset.z -= (y / mesh.bounds.size.z) * height;
@@ -102,11 +104,23 @@ public class Map {
 			light.modified = true;
 		}
 
-		Random.seed = (int)((rect.x * 10) + rect.y);
-		float rand = Random.Range(0, 100);
+		for (int i = 0; i < Glb.env.spawned_objs.Count; ++i) {
+			Vector3 pos = Glb.env.spawned_objs[i].transform.position;
+			pos.x -= rect.x;
+			pos.z -= rect.y;
+			if (pos.x < -half_width || pos.x > half_width || pos.z < -half_height || pos.z > half_height) {
+				GameObject.Destroy(Glb.env.spawned_objs[i]);
+				Glb.env.spawned_objs.RemoveAt(i);
+				--i;
+			}
+		}
 
-		if (rand >= .5f) {
-			//Light.lights.Add(Light.create(0, 0, 1, 2, 1, .5f, .25f, 1));
+		Random.seed = (int)((rect.x * 10) + rect.y);
+		int num_env_objs = Random.Range(0, 8);
+		for (int n = 0; n < num_env_objs; ++n) {
+			Vector3 pos = new Vector3((x * half_width) + rect.x + (y * Random.Range(-half_width, half_width)), -4, 
+									  (y * half_height) + rect.y + (x * Random.Range(-half_height, half_height)));
+			Glb.env.create_obj(Glb.env.rand_obj(), pos);
 		}
 	}
 }

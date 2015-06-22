@@ -14,6 +14,7 @@ public class StateManager : MonoBehaviour {
 		Glb.map.init();
 		Light.init();
 		Glb.player.init();
+		Glb.env.init();
 	}
 
 	void Update() {
