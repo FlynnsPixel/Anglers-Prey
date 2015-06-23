@@ -103,7 +103,6 @@ public class Map {
 		//recalculate mesh bounds with new vertex positions
 		mesh.RecalculateBounds();
 
-		prev_offset = offset;
 		offset.x -= (x / mesh.bounds.size.x) * width;
 		offset.z -= (y / mesh.bounds.size.z) * height;
 		foreach (Light light in Light.lights) {

@@ -82,7 +82,7 @@ public class EnemyManager {
 			enemy.update();
 			if (enemy.to_be_removed) {
 				if (enemy.light != null) enemy.light.remove();
-				GameObject.Destroy(enemy.gobj);
+				if (enemy.gobj != null) GameObject.Destroy(enemy.gobj);
 				enemies.RemoveAt(n);
 				--n;
 			}

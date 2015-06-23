@@ -26,6 +26,7 @@ public class Light {
 	private float prev_attrib_size;				//last updated attrib size of the light
 	private float prev_attrib_intensity;		//last updated attrib intensity of the light
 	private Vector3 prev_v_pos;					//last updated position of the light
+	private Vector3 prev_map_offset;
 
 	private bool updated_prev_colour = false;	//defines whether prev colours have been calculated already or not
 	private bool updated_prev_attribs = false;	//defines whether prev attribs have been calculated already or not
@@ -196,12 +197,12 @@ public class Light {
 		return l;
 	}
 
-	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, bool negate_colour = false) {
+	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, Vector3 map_offset, bool negate_colour = false) {
 		//convert light world position + map offset to a center vertex position
 		float wave_scale = Glb.map.material.GetFloat("wave_scale") / 10.0f;
-		float v_x = (((((pos.x * (1 - wave_scale)) + (negate_colour ? Glb.map.prev_offset.x : Glb.map.offset.x)) / Glb.map.width) * 
+		float v_x = (((((pos.x * (1 - wave_scale)) + map_offset.x) / Glb.map.width) * 
 						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
-		float v_z = (((((pos.z * (1 - wave_scale)) + (negate_colour ? Glb.map.prev_offset.z : Glb.map.offset.z)) / Glb.map.height) * 
+		float v_z = (((((pos.z * (1 - wave_scale)) + map_offset.z) / Glb.map.height) * 
 						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
 
 		//divide dist by vertices / 2 / 10 to make draw results the same over different amounts of vertices on the map
@@ -276,12 +277,14 @@ public class Light {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.modified) {
 						//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
-						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, false);
+						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
 						//draw the previous drawn vertex light but instead of adding the colour, subtract it instead
 						//this allows dynamic lights to be modified and static lights to be only modified once
 						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
-																					   light.prev_attrib_intensity, light.prev_v_pos, true);
+																					   light.prev_attrib_intensity, light.prev_v_pos, 
+																					   light.prev_map_offset, true);
 
+						light.prev_map_offset = Glb.map.offset;
 						light.modified = false;
 						light.first_update = false;
 						light.on_screen = true;
@@ -304,8 +307,10 @@ public class Light {
 						//the light is now off screen, so remove it's previous data from the vertex map only once
 						//until it is on screen again
 						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
-																	light.prev_attrib_intensity, light.prev_v_pos, true);
+																	light.prev_attrib_intensity, light.prev_v_pos, 
+																	light.prev_map_offset, true);
 
+						light.prev_map_offset = Glb.map.offset;
 						light.modified = true;
 						light.first_update = false;
 						light.on_screen = false;
