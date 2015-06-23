@@ -6,7 +6,11 @@ public class Enemy {
 	public GameObject gobj;
 	public Light light = null;
 	public bool to_be_removed = false;
+	public bool blood_state = false;
+	private float blood_size;
+	private float blood_intensity;
 	public int ai_type;
+	private Light blood_light;
 	private Vector3 accel;
 	private float angle = 0;
 	private int angle_timer = 0;
@@ -20,10 +24,25 @@ public class Enemy {
 		angle = Random.Range(0, Mathf.PI * 2);
 	}
 
+	public void create_blood_state() {
+		blood_state = true;
+		blood_size = 2;
+		blood_intensity = 1;
+		Light.lights.Add(blood_light = Light.create(gobj.transform.position.x, gobj.transform.position.z, blood_size, blood_intensity, 1, .25f, .15f, 1));
+		GameObject.Destroy(gobj);
+	}
+
 	public void update() {
+		if (blood_state) {
+			blood_size -= (blood_size - 15) / 100.0f;
+			blood_intensity -= (blood_intensity) / 200.0f;
+			blood_light.set_attribs(blood_size, blood_intensity);
+			return;
+		}
+
 		float dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (dist < 2) to_be_removed = true;
+		if (dist < 2) create_blood_state();
 
 		if (light != null) light.set_pos(gobj.transform.position.x, gobj.transform.position.z);
 

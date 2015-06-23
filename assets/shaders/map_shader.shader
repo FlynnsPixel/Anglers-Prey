@@ -103,12 +103,8 @@ Shader "Custom/Map" {
 	        	}
 
 	        	col.rgb += i.colour.rgb;
-	        	col.r = clamp(col.r, 0, .9);
-	        	col.g = clamp(col.g, 0, .9);
-				col.b = clamp(col.b, 0, .9);
-
-				col.rgb -= clamp(sqrt(pow(i.screen_uv.x, 2) + pow(i.screen_uv.y, 2)) / 40, 0, 1);
-
+				col.rgb -= clamp(sqrt(pow(i.screen_uv.x, 2) + pow(i.screen_uv.y, 2)) / 45, 0, 1);
+				
 	            return col;
 	        }
 

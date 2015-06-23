@@ -60,7 +60,7 @@ public class EnemyManager {
 
 		//new_enemy.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
 
-		Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 5, 1, 0, .75f, 1, 1));
+		Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 5, 1, .1f, .75f, 1, 1));
 
 		enemies.Add(new_enemy);
 	}

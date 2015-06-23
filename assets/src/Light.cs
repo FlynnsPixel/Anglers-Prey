@@ -230,9 +230,9 @@ public class Light {
 				dist = Mathf.Clamp(intensity - (dist / (vertex_size / intensity)), 0, intensity);
 				dist *= Mathf.Clamp((Mathf.Abs(x - v_x) + Mathf.Abs(y - v_z)) / 1.5f, 1.0f, 2.0f);
 				if (negate_colour) dist = -dist;
-				map_colours[index].r += dist * colour.r * colour.a;
-				map_colours[index].g += dist * colour.g * colour.a;
-				map_colours[index].b += dist * colour.b * colour.a;
+				map_colours[index].r += (dist * colour.r) * colour.a;
+				map_colours[index].g += (dist * colour.g) * colour.a;
+				map_colours[index].b += (dist * colour.b) * colour.a;
 				map_colours[index].a = unique_light_id;
 			}
 			r += 8;
