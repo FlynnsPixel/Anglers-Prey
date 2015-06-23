@@ -11,10 +11,11 @@ public class StateManager : MonoBehaviour {
 	State state;
 
 	void Start() {
+		Glb.env.init();
 		Glb.map.init();
 		Light.init();
 		Glb.player.init();
-		Glb.env.init();
+		Glb.map.spawn_init_env();
 	}
 
 	void Update() {

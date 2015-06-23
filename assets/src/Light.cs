@@ -30,6 +30,7 @@ public class Light {
 	private bool updated_prev_colour = false;	//defines whether prev colours have been calculated already or not
 	private bool updated_prev_attribs = false;	//defines whether prev attribs have been calculated already or not
 	private bool updated_prev_pos = false;		//defines whether prev positions have been calculated already or not
+	private bool set_to_remove = false;			//defines whether the light is to be cleared and then removed or not
 
 	public void set_colour(float r, float g, float b, float a) {
 		if (!updated_prev_colour) {
@@ -139,6 +140,10 @@ public class Light {
 		vcam_pos_min.z = -v_pos.z - attrib_size;
 		vcam_pos_max.x = -v_pos.x + attrib_size;
 		vcam_pos_max.z = -v_pos.z + attrib_size;
+	}
+
+	public void remove() {
+		set_to_remove = true;
 	}
 
 	public Color get_colour() { return colour; }
@@ -260,13 +265,14 @@ public class Light {
 		//loop through all the lights
 		//send per pixel light data to the shader for per pixel lights
 		//calculate vertex lights and apply them to the vertex colours of the map
-		foreach (Light light in lights) {
+		for (int i = 0; i < lights.Count; ++i) {
+			Light light = lights[i];
 			if (light.get_type() == LightType.VERTEX && !light.modified) continue;
 
 			//calculates the light position in relation to the screen so lights will not update if they are off screen
 			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
-			if (enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) {
+			if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
 				if (light.get_type() == LightType.VERTEX) {
 					if (light.modified) {
 						//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
@@ -294,7 +300,7 @@ public class Light {
 				}
 			}else {
 				if (light.get_type() == LightType.VERTEX) {
-					if (light.on_screen) {
+					if (light.on_screen || light.set_to_remove) {
 						//the light is now off screen, so remove it's previous data from the vertex map only once
 						//until it is on screen again
 						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
@@ -308,6 +314,7 @@ public class Light {
 						light.updated_prev_pos = false;
 					}
 				}
+				if (light.set_to_remove) { lights.Remove(light); light.set_to_remove = false; --i; }
 			}
 		}
 		Glb.map.mesh.colors = map_colours;

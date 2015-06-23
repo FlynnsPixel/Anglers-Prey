@@ -28,6 +28,8 @@ public class Player {
 	float last_angle = 0;
 
 	Light player_light;
+	Light enemy_light;
+	GameObject enemy;
 
 	public void init() {
 		player = GameObject.Find("player");
@@ -42,16 +44,21 @@ public class Player {
 
 		player_light = Light.create(0, 0, 10, 1, .4f, .5f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
-		Light.lights.Add(Light.create(-2.5f, -17, .75f, 1.5f, .5f, 0, .75f, 1, Light.LightType.VERTEX));
 
-		for (int n = 0; n < 20; ++n) {
+		for (int n = 0; n < 0; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-20.0f, 20.0f), Random.Range(-20.0f, 20.0f), 
 				Random.Range(5.0f, 15.0f), Random.Range(.2f, .75f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.VERTEX));
 		}
+		
+		enemy = GameObject.Find("enemy");
+		Light.lights.Add(enemy_light = Light.create(enemy.transform.position.x, enemy.transform.position.z, 4, 1, .25f, .75f, .75f, 1));
 	}
 
 	public void update() {
+		float dist = 12 - Mathf.Clamp(Mathf.Sqrt(Mathf.Pow(enemy.transform.position.x - player.transform.position.x, 2) + 
+								 Mathf.Pow(enemy.transform.position.z - player.transform.position.z, 2)) / 4.0f, 0, 12);
+		enemy_light.set_attribs(dist, dist / 20.0f);
 		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {

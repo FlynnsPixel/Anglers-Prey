@@ -34,8 +34,14 @@ public class Map {
 		half_height = height / 2.0f;
 
 		resize_vertices(44);
+	}
 
-		Light.lights.Add(Light.create(10, 0, 4, 1, 1, 0, 0, 1));
+	public void spawn_init_env() {
+		int num_env_objs = Random.Range(15, 40);
+		for (int n = 0; n < num_env_objs; ++n) {
+			Vector3 pos = new Vector3(Random.Range(-half_width, half_width), 0, Random.Range(-half_height, half_height));
+			Glb.env.create_obj(Glb.env.rand_obj(), pos);
+		}
 	}
 
 	public void resize_vertices(int row_size) {
@@ -105,11 +111,12 @@ public class Map {
 		}
 
 		for (int i = 0; i < Glb.env.spawned_objs.Count; ++i) {
-			Vector3 pos = Glb.env.spawned_objs[i].transform.position;
+			Vector3 pos = Glb.env.spawned_objs[i].gobj.transform.position;
 			pos.x -= rect.x;
 			pos.z -= rect.y;
 			if (pos.x < -half_width || pos.x > half_width || pos.z < -half_height || pos.z > half_height) {
-				GameObject.Destroy(Glb.env.spawned_objs[i]);
+				GameObject.Destroy(Glb.env.spawned_objs[i].gobj);
+				if (Glb.env.spawned_objs[i].light != null) Glb.env.spawned_objs[i].light.remove();
 				Glb.env.spawned_objs.RemoveAt(i);
 				--i;
 			}
@@ -118,9 +125,10 @@ public class Map {
 		Random.seed = (int)((rect.x * 10) + rect.y);
 		int num_env_objs = Random.Range(0, 8);
 		for (int n = 0; n < num_env_objs; ++n) {
-			Vector3 pos = new Vector3((x * half_width) + rect.x + (y * Random.Range(-half_width, half_width)), -4, 
+			EnvAsset obj = Glb.env.rand_obj();
+			Vector3 pos = new Vector3((x * half_width) + rect.x + (y * Random.Range(-half_width, half_width)), 0, 
 									  (y * half_height) + rect.y + (x * Random.Range(-half_height, half_height)));
-			Glb.env.create_obj(Glb.env.rand_obj(), pos);
+			Glb.env.create_obj(obj, pos);
 		}
 	}
 }
