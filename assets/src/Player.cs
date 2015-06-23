@@ -17,7 +17,6 @@ public class Player {
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-	private const float radians = Mathf.PI / 180.0f;
 	private const float max_speed = .5f;
 	private const float friction = .98f;
 	private const float angle_accel_speed = .4f;
@@ -40,7 +39,7 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, 10, 1, .4f, .5f, 1, 1, Light.LightType.VERTEX);
+		player_light = Light.create(0, 0, 10, 1.5f, .4f, .5f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
 
 		for (int n = 0; n < 0; ++n) {
@@ -54,8 +53,8 @@ public class Player {
 		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetKey(KeyCode.W)) {
-			accel.x -= Mathf.Cos(angle * radians) * radians;
-			accel.y -= Mathf.Sin(angle * radians) * radians;
+			accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN;
+			accel.y -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN;
 			accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 			accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
 		}
@@ -105,8 +104,8 @@ public class Player {
 		}
 			
 		if (mouse_touched) {
-			float a = Mathf.Atan2(mouse_touch_point.y - Input.mousePosition.y, mouse_touch_point.x - Input.mousePosition.x) + (180 * radians);
-			float target = a / radians;
+			float a = Mathf.Atan2(mouse_touch_point.y - Input.mousePosition.y, mouse_touch_point.x - Input.mousePosition.x) + (180 * Math.RADIAN);
+			float target = a / Math.RADIAN;
 			if (target < 170 && last_angle > 190) angle_offset += 360;
 			else if (target > 190 && last_angle < 170) angle_offset -= 360;
 			last_angle = target;
@@ -116,8 +115,8 @@ public class Player {
 
 			float dist = Mathf.Sqrt(Mathf.Pow(mouse_touch_point.y - Input.mousePosition.y, 2) + Mathf.Pow(mouse_touch_point.x - Input.mousePosition.x, 2));
 			dist = Mathf.Clamp(dist / 150.0f, 0, 1);
-			accel.x -= (Mathf.Cos(angle * radians) * radians) * dist;
-			accel.y -= (Mathf.Sin(angle * radians) * radians) * dist;
+			accel.x -= (Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN) * dist;
+			accel.y -= (Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN) * dist;
 			accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 			accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
 

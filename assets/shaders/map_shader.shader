@@ -34,6 +34,8 @@ Shader "Custom/Map" {
 
 			#include "UnityCG.cginc"
 
+			float4 reflect_colour_ST;
+
 			struct v2f {
 	            float4 pos : SV_POSITION;
 	            float4 colour : COLOR;
@@ -41,6 +43,7 @@ Shader "Custom/Map" {
 				float2 bumpuv1 : TEXCOORD1;
 				float3 v_dir : TEXCOORD2;
 				float2 uv : TEXCOORD3;
+				float2 screen_uv : TEXCOORD4;
 	        };
 
 	        struct VertIn {
@@ -52,6 +55,7 @@ Shader "Custom/Map" {
 	            v2f o;
 	        	o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 	        	o.colour = v.color;
+	        	o.screen_uv = o.pos.xy;
 
 				//scroll bump waves
 				float4 temp;
@@ -102,7 +106,9 @@ Shader "Custom/Map" {
 	        	col.r = clamp(col.r, 0, .9);
 	        	col.g = clamp(col.g, 0, .9);
 				col.b = clamp(col.b, 0, .9);
-	            
+
+				col.rgb -= clamp(sqrt(pow(i.screen_uv.x, 2) + pow(i.screen_uv.y, 2)) / 40, 0, 1);
+
 	            return col;
 	        }
 

@@ -15,8 +15,8 @@ public class EnemyManager {
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
-	private const int SPAWN_RATE = 40;
-	private const int MAX_ENEMIES = 8;
+	private const int SPAWN_RATE = 10;
+	private const int MAX_ENEMIES = 15;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
 
@@ -54,10 +54,13 @@ public class EnemyManager {
 		float m = Random.Range(0.0f, 1.0f);
 		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
-		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * (new_enemy.gobj.transform.localScale.y / asset.gobj.transform.localScale.y);
+		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * 
+				 (new_enemy.gobj.transform.localScale.y / asset.gobj.transform.localScale.y) + 1;
 		new_enemy.gobj.transform.position = pos;
 
 		//new_enemy.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
+
+		Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 5, 1, 0, .75f, 1, 1));
 
 		enemies.Add(new_enemy);
 	}
@@ -78,6 +81,7 @@ public class EnemyManager {
 			Enemy enemy = enemies[n];
 			enemy.update();
 			if (enemy.to_be_removed) {
+				if (enemy.light != null) enemy.light.remove();
 				GameObject.Destroy(enemy.gobj);
 				enemies.RemoveAt(n);
 				--n;
