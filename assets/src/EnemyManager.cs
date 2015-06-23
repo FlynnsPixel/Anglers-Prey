@@ -47,8 +47,8 @@ public class EnemyManager {
 		Enemy new_enemy = new Enemy();
 		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
 
-		AIType type = (AIType)Random.Range(1, 2);
-		if (Random.Range(0.0f, 1.0f) >= .5f) type = type | AIType.BATCH;
+		int type = Random.Range(1, 2);
+		if (Random.Range(0.0f, 1.0f) >= .5f) type = type | Enemy.AI_BATCH;
 		new_enemy.ai_type = type;
 
 		float m = Random.Range(0.0f, 1.0f);
