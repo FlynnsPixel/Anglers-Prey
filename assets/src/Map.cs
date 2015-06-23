@@ -17,7 +17,6 @@ public class Map {
 	public Vector3[] vertices;
 	public Rect rect;
 	public Vector3 offset;					//offset for when the map is shifted
-	public Vector3 prev_offset;
 
 	public void init() {
 		map = GameObject.Find("map");
@@ -83,7 +82,15 @@ public class Map {
 	}
 
 	public void update() {
-		prev_offset = offset;
+		if (Glb.player.accel.x > 0 && Glb.player.pos.x > rect.x) {
+			shift_map(1, 0);
+		}else if (Glb.player.accel.x < 0 && Glb.player.pos.x < rect.x) {
+			shift_map(-1, 0);
+		}else if (Glb.player.accel.y > 0 && Glb.player.pos.z > rect.y) {
+			shift_map(0, 1);
+		}else if (Glb.player.accel.y < 0 && Glb.player.pos.z < rect.y) {
+			shift_map(0, -1);
+		}
 	}
 
 	public void shift_map(float x, float y) {

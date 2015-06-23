@@ -16,7 +16,7 @@ public class EnemyManager {
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
 	private const int SPAWN_RATE = 10;
-	private const int MAX_ENEMIES = 15;
+	private const int MAX_ENEMIES = 100;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
 
@@ -81,7 +81,17 @@ public class EnemyManager {
 			Enemy enemy = enemies[n];
 			enemy.update();
 			if (enemy.to_be_removed) {
-				if (enemy.light != null) enemy.light.remove();
+				if (enemy.light != null && !enemy.light_removed) enemy.light.remove();
+				if (enemy.gobj != null) GameObject.Destroy(enemy.gobj);
+				enemies.RemoveAt(n);
+				--n;
+			}
+		}
+
+		if (Input.GetKeyDown(KeyCode.E)) {
+			for (int n = 0; n < enemies.Count; ++n) {
+				Enemy enemy = enemies[n];
+				if (enemy.light != null && !enemy.light_removed) enemy.light.remove();
 				if (enemy.gobj != null) GameObject.Destroy(enemy.gobj);
 				enemies.RemoveAt(n);
 				--n;

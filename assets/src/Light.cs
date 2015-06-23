@@ -7,7 +7,8 @@ public class Light {
 	//light members and functions
 	public bool modified = false;				//defines whether any of the lights attribs have been changed and are ready for an update
 	public bool first_update = true;			//defines whether the light has had it's first update
-	public bool on_screen = true;				//defines whether or not the light is on screen or not
+	public bool on_screen = false;				//defines whether or not the light is on screen or not
+	public bool n_test = false;
 
 	private Color colour;						//r, g, b, a colour of the light
 	private Color pp_attribs;					//per pixel encoded attribs of the light to send to the per pixel light shader
@@ -145,6 +146,7 @@ public class Light {
 
 	public void remove() {
 		set_to_remove = true;
+		modified = true;
 	}
 
 	public Color get_colour() { return colour; }
@@ -165,8 +167,8 @@ public class Light {
 	public static int num_vertex_lights = 0;
 	public static int num_pixel_lights = 0;
 
-	private static float unique_light_id = 1;
-	private const float UNIQUE_ID_DIF = .01f;
+	private static float unique_light_id = 100;
+	private const float UNIQUE_ID_DIF = 1;
 	private static Color[] map_colours;
 
 	public enum LightType {
@@ -181,6 +183,8 @@ public class Light {
 		light_data.filterMode = FilterMode.Point;
 		//clamp texture so it doesn't repeat
 		light_data.wrapMode = TextureWrapMode.Clamp;
+
+		map_colours = Glb.map.mesh.colors;
 
 		Glb.map.material.SetFloat("next_light_uv", 1.0f / (int)MAX_NUM_PIXELS);
 		update_all();
@@ -246,15 +250,15 @@ public class Light {
 		//l button to toggle off screen light rendering
 		if (Input.GetKeyDown(KeyCode.L)) Debug.Log("enable off screen lights: " + (enable_off_screen = !enable_off_screen));
 
-		map_colours = Glb.map.mesh.colors;
 		//check if the unique light id is near zero, and if it is then clear all vertex alpha colours
 		//alpha colours are used to determine if a colour has been already calculated when drawing vertex lights
-		if (unique_light_id <= UNIQUE_ID_DIF * 2.5f) {
-			unique_light_id = 1;
-			for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
-				for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
-					map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
-				}
+		unique_light_id = 100;
+		for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
+			for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
+				map_colours[(y * Glb.map.vertices_per_row) + x].r = 0;
+				map_colours[(y * Glb.map.vertices_per_row) + x].g = 0;
+				map_colours[(y * Glb.map.vertices_per_row) + x].b = 0;
+				map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
 			}
 		}
 
@@ -268,59 +272,59 @@ public class Light {
 		//calculate vertex lights and apply them to the vertex colours of the map
 		for (int i = 0; i < lights.Count; ++i) {
 			Light light = lights[i];
-			if (light.get_type() == LightType.VERTEX && !light.modified) continue;
+			//if (light.get_type() == LightType.VERTEX && !light.modified && !light.set_to_remove) continue;
+
+			draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
+
+			if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
 
 			//calculates the light position in relation to the screen so lights will not update if they are off screen
-			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
-			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
-			if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
-				if (light.get_type() == LightType.VERTEX) {
-					if (light.modified) {
-						//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
-						draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
-						//draw the previous drawn vertex light but instead of adding the colour, subtract it instead
-						//this allows dynamic lights to be modified and static lights to be only modified once
-						if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
-																					   light.prev_attrib_intensity, light.prev_v_pos, 
-																					   light.prev_map_offset, true);
+			//Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
+			//Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
+			//if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
+			//	if (light.get_type() == LightType.VERTEX) {
+			//		if (light.modified) {
+			//			//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
+			//			draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
+			//			//draw the previous drawn vertex light but instead of adding the colour, subtract it instead
+			//			//this allows dynamic lights to be modified and static lights to be only modified once
+			//			if (!light.first_update && light.on_screen) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
+			//																		   light.prev_attrib_intensity, light.prev_v_pos, 
+			//																		   light.prev_map_offset, true);
 
-						light.prev_map_offset = Glb.map.offset;
-						light.modified = false;
-						light.first_update = false;
-						light.on_screen = true;
-						light.updated_prev_colour = false;
-						light.updated_prev_attribs = false;
-						light.updated_prev_pos = false;
-						++num_vertex_lights;
-					}
-				}else if (light.get_type() == LightType.PER_PIXEL) {
-					//if the light is a per pixel light then set the light per pixel data
-					//to the light data texture
-					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT), 0, light.colour);
-					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 1, 0, light.pp_attribs);
-					light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 2, 0, light.pp_pos);
-					++num_pixel_lights;
-				}
-			}else {
-				if (light.get_type() == LightType.VERTEX) {
-					if (light.on_screen || light.set_to_remove) {
-						//the light is now off screen, so remove it's previous data from the vertex map only once
-						//until it is on screen again
-						if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
-																	light.prev_attrib_intensity, light.prev_v_pos, 
-																	light.prev_map_offset, true);
+			//			light.prev_map_offset = Glb.map.offset;
+			//			light.modified = false;
+			//			light.first_update = false;
+			//			light.on_screen = true;
+			//			light.updated_prev_colour = false;
+			//			light.updated_prev_attribs = false;
+			//			light.updated_prev_pos = false;
+			//			++num_vertex_lights;
+			//		}
+			//	}else if (light.get_type() == LightType.PER_PIXEL) {
+			//		//if the light is a per pixel light then set the light per pixel data
+			//		//to the light data texture
+			//		light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT), 0, light.colour);
+			//		light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 1, 0, light.pp_attribs);
+			//		light_data.SetPixel((num_pixel_lights * PIXEL_DATA_PER_LIGHT) + 2, 0, light.pp_pos);
+			//		++num_pixel_lights;
+			//	}
+			//}else {
+			//	if (light.get_type() == LightType.VERTEX) {
+			//		if (light.on_screen || light.set_to_remove) {
+			//			//the light is now off screen, so remove it's previous data from the vertex map only once
+			//			//until it is on screen again
+			//			if (!light.first_update) draw_vertex_circle(light.prev_colour, light.prev_attrib_size, 
+			//														light.prev_attrib_intensity, light.prev_v_pos, 
+			//														light.prev_map_offset, true);
 
-						light.prev_map_offset = Glb.map.offset;
-						light.modified = true;
-						light.first_update = false;
-						light.on_screen = false;
-						light.updated_prev_colour = false;
-						light.updated_prev_attribs = false;
-						light.updated_prev_pos = false;
-					}
-				}
-				if (light.set_to_remove) { lights.Remove(light); light.set_to_remove = false; --i; }
-			}
+			//			light.modified = true;
+			//			light.first_update = false;
+			//			light.on_screen = false;
+			//		}
+			//	}
+			//	if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
+			//}
 		}
 		Glb.map.mesh.colors = map_colours;
 

@@ -5,9 +5,9 @@ public class Player {
 
 	public GameObject player;
 	public Vector3 pos;
+	public Vector2 accel;
 	private Quaternion rota;
 	private Vector3 rota_euler;
-	private Vector2 accel;
 	private float angle = 90;
 	private float angle_accel = 0;
 
@@ -61,16 +61,6 @@ public class Player {
 		accel *= friction;
 		pos.x += accel.x;
 		pos.z += accel.y;
-
-		if (accel.x > 0 && pos.x > Glb.map.rect.x) {
-			Glb.map.shift_map(1, 0);
-		}else if (accel.x < 0 && pos.x < Glb.map.rect.x) {
-			Glb.map.shift_map(-1, 0);
-		}else if (accel.y > 0 && pos.z > Glb.map.rect.y) {
-			Glb.map.shift_map(0, 1);
-		}else if (accel.y < 0 && pos.z < Glb.map.rect.y) {
-			Glb.map.shift_map(0, -1);
-		}
 
 		if (Input.GetKey(KeyCode.A)) {
 			angle_accel += angle_accel_speed;

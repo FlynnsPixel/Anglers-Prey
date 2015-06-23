@@ -5,6 +5,7 @@ public class Enemy {
 
 	public GameObject gobj;
 	public Light light = null;
+	public bool light_removed = false;
 	public bool to_be_removed = false;
 	public int ai_type;
 
@@ -14,6 +15,7 @@ public class Enemy {
 	private const float max_speed = .5f;
 
 	public bool blood_state = false;
+	private Light blood_light;
 	private float blood_size;
 	private float blood_intensity;
 
@@ -29,19 +31,25 @@ public class Enemy {
 		blood_state = true;
 		blood_size = 2;
 		blood_intensity = .85f;
-		light.remove();
-		Light.lights.Add(light = Light.create(gobj.transform.position.x, gobj.transform.position.z, blood_size, blood_intensity, 1, .25f, .15f, 1));
+		Light.lights.Add(blood_light = Light.create(gobj.transform.position.x, gobj.transform.position.z, blood_size, blood_intensity, 1, .25f, .15f, 1));
 		GameObject.Destroy(gobj);
 		gobj = null;
+		light_removed = false;
 	}
 
 	public void update() {
 		if (blood_state) {
 			blood_size -= (blood_size - 22) / 250.0f;
 			blood_intensity -= (blood_intensity) / 250.0f;
-			light.set_attribs(blood_size, blood_intensity);
+			blood_light.set_attribs(blood_size, blood_intensity);
+			light.set_attribs(light.get_size(), light.get_intensity() - .1f);
+			if (!light_removed && light.get_intensity() <= 0) {
+				light_removed = true;
+				light.remove();
+			}
 			if (blood_intensity <= 0) {
 				to_be_removed = true;
+				blood_light.remove();
 			}
 			return;
 		}
