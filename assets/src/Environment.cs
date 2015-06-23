@@ -24,11 +24,11 @@ public class Environment {
 	private float total_spawn_rate = 0;
 
 	public void init() {
-		load_obj(ref rock, "env/rock", .5f, new Vector3(1, 1, 1), new Vector3(2.75f, 2.75f, 2.75f));
-		load_obj(ref coral, "env/coral", .2f, new Vector3(.4f, .4f, .4f), new Vector3(.5f, .5f, .5f));
+		load_asset(ref rock, "env/rock", .5f, new Vector3(1, 1, 1), new Vector3(2.75f, 2.75f, 2.75f));
+		load_asset(ref coral, "env/coral", .2f, new Vector3(.4f, .4f, .4f), new Vector3(.5f, .5f, .5f));
 	}
 
-	private void load_obj(ref EnvAsset obj, string name, float spawn_rate, Vector3 min_scale, Vector3 max_scale) {
+	private void load_asset(ref EnvAsset obj, string name, float spawn_rate, Vector3 min_scale, Vector3 max_scale) {
 		obj = new EnvAsset();
 		obj.gobj = (GameObject)Resources.Load(name);
 		obj.min_scale = min_scale;
@@ -38,7 +38,7 @@ public class Environment {
 		assets.Add(obj);
 	}
 
-	public EnvAsset rand_obj() {
+	public EnvAsset get_rand_asset() {
 		float rand = Random.Range(0.0f, total_spawn_rate);
 		foreach (EnvAsset obj in assets) {
 			if (obj.spawn_rate >= rand) return obj;
@@ -46,20 +46,20 @@ public class Environment {
 		return null;
 	}
 
-	public void create_obj(EnvAsset obj, Vector3 pos) {
+	public void create_obj(EnvAsset asset, Vector3 pos) {
 		EnvObj new_obj = new EnvObj();
-		new_obj.gobj = GameObject.Instantiate(obj.gobj);
+		new_obj.gobj = GameObject.Instantiate(asset.gobj);
 
 		float m = Random.Range(0.0f, 1.0f);
-		new_obj.gobj.transform.localScale = obj.min_scale + ((obj.max_scale - obj.min_scale) * m);
+		new_obj.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
-		pos.y -= obj.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * (new_obj.gobj.transform.localScale.y / obj.gobj.transform.localScale.y);
+		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * (new_obj.gobj.transform.localScale.y / asset.gobj.transform.localScale.y);
 		new_obj.gobj.transform.position = pos;
 
 		//new_obj.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
 
 		spawned_objs.Add(new_obj);
 
-		if (obj == coral) Light.lights.Add(new_obj.light = Light.create(pos.x, pos.z, 5, 1, .5f, .25f, 1, 1));
+		if (asset == coral) Light.lights.Add(new_obj.light = Light.create(pos.x, pos.z, 5, 1, .5f, .25f, 1, 1));
 	}
 }

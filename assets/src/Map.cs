@@ -40,7 +40,7 @@ public class Map {
 		int num_env_objs = Random.Range(15, 40);
 		for (int n = 0; n < num_env_objs; ++n) {
 			Vector3 pos = new Vector3(Random.Range(-half_width, half_width), 0, Random.Range(-half_height, half_height));
-			Glb.env.create_obj(Glb.env.rand_obj(), pos);
+			Glb.env.create_obj(Glb.env.get_rand_asset(), pos);
 		}
 	}
 
@@ -125,7 +125,7 @@ public class Map {
 		Random.seed = (int)((rect.x * 10) + rect.y);
 		int num_env_objs = Random.Range(0, 8);
 		for (int n = 0; n < num_env_objs; ++n) {
-			EnvAsset obj = Glb.env.rand_obj();
+			EnvAsset obj = Glb.env.get_rand_asset();
 			Vector3 pos = new Vector3((x * half_width) + rect.x + (y * Random.Range(-half_width, half_width)), 0, 
 									  (y * half_height) + rect.y + (x * Random.Range(-half_height, half_height)));
 			Glb.env.create_obj(obj, pos);

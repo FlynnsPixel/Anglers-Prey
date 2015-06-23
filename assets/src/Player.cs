@@ -3,33 +3,31 @@ using System.Collections;
 
 public class Player {
 
-	GameObject player;
+	public GameObject player;
 	public Vector3 pos;
-	Quaternion rota;
-	Vector3 rota_euler;
-	Vector2 accel;
-	float angle = 90;
-	float angle_accel = 0;
+	private Quaternion rota;
+	private Vector3 rota_euler;
+	private Vector2 accel;
+	private float angle = 90;
+	private float angle_accel = 0;
 
-	Vector3 cam_pos;
-	Camera cam;
+	private Vector3 cam_pos;
+	private Camera cam;
 
-	bool mouse_touched = false;
-	Vector3 last_mouse_pos;
+	private bool mouse_touched = false;
+	private Vector3 last_mouse_pos;
 
-	const float radians = Mathf.PI / 180.0f;
-	const float max_speed = 1;
-	const float friction = .98f;
-	const float angle_accel_speed = .4f;
-	const float angle_friction = .95f;
-	const float max_angle_accel = 4;
+	private const float radians = Mathf.PI / 180.0f;
+	private const float max_speed = 1;
+	private const float friction = .98f;
+	private const float angle_accel_speed = .4f;
+	private const float angle_friction = .95f;
+	private const float max_angle_accel = 4;
 
-	float angle_offset = 0;
-	float last_angle = 0;
+	private float angle_offset = 0;
+	private float last_angle = 0;
 
-	Light player_light;
-	Light enemy_light;
-	GameObject enemy;
+	private Light player_light;
 
 	public void init() {
 		player = GameObject.Find("player");
@@ -50,15 +48,9 @@ public class Player {
 				Random.Range(5.0f, 15.0f), Random.Range(.2f, .75f), 
 				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.VERTEX));
 		}
-		
-		enemy = GameObject.Find("enemy");
-		Light.lights.Add(enemy_light = Light.create(enemy.transform.position.x, enemy.transform.position.z, 4, 1, .25f, .75f, .75f, 1));
 	}
 
 	public void update() {
-		float dist = 12 - Mathf.Clamp(Mathf.Sqrt(Mathf.Pow(enemy.transform.position.x - player.transform.position.x, 2) + 
-								 Mathf.Pow(enemy.transform.position.z - player.transform.position.z, 2)) / 4.0f, 0, 12);
-		enemy_light.set_attribs(dist, dist / 20.0f);
 		player_light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetMouseButtonDown(0)) {
