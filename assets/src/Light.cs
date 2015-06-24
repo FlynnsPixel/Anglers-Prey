@@ -274,14 +274,13 @@ public class Light {
 			Light light = lights[i];
 			//if (light.get_type() == LightType.VERTEX && !light.modified && !light.set_to_remove) continue;
 
-			draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
-
-			if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
-
 			//calculates the light position in relation to the screen so lights will not update if they are off screen
-			//Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
-			//Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
-			//if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
+			Vector3 c1 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_min + cam_pos));
+			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
+			if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
+				draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
+			}
+			if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
 			//	if (light.get_type() == LightType.VERTEX) {
 			//		if (light.modified) {
 			//			//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
