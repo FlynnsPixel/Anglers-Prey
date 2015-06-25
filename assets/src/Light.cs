@@ -255,10 +255,7 @@ public class Light {
 		unique_light_id = 100;
 		for (int y = 0; y < Glb.map.vertices_per_row; ++y) {
 			for (int x = 0; x < Glb.map.vertices_per_row; ++x) {
-				map_colours[(y * Glb.map.vertices_per_row) + x].r = 0;
-				map_colours[(y * Glb.map.vertices_per_row) + x].g = 0;
-				map_colours[(y * Glb.map.vertices_per_row) + x].b = 0;
-				map_colours[(y * Glb.map.vertices_per_row) + x].a = 0;
+				map_colours[(y * Glb.map.vertices_per_row) + x] = Color.black;
 			}
 		}
 
@@ -279,6 +276,7 @@ public class Light {
 			Vector3 c2 = Camera.main.WorldToViewportPoint(cam_pos - (light.vcam_pos_max + cam_pos));
 			if ((enable_off_screen || (c2.x > 0 && c1.x < 1 && c2.y > 0 && c1.y < 1)) && !light.set_to_remove) {
 				draw_vertex_circle(light.colour, light.attrib_size, light.attrib_intensity, light.v_pos, Glb.map.offset, false);
+				++num_vertex_lights;
 			}
 			if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
 			//	if (light.get_type() == LightType.VERTEX) {

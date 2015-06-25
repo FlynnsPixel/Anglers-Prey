@@ -3,16 +3,28 @@ using UnityEngine;
 
 public class Enemy {
 
-	public GameObject gobj;
+	public GameObject gobj = null;
+	public Mesh mesh = null;
 	public Light light = null;
 	public bool light_removed = false;
 	public bool to_be_removed = false;
 	public int ai_type;
 
 	private Vector3 accel;
+	private float angle_dest = 0;
+	private const float max_speed = .5f;
+	private Vector3 init_pos;
+
 	private float angle = 0;
 	private int angle_timer = 0;
-	private const float max_speed = .5f;
+	private Vector3 rota_euler;
+	private float angle_accel = 0;
+	private float angle_offset = 0;
+	private float last_angle = 0;
+	private Vector3 init_rota;
+
+	private const float max_angle_accel = 4;
+	private const float angle_friction = .8f;
 
 	public bool blood_state = false;
 	private Light blood_light;
@@ -23,8 +35,10 @@ public class Enemy {
 	public const int AI_AGGRESSIVE		= 1 << 1; 
 	public const int AI_BATCH			= 1 << 2;
 
-	public Enemy() {
-		angle = Random.Range(0, Mathf.PI * 2);
+	public void init() {
+		angle_dest = Random.Range(0, Mathf.PI * 2);
+		init_rota = gobj.transform.localEulerAngles;
+		init_pos = gobj.transform.position;
 	}
 
 	public void create_blood_state() {
@@ -56,18 +70,36 @@ public class Enemy {
 
 		float dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (dist < 2) { create_blood_state(); return; }
+		if (dist < 3) { create_blood_state(); return; }
 
 		if (light != null) light.set_pos(gobj.transform.position.x, gobj.transform.position.z);
 
 		++angle_timer;
-		if (angle_timer >= 50) {
+		if (angle_timer >= 20) {
 			angle_timer = 0;
-			angle += Random.Range(-180.0f, 180.0f);
+			angle_dest += Random.Range(-Mathf.PI / 8.0f, Mathf.PI / 8.0f);
 		}
 
-		accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN * .05f;
-		accel.z -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN * .05f;
+		float target = angle_dest / Math.RADIAN;
+		if (target < 170 && last_angle > 190) angle_offset += 360;
+		else if (target > 190 && last_angle < 170) angle_offset -= 360;
+		last_angle = target;
+
+		angle -= (angle - (target + angle_offset)) / 50.0f;
+		angle_accel = -(angle - (target + angle_offset)) / 50.0f;
+		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
+		angle_accel *= angle_friction;
+
+		rota_euler.x -= angle_accel;
+		rota_euler.x -= rota_euler.x / 80.0f;
+		rota_euler.x = Mathf.Clamp(rota_euler.x, -45.0f, 45.0f);
+		rota_euler.y = -angle + 180;
+
+		gobj.transform.localEulerAngles = rota_euler + init_rota;
+
+		accel.x -= Mathf.Cos(angle_dest) * Math.RADIAN;
+		accel.z -= Mathf.Sin(angle_dest) * Math.RADIAN;
+		accel *= .9f;
 		accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 		accel.z = Mathf.Clamp(accel.z, -max_speed, max_speed);
 		gobj.transform.position += accel;

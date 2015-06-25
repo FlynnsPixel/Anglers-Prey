@@ -17,7 +17,7 @@ public class Player {
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-	private const float max_speed = .5f;
+	private const float max_speed = .2f;
 	private const float friction = .98f;
 	private const float angle_accel_speed = .4f;
 	private const float angle_friction = .95f;
@@ -39,7 +39,7 @@ public class Player {
 		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
 
-		player_light = Light.create(0, 0, 10, 1.5f, .4f, .5f, 1, 1, Light.LightType.VERTEX);
+		player_light = Light.create(0, 0, 10, 1.5f, .6f, .7f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
 
 		for (int n = 0; n < 0; ++n) {
@@ -86,11 +86,12 @@ public class Player {
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
-			mouse_touch_point = Input.mousePosition;
+			mouse_touch_point.x = Screen.width / 2;
+			mouse_touch_point.y = Screen.height / 2;
 		}else if (Input.GetMouseButtonUp(0)) {
 			mouse_touched = false;
-			GameObject cursor_target = GameObject.Find("cursor_target");
-			cursor_target.transform.Translate(400, 0, 0);
+			//GameObject cursor_target = GameObject.Find("cursor_target");
+			//cursor_target.transform.Translate(400, 0, 0);
 		}
 			
 		if (mouse_touched) {
@@ -100,19 +101,19 @@ public class Player {
 			else if (target > 190 && last_angle < 170) angle_offset -= 360;
 			last_angle = target;
 
-			angle -= (angle - (target + angle_offset)) / 20.0f;
-			angle_accel = -(angle - (target + angle_offset)) / 20.0f;
+			angle -= (angle - (target + angle_offset)) / 50.0f;
+			angle_accel = -(angle - (target + angle_offset)) / 50.0f;
 
 			float dist = Mathf.Sqrt(Mathf.Pow(mouse_touch_point.y - Input.mousePosition.y, 2) + Mathf.Pow(mouse_touch_point.x - Input.mousePosition.x, 2));
-			dist = Mathf.Clamp(dist / 150.0f, 0, 1);
+			dist = Mathf.Clamp(dist / (Mathf.Sqrt(Mathf.Pow(Screen.width, 2) + Mathf.Pow(Screen.height, 2)) / 2), 0, 1);
 			accel.x -= (Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN) * dist;
 			accel.y -= (Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN) * dist;
 			accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 			accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
 
-			GameObject cursor_target = GameObject.Find("cursor_target");
-			mouse_touch_point.z = 10;
-			cursor_target.transform.position = cam.ScreenToWorldPoint(mouse_touch_point);
+			//GameObject cursor_target = GameObject.Find("cursor_target");
+			//mouse_touch_point.z = 10;
+			//cursor_target.transform.position = cam.ScreenToWorldPoint(mouse_touch_point);
 		}
 	}
 }

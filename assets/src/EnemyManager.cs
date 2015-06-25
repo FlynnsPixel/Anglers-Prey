@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class EnemyAsset {
 	
-	public GameObject gobj;
+	public GameObject gobj = null;
+	public GameObject mesh = null;
 	public float spawn_rate = 0;
 	public Vector3 min_scale;
 	public Vector3 max_scale;
@@ -11,7 +12,8 @@ public class EnemyAsset {
 
 public class EnemyManager {
 
-	public EnemyAsset fish;
+	public EnemyAsset chimaera;
+	public EnemyAsset bio_eel;
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
@@ -21,13 +23,18 @@ public class EnemyManager {
 	private float spawn_radius;
 
 	public void init() {
-		load_asset(ref fish, "enemies/fish", .5f, new Vector3(1, 1, 1), new Vector3(2.75f, 2.75f, 2.75f));
+		load_asset(ref chimaera, "enemies/chimaera", .5f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
 		spawn_radius = Glb.map.width / 2;
 	}
 
 	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, Vector3 min_scale, Vector3 max_scale) {
 		obj = new EnemyAsset();
 		obj.gobj = (GameObject)Resources.Load(name);
+		foreach (Transform child in obj.gobj.transform) {
+			if (child.name.IndexOf("mesh") != -1) { obj.mesh = child.gameObject; break; }
+		}
+		if (obj.mesh == null) Debug.Log("no mesh object could be found for enemy (" + name + ")");
 		obj.min_scale = min_scale;
 		obj.max_scale = max_scale;
 		total_spawn_rate += spawn_rate;
@@ -54,13 +61,23 @@ public class EnemyManager {
 		float m = Random.Range(0.0f, 1.0f);
 		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
-		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * 
-				 (new_enemy.gobj.transform.localScale.y / asset.gobj.transform.localScale.y) + 1;
+		GameObject mesh_obj = null;
+		foreach (Transform child in new_enemy.gobj.transform) {
+			if (child.name.IndexOf("mesh") != -1) { mesh_obj = child.gameObject; break; }
+		}
+		new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		new_enemy.mesh.RecalculateBounds();
+		Bounds bounds = new_enemy.mesh.bounds;
+
+		pos.y -= bounds.size.y;
 		new_enemy.gobj.transform.position = pos;
 
-		//new_enemy.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
+		new_enemy.init();
 
-		Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 5, 1, .1f, .75f, 1, 1));
+		if (asset == chimaera)
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 6, .75f, .1f, 1, .5f, 1));
+		else if (asset == bio_eel)
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 6, .75f, 1, .1f, .5f, 1));
 
 		enemies.Add(new_enemy);
 	}
