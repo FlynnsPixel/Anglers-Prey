@@ -233,7 +233,7 @@ public class Light {
 
 				//use custom light formula to calculate the r, g, b, a light values with the light size, intensity and dist from center
 				dist = Mathf.Clamp(intensity - (dist / (vertex_size / intensity)), 0, intensity);
-				dist *= Mathf.Clamp((Mathf.Abs(x - v_x) + Mathf.Abs(y - v_z)) / 1.5f, 1.0f, 2.0f);
+				//dist *= Mathf.Clamp((Mathf.Abs(x - v_x) + Mathf.Abs(y - v_z)) / 1.5f, 1.0f, 2.0f);
 				if (negate_colour) dist = -dist;
 				map_colours[index].r += (dist * colour.r) * colour.a;
 				map_colours[index].g += (dist * colour.g) * colour.a;

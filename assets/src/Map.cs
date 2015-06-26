@@ -32,7 +32,7 @@ public class Map {
 		half_width = width / 2.0f;
 		half_height = height / 2.0f;
 
-		resize_vertices(44);
+		resize_vertices(55);
 	}
 
 	public void spawn_init_env() {
@@ -129,7 +129,7 @@ public class Map {
 		}
 
 		Random.seed = (int)((rect.x * 10) + rect.y);
-		int num_env_objs = Random.Range(0, 8);
+		int num_env_objs = Random.Range(1, 10);
 		for (int n = 0; n < num_env_objs; ++n) {
 			EnvAsset obj = Glb.env.get_rand_asset();
 			Vector3 pos = new Vector3((x * half_width) + rect.x + (y * Random.Range(-half_width, half_width)), 0, 

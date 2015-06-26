@@ -14,17 +14,19 @@ public class EnemyManager {
 
 	public EnemyAsset chimaera;
 	public EnemyAsset bio_eel;
+	public EnemyAsset gulper_eel;
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
 	private const int SPAWN_RATE = 10;
-	private const int MAX_ENEMIES = 100;
+	private const int MAX_ENEMIES = 20;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
 
 	public void init() {
 		load_asset(ref chimaera, "enemies/chimaera", .5f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
 		load_asset(ref bio_eel, "enemies/bio_eel", .5f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
 		spawn_radius = Glb.map.width / 2;
 	}
 
@@ -69,7 +71,8 @@ public class EnemyManager {
 		new_enemy.mesh.RecalculateBounds();
 		Bounds bounds = new_enemy.mesh.bounds;
 
-		pos.y -= bounds.size.y;
+		if (asset == gulper_eel) Debug.Log(bounds.size.y);
+		pos.y -= bounds.size.y + 1;
 		new_enemy.gobj.transform.position = pos;
 
 		new_enemy.init();
@@ -78,6 +81,8 @@ public class EnemyManager {
 			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 6, .75f, .1f, 1, .5f, 1));
 		else if (asset == bio_eel)
 			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 6, .75f, 1, .1f, .5f, 1));
+		else if (asset == gulper_eel)
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, 6, .75f, .2f, .75f, .7f, 1));
 
 		enemies.Add(new_enemy);
 	}

@@ -1,0 +1,588 @@
+fileFormatVersion: 2
+guid: 65d152ee62f0db34baf3e54e2205cd45
+timeCreated: 1435240278
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: joint1
+    100004: joint2
+    100006: joint3
+    100008: joint4
+    100010: joint5
+    100012: joint6
+    100014: joint7
+    100016: pCone1
+    100018: pCone10
+    100020: pCone11
+    100022: pCone12
+    100024: pCone13
+    100026: pCone14
+    100028: pCone15
+    100030: pCone16
+    100032: pCone17
+    100034: pCone18
+    100036: pCone19
+    100038: pCone2
+    100040: pCone20
+    100042: pCone21
+    100044: pCone22
+    100046: pCone23
+    100048: pCone24
+    100050: pCone25
+    100052: pCone26
+    100054: pCone27
+    100056: pCone28
+    100058: pCone29
+    100060: pCone3
+    100062: pCone30
+    100064: pCone31
+    100066: pCone32
+    100068: pCone33
+    100070: pCone34
+    100072: pCone35
+    100074: pCone36
+    100076: pCone37
+    100078: pCone38
+    100080: pCone39
+    100082: pCone4
+    100084: pCone40
+    100086: pCone41
+    100088: pCone42
+    100090: pCone43
+    100092: pCone44
+    100094: pCone45
+    100096: pCone46
+    100098: pCone47
+    100100: pCone48
+    100102: pCone49
+    100104: pCone5
+    100106: pCone50
+    100108: pCone51
+    100110: pCone52
+    100112: pCone53
+    100114: pCone6
+    100116: pCone7
+    100118: pCone8
+    100120: pCone9
+    100122: pCube2
+    100124: pCube3
+    100126: pCylinder1
+    100128: pPlane2
+    100130: pPlane3
+    100132: transform1
+    100134: transform10
+    100136: transform11
+    100138: transform12
+    100140: transform13
+    100142: transform14
+    100144: transform15
+    100146: transform16
+    100148: transform17
+    100150: transform18
+    100152: transform19
+    100154: transform2
+    100156: transform20
+    100158: transform21
+    100160: transform22
+    100162: transform23
+    100164: transform24
+    100166: transform25
+    100168: transform26
+    100170: transform27
+    100172: transform28
+    100174: transform29
+    100176: transform3
+    100178: transform30
+    100180: transform31
+    100182: transform32
+    100184: transform33
+    100186: transform34
+    100188: transform35
+    100190: transform36
+    100192: transform37
+    100194: transform38
+    100196: transform39
+    100198: transform4
+    100200: transform40
+    100202: transform41
+    100204: transform42
+    100206: transform43
+    100208: transform44
+    100210: transform45
+    100212: transform46
+    100214: transform47
+    100216: transform48
+    100218: transform49
+    100220: transform5
+    100222: transform50
+    100224: transform51
+    100226: transform52
+    100228: transform53
+    100230: transform54
+    100232: transform55
+    100234: transform56
+    100236: transform57
+    100238: transform6
+    100240: transform7
+    100242: transform8
+    100244: transform9
+    400000: //RootNode
+    400002: joint1
+    400004: joint2
+    400006: joint3
+    400008: joint4
+    400010: joint5
+    400012: joint6
+    400014: joint7
+    400016: pCone1
+    400018: pCone10
+    400020: pCone11
+    400022: pCone12
+    400024: pCone13
+    400026: pCone14
+    400028: pCone15
+    400030: pCone16
+    400032: pCone17
+    400034: pCone18
+    400036: pCone19
+    400038: pCone2
+    400040: pCone20
+    400042: pCone21
+    400044: pCone22
+    400046: pCone23
+    400048: pCone24
+    400050: pCone25
+    400052: pCone26
+    400054: pCone27
+    400056: pCone28
+    400058: pCone29
+    400060: pCone3
+    400062: pCone30
+    400064: pCone31
+    400066: pCone32
+    400068: pCone33
+    400070: pCone34
+    400072: pCone35
+    400074: pCone36
+    400076: pCone37
+    400078: pCone38
+    400080: pCone39
+    400082: pCone4
+    400084: pCone40
+    400086: pCone41
+    400088: pCone42
+    400090: pCone43
+    400092: pCone44
+    400094: pCone45
+    400096: pCone46
+    400098: pCone47
+    400100: pCone48
+    400102: pCone49
+    400104: pCone5
+    400106: pCone50
+    400108: pCone51
+    400110: pCone52
+    400112: pCone53
+    400114: pCone6
+    400116: pCone7
+    400118: pCone8
+    400120: pCone9
+    400122: pCube2
+    400124: pCube3
+    400126: pCylinder1
+    400128: pPlane2
+    400130: pPlane3
+    400132: transform1
+    400134: transform10
+    400136: transform11
+    400138: transform12
+    400140: transform13
+    400142: transform14
+    400144: transform15
+    400146: transform16
+    400148: transform17
+    400150: transform18
+    400152: transform19
+    400154: transform2
+    400156: transform20
+    400158: transform21
+    400160: transform22
+    400162: transform23
+    400164: transform24
+    400166: transform25
+    400168: transform26
+    400170: transform27
+    400172: transform28
+    400174: transform29
+    400176: transform3
+    400178: transform30
+    400180: transform31
+    400182: transform32
+    400184: transform33
+    400186: transform34
+    400188: transform35
+    400190: transform36
+    400192: transform37
+    400194: transform38
+    400196: transform39
+    400198: transform4
+    400200: transform40
+    400202: transform41
+    400204: transform42
+    400206: transform43
+    400208: transform44
+    400210: transform45
+    400212: transform46
+    400214: transform47
+    400216: transform48
+    400218: transform49
+    400220: transform5
+    400222: transform50
+    400224: transform51
+    400226: transform52
+    400228: transform53
+    400230: transform54
+    400232: transform55
+    400234: transform56
+    400236: transform57
+    400238: transform6
+    400240: transform7
+    400242: transform8
+    400244: transform9
+    4300000: pCone53
+    7400000: Take 001
+    9500000: //RootNode
+    11100000: //RootNode
+    13700000: pCone53
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Take 001
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 24
+      wrapMode: 2
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 1
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: joint1
+        weight: 1
+      - path: joint1/joint2
+        weight: 1
+      - path: joint1/joint2/joint3
+        weight: 1
+      - path: joint1/joint2/joint3/joint4
+        weight: 1
+      - path: joint1/joint2/joint3/joint4/joint5
+        weight: 1
+      - path: joint1/joint2/joint3/joint4/joint5/joint6
+        weight: 1
+      - path: joint1/joint2/joint3/joint4/joint5/joint6/joint7
+        weight: 1
+      - path: pCone1
+        weight: 1
+      - path: pCone1/transform38
+        weight: 1
+      - path: pCone2
+        weight: 1
+      - path: pCone2/transform37
+        weight: 1
+      - path: pCone3
+        weight: 1
+      - path: pCone3/transform36
+        weight: 1
+      - path: pCone4
+        weight: 1
+      - path: pCone4/transform35
+        weight: 1
+      - path: pCone5
+        weight: 1
+      - path: pCone5/transform34
+        weight: 1
+      - path: pCone6
+        weight: 1
+      - path: pCone6/transform33
+        weight: 1
+      - path: pCone7
+        weight: 1
+      - path: pCone7/transform32
+        weight: 1
+      - path: pCone8
+        weight: 1
+      - path: pCone8/transform31
+        weight: 1
+      - path: pCone9
+        weight: 1
+      - path: pCone9/transform30
+        weight: 1
+      - path: pCone10
+        weight: 1
+      - path: pCone10/transform29
+        weight: 1
+      - path: pCone11
+        weight: 1
+      - path: pCone11/transform28
+        weight: 1
+      - path: pCone12
+        weight: 1
+      - path: pCone12/transform27
+        weight: 1
+      - path: pCone13
+        weight: 1
+      - path: pCone13/transform26
+        weight: 1
+      - path: pCone14
+        weight: 1
+      - path: pCone14/transform25
+        weight: 1
+      - path: pCone15
+        weight: 1
+      - path: pCone15/transform24
+        weight: 1
+      - path: pCone16
+        weight: 1
+      - path: pCone16/transform23
+        weight: 1
+      - path: pCone17
+        weight: 1
+      - path: pCone17/transform22
+        weight: 1
+      - path: pCone18
+        weight: 1
+      - path: pCone18/transform21
+        weight: 1
+      - path: pCone19
+        weight: 1
+      - path: pCone19/transform20
+        weight: 1
+      - path: pCone20
+        weight: 1
+      - path: pCone20/transform19
+        weight: 1
+      - path: pCone21
+        weight: 1
+      - path: pCone21/transform18
+        weight: 1
+      - path: pCone22
+        weight: 1
+      - path: pCone22/transform17
+        weight: 1
+      - path: pCone23
+        weight: 1
+      - path: pCone23/transform16
+        weight: 1
+      - path: pCone24
+        weight: 1
+      - path: pCone24/transform15
+        weight: 1
+      - path: pCone25
+        weight: 1
+      - path: pCone25/transform14
+        weight: 1
+      - path: pCone26
+        weight: 1
+      - path: pCone26/transform13
+        weight: 1
+      - path: pCone27
+        weight: 1
+      - path: pCone27/transform12
+        weight: 1
+      - path: pCone28
+        weight: 1
+      - path: pCone28/transform11
+        weight: 1
+      - path: pCone29
+        weight: 1
+      - path: pCone29/transform10
+        weight: 1
+      - path: pCone30
+        weight: 1
+      - path: pCone30/transform9
+        weight: 1
+      - path: pCone31
+        weight: 1
+      - path: pCone31/transform8
+        weight: 1
+      - path: pCone32
+        weight: 1
+      - path: pCone32/transform7
+        weight: 1
+      - path: pCone33
+        weight: 1
+      - path: pCone33/transform6
+        weight: 1
+      - path: pCone34
+        weight: 1
+      - path: pCone34/transform5
+        weight: 1
+      - path: pCone35
+        weight: 1
+      - path: pCone35/transform4
+        weight: 1
+      - path: pCone36
+        weight: 1
+      - path: pCone36/transform3
+        weight: 1
+      - path: pCone37
+        weight: 1
+      - path: pCone37/transform52
+        weight: 1
+      - path: pCone38
+        weight: 1
+      - path: pCone38/transform51
+        weight: 1
+      - path: pCone39
+        weight: 1
+      - path: pCone39/transform50
+        weight: 1
+      - path: pCone40
+        weight: 1
+      - path: pCone40/transform49
+        weight: 1
+      - path: pCone41
+        weight: 1
+      - path: pCone41/transform48
+        weight: 1
+      - path: pCone42
+        weight: 1
+      - path: pCone42/transform47
+        weight: 1
+      - path: pCone43
+        weight: 1
+      - path: pCone43/transform46
+        weight: 1
+      - path: pCone44
+        weight: 1
+      - path: pCone44/transform45
+        weight: 1
+      - path: pCone45
+        weight: 1
+      - path: pCone45/transform44
+        weight: 1
+      - path: pCone46
+        weight: 1
+      - path: pCone46/transform43
+        weight: 1
+      - path: pCone47
+        weight: 1
+      - path: pCone47/transform42
+        weight: 1
+      - path: pCone48
+        weight: 1
+      - path: pCone48/transform41
+        weight: 1
+      - path: pCone49
+        weight: 1
+      - path: pCone49/transform40
+        weight: 1
+      - path: pCone50
+        weight: 1
+      - path: pCone50/transform39
+        weight: 1
+      - path: pCone51
+        weight: 1
+      - path: pCone51/transform55
+        weight: 1
+      - path: pCone52
+        weight: 1
+      - path: pCone52/transform57
+        weight: 1
+      - path: pCone53
+        weight: 1
+      - path: pCube2
+        weight: 1
+      - path: pCube2/transform2
+        weight: 1
+      - path: pCube3
+        weight: 1
+      - path: pCube3/transform56
+        weight: 1
+      - path: pCylinder1
+        weight: 1
+      - path: pCylinder1/transform1
+        weight: 1
+      - path: pPlane2
+        weight: 1
+      - path: pPlane2/transform53
+        weight: 1
+      - path: pPlane3
+        weight: 1
+      - path: pPlane3/transform54
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 25
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

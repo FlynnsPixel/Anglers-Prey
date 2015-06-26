@@ -11,15 +11,17 @@ public class Player {
 	private float angle = 90;
 	private float angle_accel = 0;
 
-	private Vector3 cam_pos;
 	private Camera cam;
+	private Vector3 cam_pos;
+	private Vector3 cam_euler_rota;
+	private float cam_angle = 90;
 
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
 	private const float max_speed = .2f;
-	private const float friction = .98f;
-	private const float angle_accel_speed = .4f;
+	private const float friction = .92f;
+	private const float angle_accel_speed = .1f;
 	private const float angle_friction = .95f;
 	private const float max_angle_accel = 4;
 
@@ -36,10 +38,11 @@ public class Player {
 		rota_euler.x = 0;
 		rota_euler.y = 0;
 		rota_euler.z = 0;
-		cam_pos = Camera.main.transform.position;
 		cam = Camera.main;
+		cam_pos = Camera.main.transform.position;
+		cam_euler_rota = Camera.main.transform.localEulerAngles;
 
-		player_light = Light.create(0, 0, 10, 1.5f, .6f, .7f, 1, 1, Light.LightType.VERTEX);
+		player_light = Light.create(0, 0, 15, 1.5f, .6f, .7f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(player_light);
 
 		for (int n = 0; n < 0; ++n) {
@@ -70,6 +73,7 @@ public class Player {
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
 		angle_accel *= angle_friction;
 		angle += angle_accel;
+		cam_angle -= (cam_angle - angle) / 40.0f;
 
 		rota.eulerAngles = rota_euler;
 		rota_euler.x -= angle_accel;
@@ -80,9 +84,11 @@ public class Player {
 		player.transform.position = pos;
 		player.transform.rotation = rota;
 
-		cam_pos.x -= (cam_pos.x - pos.x) / 20.0f;
-		cam_pos.z -= (cam_pos.z - pos.z) / 20.0f;
+		cam_euler_rota.y = -cam_angle - 90;
+		cam_pos.x -= (cam_pos.x - pos.x) / 10.0f;
+		cam_pos.z -= (cam_pos.z - pos.z) / 10.0f;
 		cam.transform.position = cam_pos;
+		cam.transform.localEulerAngles = cam_euler_rota;
 
 		if (Input.GetMouseButtonDown(0)) {
 			mouse_touched = true;
@@ -102,6 +108,7 @@ public class Player {
 			last_angle = target;
 
 			angle -= (angle - (target + angle_offset)) / 50.0f;
+			cam_angle -= (cam_angle - (target + angle_offset)) / 400.0f;
 			angle_accel = -(angle - (target + angle_offset)) / 50.0f;
 
 			float dist = Mathf.Sqrt(Mathf.Pow(mouse_touch_point.y - Input.mousePosition.y, 2) + Mathf.Pow(mouse_touch_point.x - Input.mousePosition.x, 2));

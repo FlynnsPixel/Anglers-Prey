@@ -51,9 +51,11 @@ public class Environment {
 		new_obj.gobj = GameObject.Instantiate(asset.gobj);
 
 		float m = Random.Range(0.0f, 1.0f);
-		new_obj.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
+		Vector3 scale = (asset.min_scale + ((asset.max_scale - asset.min_scale) * m)) * 1.25f;
+		new_obj.gobj.transform.localScale = scale;
 
 		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * (new_obj.gobj.transform.localScale.y / asset.gobj.transform.localScale.y);
+		pos.y -= 4;
 		new_obj.gobj.transform.position = pos;
 
 		//new_obj.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
