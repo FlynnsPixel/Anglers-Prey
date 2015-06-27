@@ -71,7 +71,6 @@ public class EnemyManager {
 		new_enemy.mesh.RecalculateBounds();
 		Bounds bounds = new_enemy.mesh.bounds;
 
-		if (asset == gulper_eel) Debug.Log(bounds.size.y);
 		pos.y -= bounds.size.y + 1;
 		new_enemy.gobj.transform.position = pos;
 

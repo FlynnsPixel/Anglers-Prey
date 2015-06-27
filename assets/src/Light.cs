@@ -261,7 +261,9 @@ public class Light {
 
 		num_vertex_lights = 0;
 		num_pixel_lights = 0;
-		Vector3 cam_pos = Camera.main.transform.position;
+
+		Glb.cam.reset_rota();
+		Vector3 cam_pos = Glb.cam.cam_pos;
 		cam_pos.y = 0;
 
 		//loop through all the lights
@@ -279,6 +281,7 @@ public class Light {
 				++num_vertex_lights;
 			}
 			if (light.set_to_remove) { lights.RemoveAt(i); light.set_to_remove = false; --i; }
+			//fully uncommented code for static light optimisation
 			//	if (light.get_type() == LightType.VERTEX) {
 			//		if (light.modified) {
 			//			//if any of the lights values have been modified, then draw a vertex circle with the lights attribs
@@ -330,5 +333,7 @@ public class Light {
 			light_data.Apply();
 			Glb.map.material.SetTexture("light_data", light_data);
 		}
+
+		Glb.cam.update();
 	}
 }
