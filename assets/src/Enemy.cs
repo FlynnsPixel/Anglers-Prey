@@ -86,13 +86,13 @@ public class Enemy {
 		last_angle = target;
 
 		angle -= (angle - (target + angle_offset)) / 50.0f;
-		angle_accel = -(angle - (target + angle_offset)) / 50.0f;
+		angle_accel = -(angle - (target + angle_offset)) / 150.0f;
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
 		angle_accel *= angle_friction;
 
 		rota_euler.x -= angle_accel * 4;
 		rota_euler.x -= rota_euler.x / 80.0f;
-		rota_euler.x = Mathf.Clamp(rota_euler.x, -45.0f, 45.0f);
+		rota_euler.x = Mathf.Clamp(rota_euler.x, -35.0f, 35.0f);
 		rota_euler.y = -angle + 180;
 
 		gobj.transform.localEulerAngles = rota_euler + init_rota;

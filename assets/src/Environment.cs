@@ -24,7 +24,7 @@ public class Environment {
 	private float total_spawn_rate = 0;
 
 	public void init() {
-		load_asset(ref rock, "env/rock", .5f, new Vector3(1, 1, 1), new Vector3(2.75f, 2.75f, 2.75f));
+		load_asset(ref rock, "env/rock", .5f, new Vector3(.7f, .7f, .7f), new Vector3(2.75f, 2.75f, 2.75f));
 		load_asset(ref coral, "env/coral", .2f, new Vector3(.4f, .4f, .4f), new Vector3(.5f, .5f, .5f));
 	}
 
@@ -54,14 +54,13 @@ public class Environment {
 		Vector3 scale = (asset.min_scale + ((asset.max_scale - asset.min_scale) * m)) * 1.25f;
 		new_obj.gobj.transform.localScale = scale;
 
-		pos.y -= asset.gobj.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * (new_obj.gobj.transform.localScale.y / asset.gobj.transform.localScale.y);
-		pos.y -= 4;
+		pos.y -= 20;
 		new_obj.gobj.transform.position = pos;
 
-		//new_obj.gobj.transform.Rotate(0, Random.Range(0, 360), 0);
+		Vector3 rota = new_obj.gobj.transform.localEulerAngles;
+		rota.y = Random.Range(0, 360);
+		new_obj.gobj.transform.localEulerAngles = rota;
 
 		spawned_objs.Add(new_obj);
-
-		if (asset == coral) Light.lights.Add(new_obj.light = Light.create(pos.x, pos.z, 5, 1, .5f, .25f, 1, 1));
 	}
 }

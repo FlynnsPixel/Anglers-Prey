@@ -22,14 +22,16 @@ public class Player {
 	private float accel_speed_init;
 	private float max_rota_init;
 
-	private const float FRICTION = .92f;
-	private const float ROTA_ACCEL_SPEED = .1f;
-	private const float ROTA_FRICTION = .95f;
+	public const float FRICTION = .92f;
+	public const float ROTA_ACCEL_SPEED = .1f;
+	public const float ROTA_FRICTION = .95f;
 
 	private float angle_offset = 0;
 	private float last_angle = 0;
 
-	private Light player_light;
+	public Light light;
+	public const float INIT_LIGHT_SIZE = 18;
+	public const float INIT_LIGHT_INTENSITY = 1.5f;
 
 	private bool dashing = false;
 	private int dash_timer = 0;
@@ -45,8 +47,8 @@ public class Player {
 		accel_speed_init = accel_speed;
 		max_rota_init = max_rota;
 
-		player_light = Light.create(0, 0, 15, 1.5f, .6f, .7f, 1, 1, Light.LightType.VERTEX);
-		Light.lights.Add(player_light);
+		light = Light.create(0, 0, INIT_LIGHT_SIZE, INIT_LIGHT_INTENSITY, .6f, .7f, 1, 1, Light.LightType.VERTEX);
+		Light.lights.Add(light);
 
 		for (int n = 0; n < 0; ++n) {
 			Light.lights.Add(Light.create(Random.Range(-20.0f, 20.0f), Random.Range(-20.0f, 20.0f), 
@@ -56,7 +58,7 @@ public class Player {
 	}
 
 	public void update() {
-		player_light.set_pos(player.transform.position.x, player.transform.position.z);
+		light.set_pos(player.transform.position.x, player.transform.position.z);
 
 		if (Input.GetKey(KeyCode.W)) {
 			accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN * accel_speed;

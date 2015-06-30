@@ -53,8 +53,12 @@ class LeapListener : Listener {
 				Vector direction = hand.Direction;
 
 				// Calculate the hand's pitch, roll, and yaw angles
-				float r = Mathf.Clamp(normal.Roll / Math.RADIAN, -45, 45) / 450.0f;
+				float r = Mathf.Clamp(normal.Roll / Math.RADIAN, -45, 45) / (45.0f / Player.ROTA_ACCEL_SPEED);
 				Glb.player.angle_accel += r;
+
+				float scale_y = Mathf.Clamp((hand.PalmPosition.y - 100) / 20.0f, 0, 1);
+				Glb.player.light.set_attribs(scale_y * Player.INIT_LIGHT_SIZE, 
+											 scale_y * Player.INIT_LIGHT_INTENSITY);
 			}
 		//}
 	}
