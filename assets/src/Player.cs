@@ -9,7 +9,7 @@ public class Player {
 	public Quaternion rota;
 	public Vector3 rota_euler;
 	private float angle = 90;
-	private float angle_accel = 0;
+	public float angle_accel = 0;
 	private float cam_angle = 90;
 
 	private bool mouse_touched = false;

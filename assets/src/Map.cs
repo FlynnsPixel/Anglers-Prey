@@ -27,6 +27,7 @@ public class Map {
 		rect.height = map.transform.localScale.z;
 
 		material = map.GetComponent<Renderer>().material;
+
 		width = mesh.bounds.size.x * rect.width;
 		height = mesh.bounds.size.z * rect.height;
 		half_width = width / 2.0f;
@@ -79,6 +80,8 @@ public class Map {
 		}
 		mesh.vertices = vertices;
 		mesh.SetIndices(indices, MeshTopology.Triangles, 0);
+
+		mesh.RecalculateBounds();
 	}
 
 	public void update() {
