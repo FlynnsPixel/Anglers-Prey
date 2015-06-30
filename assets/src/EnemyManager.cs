@@ -68,7 +68,7 @@ public class EnemyManager {
 		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
 		float m = Random.Range(0.0f, 1.0f);
-		if (blurred_enemy) m *= Random.Range(12.0f, 18.0f);
+		if (blurred_enemy) m = Random.Range(12.0f, 18.0f);
 		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
 		GameObject mesh_obj = null;
@@ -80,6 +80,24 @@ public class EnemyManager {
 
 		if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
 
+		//gen 0-1 value in exactly 2 channels
+		Vector3 colour_vec = Vector3.zero;
+		float rand = Random.Range(0, 3);
+
+		if (rand == 0) colour_vec.x = Random.Range(0.0f, 1.0f); 
+		else if (rand == 1) colour_vec.y = Random.Range(0.0f, 1.0f); 
+		else if (rand == 2) colour_vec.z = Random.Range(0.0f, 1.0f);
+
+		rand += Random.Range(1, 3);
+		rand = rand % 3;
+
+		if (rand == 0) colour_vec.x = Random.Range(0.0f, 1.0f); 
+		else if (rand == 1) colour_vec.y = Random.Range(0.0f, 1.0f); 
+		else if (rand == 2) colour_vec.z = Random.Range(0.0f, 1.0f);
+
+		Color colour = new Color(colour_vec.x * 255.0f, colour_vec.y * 255.0f, colour_vec.z * 255.0f);
+		mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", colour);
+
 		//position enemy
 		pos.y -= s.z;
 		if (blurred_enemy) pos.y -= 4;
@@ -88,15 +106,16 @@ public class EnemyManager {
 		//init and apply light
 		new_enemy.init();
 
+		float size = Mathf.Max(s.x, s.y);
 		float intensity = .75f;
-		if (blurred_enemy) intensity = .4f;
+		if (blurred_enemy) { intensity = .55f; size = size / 4.0f; }
 
 		if (asset == chimaera)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, .1f, 1, .5f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
 		else if (asset == bio_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, 1, .1f, .5f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
 		else if (asset == gulper_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, .2f, .75f, .7f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
 
 		enemies.Add(new_enemy);
 	}
