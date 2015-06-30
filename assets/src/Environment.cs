@@ -51,10 +51,10 @@ public class Environment {
 		new_obj.gobj = GameObject.Instantiate(asset.gobj);
 
 		float m = Random.Range(0.0f, 1.0f);
-		Vector3 scale = (asset.min_scale + ((asset.max_scale - asset.min_scale) * m)) * 1.25f;
+		Vector3 scale = (asset.min_scale + ((asset.max_scale - asset.min_scale) * m)) * 2;
 		new_obj.gobj.transform.localScale = scale;
 
-		pos.y -= 20;
+		pos.y -= 45;
 		new_obj.gobj.transform.position = pos;
 
 		Vector3 rota = new_obj.gobj.transform.localEulerAngles;

@@ -13,7 +13,7 @@ public class Enemy {
 
 	private Vector3 accel;
 	private float angle_dest = 0;
-	private const float max_speed = .1f;
+	private const float max_speed = .04f;
 	private Vector3 init_pos;
 
 	private float angle = 0;

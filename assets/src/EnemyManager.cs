@@ -20,14 +20,14 @@ public class EnemyManager {
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
 	private const int SPAWN_RATE = 10;
-	private const int MAX_ENEMIES = 10;
+	private const int MAX_ENEMIES = 20;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, .5f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .8f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .5f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
+		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
 		spawn_radius = Glb.map.width / 2;
 	}
 
@@ -68,7 +68,7 @@ public class EnemyManager {
 		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
 		float m = Random.Range(0.0f, 1.0f);
-		if (blurred_enemy) m = Random.Range(12.0f, 18.0f);
+		if (blurred_enemy) m = Random.Range(15.0f, 25.0f);
 		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
 		GameObject mesh_obj = null;
@@ -100,7 +100,7 @@ public class EnemyManager {
 
 		//position enemy
 		pos.y -= s.z;
-		if (blurred_enemy) pos.y -= 4;
+		if (blurred_enemy) pos.y -= 2;
 		new_enemy.gobj.transform.position = pos;
 
 		//init and apply light
@@ -108,7 +108,7 @@ public class EnemyManager {
 
 		float size = Mathf.Max(s.x, s.y);
 		float intensity = .75f;
-		if (blurred_enemy) { intensity = .55f; size = size / 4.0f; }
+		if (blurred_enemy) { intensity = .75f; size = size / 2.0f; }
 
 		if (asset == chimaera)
 			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));

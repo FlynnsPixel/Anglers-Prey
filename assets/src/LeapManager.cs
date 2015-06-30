@@ -42,25 +42,30 @@ class LeapListener : Listener {
 		// Get the most recent frame and report some basic information
 		Frame frame = controller.Frame();
 
-		//++a;
-		//if (a > 40) {
-		//	a = 0;
-			foreach (Hand hand in frame.Hands) {
-				//Debug.Log("Hand id: " + hand.Id
-				//			+ ", palm position: " + hand.PalmPosition);
-				// Get the hand's normal vector and direction
-				Vector normal = hand.PalmNormal;
-				Vector direction = hand.Direction;
+		if (!Glb.player.dashing) {
+			//++a;
+			//if (a > 40) {
+			//	a = 0;
+				foreach (Hand hand in frame.Hands) {
+					//Debug.Log("Hand id: " + hand.Id
+					//			+ ", palm position: " + hand.PalmPosition);
+					// Get the hand's normal vector and direction
+					Vector normal = hand.PalmNormal;
+					Vector direction = hand.Direction;
 
-				// Calculate the hand's pitch, roll, and yaw angles
-				float r = Mathf.Clamp(normal.Roll / Math.RADIAN, -45, 45) / (45.0f / Player.ROTA_ACCEL_SPEED);
-				Glb.player.angle_accel += r;
+					// Calculate the hand's pitch, roll, and yaw angles
+					float r = Mathf.Clamp(normal.Roll / Math.RADIAN, -45, 45) / (45.0f / Player.ROTA_ACCEL_SPEED);
+					Glb.player.angle_accel += r;
 
-				float scale_y = Mathf.Clamp((hand.PalmPosition.y - 100) / 20.0f, 0, 1);
-				Glb.player.light.set_attribs(scale_y * Player.INIT_LIGHT_SIZE, 
-											 scale_y * Player.INIT_LIGHT_INTENSITY);
-			}
-		//}
+					float p = normal.Pitch / Math.RADIAN;
+					if (p >= -25 && p <= 0) Glb.player.dash();
+
+					float scale_z = 1 - Mathf.Clamp((-hand.PalmPosition.z + 40) / 50.0f, 0, 1);
+					Glb.player.light.set_attribs(Mathf.Max(scale_z * Player.INIT_LIGHT_SIZE, 8.0f), 
+												 Mathf.Max(scale_z * Player.INIT_LIGHT_INTENSITY, .25f));
+				}
+			//}
+		}
 	}
 }
 

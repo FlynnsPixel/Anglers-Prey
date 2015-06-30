@@ -33,9 +33,10 @@ public class Player {
 	public const float INIT_LIGHT_SIZE = 18;
 	public const float INIT_LIGHT_INTENSITY = 1.5f;
 
-	private bool dashing = false;
+	public bool dashing = false;
 	private int dash_timer = 0;
-	private int dash_rate = 200;
+	private int dash_length = 50;
+	private float dash_angle = 0;
 
 	public void init() {
 		player = GameObject.Find("player");
@@ -60,25 +61,29 @@ public class Player {
 	public void update() {
 		light.set_pos(player.transform.position.x, player.transform.position.z);
 
-		if (Input.GetKey(KeyCode.W)) {
-			accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN * accel_speed;
-			accel.y -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN * accel_speed;
-			accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
-			accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
-		}
+		//if (Input.GetKey(KeyCode.W)) {
+		accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN * accel_speed;
+		accel.y -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN * accel_speed;
+		accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
+		accel.y = Mathf.Clamp(accel.y, -max_speed, max_speed);
 		accel *= FRICTION;
 		pos.x += accel.x;
 		pos.z += accel.y;
 
-		if (Input.GetKey(KeyCode.A)) {
-			angle_accel += ROTA_ACCEL_SPEED;
-		}else if (Input.GetKey(KeyCode.D)) {
-			angle_accel -= ROTA_ACCEL_SPEED;
+		if (!dashing) {
+			if (Input.GetKey(KeyCode.A)) {
+				angle_accel += ROTA_ACCEL_SPEED;
+			}else if (Input.GetKey(KeyCode.D)) {
+				angle_accel -= ROTA_ACCEL_SPEED;
+			}
 		}
 		angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
 		angle_accel *= ROTA_FRICTION;
 		angle += angle_accel;
-		cam_angle -= (cam_angle - angle) / 25.0f;
+		if (dashing)
+			cam_angle -= (cam_angle - angle) / 10.0f;
+		else
+			cam_angle -= (cam_angle - angle) / 25.0f;
 		Glb.cam.cam_rota.y = -cam_angle - 90;
 
 		rota.eulerAngles = rota_euler;
@@ -94,7 +99,7 @@ public class Player {
 			mouse_touched = true;
 			float dist_x = Mathf.Clamp((Input.mousePosition.x - (Screen.width / 2)) / 100.0f, -max_rota, max_rota);
 			float dist_y = Mathf.Clamp((Input.mousePosition.y - (Screen.height / 2)) / 200.0f, 0, 1);
-			angle_accel = -dist_x;
+			if (!dashing) angle_accel = -dist_x;
 
 			accel.x -= (Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN) * dist_y;
 			accel.y -= (Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN) * dist_y;
@@ -106,21 +111,26 @@ public class Player {
 
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			if (!dashing) {
-				dashing = true;
-				dash_timer = 0;
-				max_speed *= 2;
-				accel_speed *= 2;
-				max_rota *= 5;
+				dash();
 			}
 		}
 		if (dashing) {
 			++dash_timer;
-			if (dash_timer > dash_rate) {
+			if (dash_timer > dash_length) {
 				dashing = false;
 				max_speed = max_speed_init;
 				accel_speed = accel_speed_init;
 				max_rota = max_rota_init;
 			}
 		}
+	}
+
+	public void dash() {
+		dashing = true;
+		dash_timer = 0;
+		max_speed *= 2;
+		accel_speed *= 2;
+		max_rota *= 5;
+		dash_angle = angle;
 	}
 }
