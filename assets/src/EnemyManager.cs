@@ -6,7 +6,7 @@ public class EnemyAsset {
 	public GameObject gobj = null;
 	public GameObject mesh = null;
 	public float spawn_rate = 0;
-	public float large_spawn_rate = 0;
+	public float blurred_spawn_rate = 0;
 	public Vector3 min_scale;
 	public Vector3 max_scale;
 }
@@ -25,13 +25,13 @@ public class EnemyManager {
 	private float spawn_radius;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, 1, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, 1, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, 1, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
+		load_asset(ref chimaera, "enemies/chimaera", .5f, .5f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .8f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .5f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
 		spawn_radius = Glb.map.width / 2;
 	}
 
-	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float large_spawn_rate, Vector3 min_scale, Vector3 max_scale) {
+	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale) {
 		obj = new EnemyAsset();
 		obj.gobj = (GameObject)Resources.Load(name);
 		foreach (Transform child in obj.gobj.transform) {
@@ -42,7 +42,7 @@ public class EnemyManager {
 		obj.max_scale = max_scale;
 		total_spawn_rate += spawn_rate;
 		obj.spawn_rate = total_spawn_rate;
-		obj.large_spawn_rate = large_spawn_rate;
+		obj.blurred_spawn_rate = blurred_spawn_rate;
 		assets.Add(obj);
 	}
 
@@ -65,10 +65,10 @@ public class EnemyManager {
 		new_enemy.ai_type = type;
 
 		//scale enemy
-		bool large_enemy = Random.value < asset.large_spawn_rate;
+		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
 		float m = Random.Range(0.0f, 1.0f);
-		if (large_enemy) m += 8;
+		if (blurred_enemy) m *= Random.Range(12.0f, 18.0f);
 		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
 		GameObject mesh_obj = null;
@@ -78,22 +78,25 @@ public class EnemyManager {
 		new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
 		Vector3 s = Vector3.Scale(new_enemy.mesh.bounds.size, new_enemy.gobj.transform.localScale);
 
-		if (large_enemy) mesh_obj.layer = 8;
+		if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
 
 		//position enemy
-		pos.y -= s.z + 1;
-		if (large_enemy) pos.y -= 4;
+		pos.y -= s.z;
+		if (blurred_enemy) pos.y -= 4;
 		new_enemy.gobj.transform.position = pos;
 
 		//init and apply light
 		new_enemy.init();
 
+		float intensity = .75f;
+		if (blurred_enemy) intensity = .4f;
+
 		if (asset == chimaera)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y) / 2.0f, .75f, .1f, 1, .5f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, .1f, 1, .5f, 1));
 		else if (asset == bio_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y) / 2.0f, .75f, 1, .1f, .5f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, 1, .1f, .5f, 1));
 		else if (asset == gulper_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y) / 2.0f, .75f, .2f, .75f, .7f, 1));
+			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, Mathf.Max(s.x, s.y), intensity, .2f, .75f, .7f, 1));
 
 		enemies.Add(new_enemy);
 	}
