@@ -12,12 +12,17 @@ public class Player {
 	public float angle_accel = 0;
 	private float cam_angle = 90;
 
+	public const float MAX_ENERGY = 400;
+	private float energy = MAX_ENERGY;
+	private float light_size = 0;
+	private float light_intensity = 0;
+
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
 	private float max_speed = .15f;
 	private float accel_speed = 1;
-	private float max_rota = 1;
+	private float max_rota = 2.0f;
 	private float max_speed_init;
 	private float accel_speed_init;
 	private float max_rota_init;
@@ -41,7 +46,7 @@ public class Player {
 	public void init() {
 		player = GameObject.Find("player");
 		pos = player.transform.position;
-		pos.y = -1.5f;
+		pos.y = -2.0f;
 		rota = player.transform.rotation;
 
 		max_speed_init = max_speed;
@@ -60,6 +65,9 @@ public class Player {
 
 	public void update() {
 		light.set_pos(player.transform.position.x, player.transform.position.z);
+		light_size -= (light_size - ((energy / MAX_ENERGY) * INIT_LIGHT_SIZE)) / 20.0f;
+		light_intensity -= (light_intensity - ((energy / MAX_ENERGY) * INIT_LIGHT_INTENSITY)) / 20.0f;
+		light.set_attribs(light_size, light_intensity);
 
 		//if (Input.GetKey(KeyCode.W)) {
 		accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN * accel_speed;
@@ -76,6 +84,9 @@ public class Player {
 			}else if (Input.GetKey(KeyCode.D)) {
 				angle_accel -= ROTA_ACCEL_SPEED;
 			}
+		}else {
+			calc_dash_angle();
+			set_energy(energy - .5f);
 		}
 		angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
 		angle_accel *= ROTA_FRICTION;
@@ -88,9 +99,10 @@ public class Player {
 
 		rota.eulerAngles = rota_euler;
 		rota_euler.x -= angle_accel;
-		rota_euler.x = Mathf.Clamp(rota_euler.x, 45, 135);
-		rota_euler.x -= (rota_euler.x - 90) / 20.0f;
+		rota_euler.x = Mathf.Clamp(rota_euler.x, -45, 45);
+		rota_euler.x -= (rota_euler.x) / 20.0f;
 		rota_euler.y = -angle;
+		rota_euler.z = 0;
 
 		player.transform.position = pos;
 		player.transform.rotation = rota;
@@ -131,6 +143,32 @@ public class Player {
 		max_speed *= 2;
 		accel_speed *= 2;
 		max_rota *= 5;
-		dash_angle = angle;
+		calc_dash_angle();
 	}
+
+	public void calc_dash_angle() {
+		float min_dist = 9999;
+		Enemy closest_e = null;
+		float closest_e_angle = 0;
+		foreach (Enemy e in Glb.em.enemies) {
+			if (!e.blurred_enemy && !e.blood_state && !e.to_be_removed && e.player_dist < 5 && e.player_dist < min_dist) { 
+				float e_angle = Mathf.Atan2(pos.z - e.gobj.transform.position.z, pos.x - e.gobj.transform.position.x) / Math.RADIAN;
+				float a = (angle % 360) - e_angle;
+				if (a > -67.0f && a < 67.0f) {
+					closest_e = e; min_dist = e.player_dist; closest_e_angle = angle - a;
+				}
+			}
+		}
+		if (closest_e != null) {
+			angle = closest_e_angle;
+			dash_angle = angle;
+			angle_accel = 0;
+		}
+	}
+
+	public void set_energy(float e) {
+		energy = Mathf.Clamp(e, 0, MAX_ENERGY);
+	}
+
+	public float get_energy() { return energy; }
 }

@@ -4,12 +4,14 @@ using UnityEngine;
 public class Enemy {
 
 	public GameObject gobj = null;
+	public EnemyAsset asset = null;
 	public Mesh mesh = null;
 	public Light light = null;
 	public bool light_removed = false;
 	public bool to_be_removed = false;
 	public int ai_type;
 	public bool blurred_enemy = false;
+	public float player_dist = 9999;
 
 	private Vector3 accel;
 	private float angle_dest = 0;
@@ -50,6 +52,7 @@ public class Enemy {
 		GameObject.Destroy(gobj);
 		gobj = null;
 		light_removed = false;
+		Glb.player.set_energy(Glb.player.get_energy() + asset.energy_gain);
 	}
 
 	public void update() {
@@ -68,10 +71,10 @@ public class Enemy {
 			}
 			return;
 		}
-
-		float dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
-		if (dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (!blurred_enemy && dist < 3) { create_blood_state(); return; }
+		
+		player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
+		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
+		if (!blurred_enemy && player_dist < 3) { create_blood_state(); return; }
 
 		if (light != null) light.set_pos(gobj.transform.position.x, gobj.transform.position.z);
 

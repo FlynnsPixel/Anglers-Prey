@@ -9,6 +9,7 @@ public class EnemyAsset {
 	public float blurred_spawn_rate = 0;
 	public Vector3 min_scale;
 	public Vector3 max_scale;
+	public float energy_gain;
 }
 
 public class EnemyManager {
@@ -25,13 +26,13 @@ public class EnemyManager {
 	private float spawn_radius;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f));
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f));
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1));
+		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f), 100);
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f), 120);
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1), 80);
 		spawn_radius = Glb.map.width / 2;
 	}
 
-	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale) {
+	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale, float energy_gain) {
 		obj = new EnemyAsset();
 		obj.gobj = (GameObject)Resources.Load(name);
 		foreach (Transform child in obj.gobj.transform) {
@@ -43,6 +44,7 @@ public class EnemyManager {
 		total_spawn_rate += spawn_rate;
 		obj.spawn_rate = total_spawn_rate;
 		obj.blurred_spawn_rate = blurred_spawn_rate;
+		obj.energy_gain = energy_gain;
 		assets.Add(obj);
 	}
 
@@ -58,6 +60,7 @@ public class EnemyManager {
 		//create enemy class and object
 		Enemy new_enemy = new Enemy();
 		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
+		new_enemy.asset = asset;
 
 		//ai type
 		int type = Random.Range(1, 2);
@@ -108,7 +111,7 @@ public class EnemyManager {
 
 		float size = Mathf.Max(s.x, s.y);
 		float intensity = .75f;
-		if (blurred_enemy) { intensity = .75f; size = size / 2.0f; }
+		if (blurred_enemy) { intensity = .55f; size = size / 3.0f; }
 
 		if (asset == chimaera)
 			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
