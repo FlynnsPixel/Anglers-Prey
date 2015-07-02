@@ -56,11 +56,11 @@ public class Player {
 		light = Light.create(0, 0, INIT_LIGHT_SIZE, INIT_LIGHT_INTENSITY, .6f, .7f, 1, 1, Light.LightType.VERTEX);
 		Light.lights.Add(light);
 
-		for (int n = 0; n < 0; ++n) {
-			Light.lights.Add(Light.create(Random.Range(-20.0f, 20.0f), Random.Range(-20.0f, 20.0f), 
-				Random.Range(5.0f, 15.0f), Random.Range(.2f, .75f), 
-				Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f, Light.LightType.VERTEX));
+		Animation ani = null;
+		foreach (Transform child in player.transform) {
+			if (child.name.IndexOf("ani") != -1) { ani = child.gameObject.GetComponent<Animation>(); break; }
 		}
+		ani["swim"].speed = 5;
 	}
 
 	public void update() {
@@ -86,7 +86,7 @@ public class Player {
 			}
 		}else {
 			calc_dash_angle();
-			set_energy(energy - .5f);
+			set_energy(energy - 1);
 		}
 		angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
 		angle_accel *= ROTA_FRICTION;
