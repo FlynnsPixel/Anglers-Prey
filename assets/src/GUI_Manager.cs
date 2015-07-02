@@ -25,7 +25,18 @@ public class GUI_Manager : MonoBehaviour {
 	Rect rstats_rect;
 	Texture rstats_texture;
 
+	GUIStyle timer_style = new GUIStyle();
+	Rect timer_rect;
+	int timer = 0;
+
 	void Start() {
+		time_texture = Resources.Load("textures/time_gui") as Texture;
+		rstats_texture = Resources.Load("textures/rstats_gui") as Texture;
+
+		float w = time_texture.width;
+		time_rect = new Rect(0, 0, w, time_texture.height);
+		rstats_rect = new Rect(Screen.width - w, 0, w, rstats_texture.height);
+
 		int s_w = Screen.width, s_h = Screen.height;
 		
 		debug_rect = new Rect(0, time_texture.height, s_w, (s_h * 2) / 100);
@@ -33,17 +44,15 @@ public class GUI_Manager : MonoBehaviour {
 		debug_style.fontSize = (s_h * 2) / 80;
 		debug_style.normal.textColor = new Color(1, 1, 1, 1);
 
-		time_texture = Resources.Load("textures/time_gui") as Texture;
-		rstats_texture = Resources.Load("textures/rstats_gui") as Texture;
-
-		float w = time_texture.width;
-		time_rect = new Rect(0, 0, w, time_texture.height);
-		rstats_rect = new Rect(Screen.width - w, 0, w, rstats_texture.height);
+		timer_rect = new Rect(20, 10, time_texture.width, time_texture.height);
+		timer_style.alignment = TextAnchor.UpperLeft;
+		timer_style.fontSize = (int)(time_texture.height / 2.0f);
+		timer_style.normal.textColor = new Color(1, 1, 1, 1);
 	}
 
 	void Update() {
 		d_time += (Time.deltaTime - d_time) * .1f;
-		if (Input.GetKeyDown(KeyCode.H)) debug_stats_active = true;
+		if (Input.GetKeyDown(KeyCode.H)) debug_stats_active = !debug_stats_active;
 	}
 
 	void OnGUI() {
@@ -70,5 +79,17 @@ public class GUI_Manager : MonoBehaviour {
 			text += "Leap connected: " + LeapManager.connected + "\n";
 			GUI.Label(debug_rect, text, debug_style);
 		}
+
+		string timer_str = "";
+		timer_str += (int)(Time.realtimeSinceStartup / 60.0f);
+		timer_str += ":";
+		string time_seconds = System.Convert.ToString((int)(Time.realtimeSinceStartup % 60));
+		if (time_seconds.Length == 1) time_seconds = "0" + time_seconds;
+		timer_str += time_seconds;
+		timer_str += ":";
+		string time_ms = System.Convert.ToString((int)((Time.realtimeSinceStartup % 1.0f) * 100));
+		timer_str += time_ms;
+
+		GUI.Label(timer_rect, timer_str, timer_style);
 	}
 }
