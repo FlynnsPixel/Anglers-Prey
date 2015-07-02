@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GUI_Manager : MonoBehaviour {
+public class GUI_Manager {
 
 	float d_time = 0;
 
@@ -32,8 +32,12 @@ public class GUI_Manager : MonoBehaviour {
 	GUIStyle rstats_style = new GUIStyle();
 	Rect rstats_rect;
 	int rstats = 0;
+	float rstats_scale = 1;
+	float rstats_dest_scale = 1;
+	int rstats_font_size = 1;
+	float rstats_scale_accel = 0;
 
-	void Start() {
+	public void init() {
 		time_texture = Resources.Load("textures/time_gui") as Texture;
 		rstats_texture = Resources.Load("textures/rstats_gui") as Texture;
 
@@ -56,19 +60,19 @@ public class GUI_Manager : MonoBehaviour {
 		timer_style.normal.textColor = new Color(1, 1, 1, 1);
 		timer_style.font = gui_font;
 
-		rstats_rect = new Rect((time_gui_rect.width / 2.0f) - 125, (time_gui_rect.height / 2.0f) - 40, rstats_rect.width, rstats_rect.height);
+		rstats_rect = new Rect(rstats_gui_rect.x + ((rstats_gui_rect.width / 2.0f) - 50), (rstats_gui_rect.height / 2.0f) - 40, rstats_rect.width, rstats_rect.height);
 		rstats_style.alignment = TextAnchor.UpperLeft;
-		rstats_style.fontSize = (int)(time_texture.height / 2.0f);
+		rstats_style.fontSize = (rstats_font_size = (int)(rstats_texture.height / 2.0f));
 		rstats_style.normal.textColor = new Color(1, 1, 1, 1);
 		rstats_style.font = gui_font;
 	}
 
-	void Update() {
+	public void update() {
 		d_time += (Time.deltaTime - d_time) * .1f;
 		if (Input.GetKeyDown(KeyCode.H)) debug_stats_active = !debug_stats_active;
 	}
 
-	void OnGUI() {
+	public void update_gui() {
 		GUI.DrawTexture(time_gui_rect, time_texture);
 		GUI.DrawTexture(rstats_gui_rect, rstats_texture);
 
@@ -103,11 +107,19 @@ public class GUI_Manager : MonoBehaviour {
 		string time_ms = System.Convert.ToString((int)((Time.realtimeSinceStartup % 1.0f) * 100));
 		timer_str += time_ms;
 
-		timer_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad / 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
+		timer_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad * 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
 		GUI.Label(timer_rect, timer_str, timer_style);
 
-		string rstats_str = "0";
-		rstats_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad / 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
+		string rstats_str = Glb.em.fish_eaten + "  eaten";
+		rstats_style.normal.textColor = new Color(Mathf.Sin((Time.timeSinceLevelLoad + 40) / 2.0f), .5f, .5f + (Mathf.Cos((Time.timeSinceLevelLoad + 40) * 2.0f) / 2.0f), 1);
+		rstats_scale_accel = Mathf.Clamp((rstats_scale - rstats_dest_scale) / 10.0f, 0, .1f);
+		rstats_scale += rstats_scale_accel;
+		if (rstats_scale >= rstats_dest_scale - .01f) rstats_dest_scale = 1;
+		rstats_style.fontSize = (int)(rstats_font_size * rstats_scale);
 		GUI.Label(rstats_rect, rstats_str, rstats_style);
+	}
+
+	public void scale_rstats() {
+		rstats_dest_scale = 2;
 	}
 }

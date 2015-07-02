@@ -24,6 +24,7 @@ public class EnemyManager {
 	private const int MAX_ENEMIES = 20;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
+	public int fish_eaten = 0;
 
 	public void init() {
 		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f), 100);

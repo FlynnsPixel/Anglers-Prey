@@ -52,7 +52,10 @@ public class Enemy {
 		GameObject.Destroy(gobj);
 		gobj = null;
 		light_removed = false;
+
 		Glb.player.set_energy(Glb.player.get_energy() + asset.energy_gain);
+		++Glb.em.fish_eaten;
+		Glb.gui.scale_rstats();
 	}
 
 	public void update() {
