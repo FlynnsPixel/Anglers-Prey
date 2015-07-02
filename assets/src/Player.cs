@@ -8,9 +8,9 @@ public class Player {
 	public Vector2 accel;
 	public Quaternion rota;
 	public Vector3 rota_euler;
-	private float angle = 90;
+	public float angle = 90;
 	public float angle_accel = 0;
-	private float cam_angle = 90;
+	public float cam_angle = 90;
 
 	public const float MAX_ENERGY = 400;
 	private float energy = MAX_ENERGY;
@@ -20,14 +20,14 @@ public class Player {
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-	private float max_speed = .15f;
-	private float accel_speed = 1;
+	private float max_speed = 4;
+	private float accel_speed = .1f;
 	private float max_rota = 2.0f;
 	private float max_speed_init;
 	private float accel_speed_init;
 	private float max_rota_init;
 
-	public const float FRICTION = .92f;
+	public const float FRICTION = .98f;
 	public const float ROTA_ACCEL_SPEED = .1f;
 	public const float ROTA_FRICTION = .95f;
 
@@ -37,6 +37,7 @@ public class Player {
 	public Light light;
 	public const float INIT_LIGHT_SIZE = 18;
 	public const float INIT_LIGHT_INTENSITY = 1.5f;
+	public bool light_off = false;
 
 	public bool dashing = false;
 	private int dash_timer = 0;
@@ -65,8 +66,13 @@ public class Player {
 
 	public void update() {
 		light.set_pos(player.transform.position.x, player.transform.position.z);
-		light_size -= (light_size - ((energy / MAX_ENERGY) * INIT_LIGHT_SIZE)) / 20.0f;
-		light_intensity -= (light_intensity - ((energy / MAX_ENERGY) * INIT_LIGHT_INTENSITY)) / 20.0f;
+		if (light_off) {
+			light_size -= (light_size - 5) / 2.0f;
+			light_intensity -= (light_intensity - .1f) / 2.0f;
+		}else {
+			light_size -= (light_size - ((energy / MAX_ENERGY) * INIT_LIGHT_SIZE)) / 20.0f;
+			light_intensity -= (light_intensity - ((energy / MAX_ENERGY) * INIT_LIGHT_INTENSITY)) / 20.0f;
+		}
 		light.set_attribs(light_size, light_intensity);
 
 		//if (Input.GetKey(KeyCode.W)) {
@@ -77,6 +83,8 @@ public class Player {
 		accel *= FRICTION;
 		pos.x += accel.x;
 		pos.z += accel.y;
+
+		if (Input.GetKeyDown(KeyCode.Q) || Input.GetMouseButtonDown(2)) light_off = !light_off;
 
 		if (!dashing) {
 			if (Input.GetKey(KeyCode.A)) {
@@ -140,8 +148,8 @@ public class Player {
 	public void dash() {
 		dashing = true;
 		dash_timer = 0;
-		max_speed *= 2;
-		accel_speed *= 2;
+		max_speed *= 8;
+		accel_speed *= 8;
 		max_rota *= 5;
 		calc_dash_angle();
 	}

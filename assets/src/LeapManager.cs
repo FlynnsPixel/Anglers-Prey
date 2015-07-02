@@ -58,11 +58,9 @@ class LeapListener : Listener {
 					Glb.player.angle_accel += r;
 
 					float p = normal.Pitch / Math.RADIAN;
-					if (p >= -25 && p <= 0) Glb.player.dash();
+					if (p >= -180 && p >= -135) Glb.player.dash();
 
-					float scale_z = 1 - Mathf.Clamp((-hand.PalmPosition.z + 40) / 50.0f, 0, 1);
-					Glb.player.light.set_attribs(Mathf.Max(scale_z * Player.INIT_LIGHT_SIZE, 8.0f), 
-												 Mathf.Max(scale_z * Player.INIT_LIGHT_INTENSITY, .25f));
+					if (hand.PalmPosition.z < -50) Glb.player.light_off = true; else Glb.player.light_off = false;
 				}
 			//}
 		}

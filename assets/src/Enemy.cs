@@ -77,7 +77,16 @@ public class Enemy {
 		
 		player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (!blurred_enemy && player_dist < 3) { create_blood_state(); return; }
+		if (!blurred_enemy && player_dist < 3) {
+			//float e_angle = Mathf.Atan2(Glb.player.pos.z - gobj.transform.position.z, Glb.player.pos.x - gobj.transform.position.x) / Math.RADIAN;
+			//float a = (Glb.player.angle % 360) - e_angle;
+			//if (e_angle >= (Glb.player.angle % 360) - 45 && e_angle <= (Glb.player.angle % 360) + 45) {
+				create_blood_state();
+				return;
+			//}else {
+			//	Glb.player.accel = -Glb.player.accel;
+			//}
+		}
 
 		if (light != null) light.set_pos(gobj.transform.position.x, gobj.transform.position.z);
 
