@@ -19,23 +19,27 @@ public class GUI_Manager : MonoBehaviour {
 	Rect debug_rect;
 	bool debug_stats_active = false;
 
-	Rect time_rect;
+	Rect time_gui_rect;
 	Texture time_texture;
 
-	Rect rstats_rect;
+	Rect rstats_gui_rect;
 	Texture rstats_texture;
 
 	GUIStyle timer_style = new GUIStyle();
 	Rect timer_rect;
 	int timer = 0;
 
+	GUIStyle rstats_style = new GUIStyle();
+	Rect rstats_rect;
+	int rstats = 0;
+
 	void Start() {
 		time_texture = Resources.Load("textures/time_gui") as Texture;
 		rstats_texture = Resources.Load("textures/rstats_gui") as Texture;
 
 		float w = time_texture.width;
-		time_rect = new Rect(0, 0, w, time_texture.height);
-		rstats_rect = new Rect(Screen.width - w, 0, w, rstats_texture.height);
+		time_gui_rect = new Rect(0, 0, w, time_texture.height);
+		rstats_gui_rect = new Rect(Screen.width - w, 0, w, rstats_texture.height);
 
 		int s_w = Screen.width, s_h = Screen.height;
 		
@@ -44,10 +48,19 @@ public class GUI_Manager : MonoBehaviour {
 		debug_style.fontSize = (s_h * 2) / 80;
 		debug_style.normal.textColor = new Color(1, 1, 1, 1);
 
-		timer_rect = new Rect(20, 10, time_texture.width, time_texture.height);
+		Font gui_font = Resources.Load("fonts/gui_font") as Font;
+
+		timer_rect = new Rect((time_gui_rect.width / 2.0f) - 125, (time_gui_rect.height / 2.0f) - 40, timer_rect.width, timer_rect.height);
 		timer_style.alignment = TextAnchor.UpperLeft;
 		timer_style.fontSize = (int)(time_texture.height / 2.0f);
 		timer_style.normal.textColor = new Color(1, 1, 1, 1);
+		timer_style.font = gui_font;
+
+		rstats_rect = new Rect((time_gui_rect.width / 2.0f) - 125, (time_gui_rect.height / 2.0f) - 40, rstats_rect.width, rstats_rect.height);
+		rstats_style.alignment = TextAnchor.UpperLeft;
+		rstats_style.fontSize = (int)(time_texture.height / 2.0f);
+		rstats_style.normal.textColor = new Color(1, 1, 1, 1);
+		rstats_style.font = gui_font;
 	}
 
 	void Update() {
@@ -56,8 +69,8 @@ public class GUI_Manager : MonoBehaviour {
 	}
 
 	void OnGUI() {
-		GUI.DrawTexture(time_rect, time_texture);
-		GUI.DrawTexture(rstats_rect, rstats_texture);
+		GUI.DrawTexture(time_gui_rect, time_texture);
+		GUI.DrawTexture(rstats_gui_rect, rstats_texture);
 
 		if (debug_stats_active) {
 			//add all fps values calculated and average the result if greater than fps_rate
@@ -90,6 +103,11 @@ public class GUI_Manager : MonoBehaviour {
 		string time_ms = System.Convert.ToString((int)((Time.realtimeSinceStartup % 1.0f) * 100));
 		timer_str += time_ms;
 
+		timer_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad / 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
 		GUI.Label(timer_rect, timer_str, timer_style);
+
+		string rstats_str = "0";
+		rstats_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad / 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
+		GUI.Label(rstats_rect, rstats_str, rstats_style);
 	}
 }

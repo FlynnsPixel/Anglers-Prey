@@ -151,10 +151,10 @@ public class Player {
 		Enemy closest_e = null;
 		float closest_e_angle = 0;
 		foreach (Enemy e in Glb.em.enemies) {
-			if (!e.blurred_enemy && !e.blood_state && !e.to_be_removed && e.player_dist < 5 && e.player_dist < min_dist) { 
+			if (!e.blurred_enemy && !e.blood_state && !e.to_be_removed && e.player_dist < 8 && e.player_dist < min_dist) { 
 				float e_angle = Mathf.Atan2(pos.z - e.gobj.transform.position.z, pos.x - e.gobj.transform.position.x) / Math.RADIAN;
 				float a = (angle % 360) - e_angle;
-				if (a > -67.0f && a < 67.0f) {
+				if (a > -90 && a < 90) {
 					closest_e = e; min_dist = e.player_dist; closest_e_angle = angle - a;
 				}
 			}
