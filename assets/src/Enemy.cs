@@ -7,8 +7,9 @@ public class Enemy {
 	public EnemyAsset asset = null;
     public Mesh mesh = null;
     public GameObject mesh_obj = null;
-    public BoxCollider box_collider = null;
-	public Light light = null;
+    public BoxCollider box_collider_body = null;
+    public BoxCollider box_collider_head = null;
+    public Light light = null;
 	public bool light_removed = false;
 	public bool to_be_removed = false;
 	public int ai_type;
@@ -56,7 +57,7 @@ public class Enemy {
         //initial speeds for enemies
         if (asset == Glb.em.chimaera) max_speed = .04f;
         else if (asset == Glb.em.bio_eel) max_speed = .03f;
-        else if (asset == Glb.em.gulper_eel) max_speed = .07f;
+        else if (asset == Glb.em.gulper_eel) max_speed = .085f;
 
         //check if the created fish is larger than the player
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);
@@ -126,32 +127,43 @@ public class Enemy {
 
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (!blurred_enemy && box_collider.bounds.Intersects(Glb.player.box_collider.bounds)) {
-            float a = Glb.player.angle - (angle + 180);
-            if (!larger_fish) {
-				create_blood_state();
-				return;
-			}else {
-                //get hit by enemy
-                Debug.Log(a + ", " + Glb.player.angle + ", " + (angle + 180));
-                if (a > -90 && a < 90) {
+		if (!blurred_enemy) {
+            if (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
+                if (larger_fish) {
+                    //get hit by enemy
                     Glb.player.spin_angle_accel = 5.0f;
                     Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
+                    //push back player
+                    Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                    Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                    //push back enemy
+                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
+                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
+
+                    always_follow = true;
                 }else {
+                    create_blood_state();
+                    return;
+                }
+            }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_body.bounds) || box_collider_body.bounds.Intersects(Glb.player.box_collider_head.bounds)) {
+                if (larger_fish) {
                     if (Glb.player.dashing) energy -= 90; else energy -= 40;
                     if (energy < 0) {
                         create_blood_state();
                         return;
                     }
-                }
-                //push back player
-                Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
-                Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
-                //push back enemy
-                accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
-                accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
+                    //push back player
+                    Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                    Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                    //push back enemy
+                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 2.0f;
+                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 2.0f;
 
-                always_follow = true;
+                    always_follow = true;
+                }else {
+                    create_blood_state();
+                    return;
+                }
             }
 		}
 

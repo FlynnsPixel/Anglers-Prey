@@ -62,10 +62,11 @@ public class EnemyManager {
 		Enemy new_enemy = new Enemy();
 		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
         new_enemy.asset = asset;
-        new_enemy.box_collider = new_enemy.gobj.GetComponent<BoxCollider>();
+        new_enemy.box_collider_body = new_enemy.gobj.GetComponents<BoxCollider>()[0];
+        new_enemy.box_collider_head = new_enemy.gobj.GetComponents<BoxCollider>()[1];
 
-		//scale enemy
-		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
+        //scale enemy
+        bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
         float m = Random.Range(0.0f, .2f);
         if (Random.value < .5f) m += Random.Range(.3f, .5f);

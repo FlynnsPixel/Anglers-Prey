@@ -5,7 +5,8 @@ public class Player {
 
     public GameObject player;
     public SkinnedMeshRenderer mesh;
-    public BoxCollider box_collider;
+    public BoxCollider box_collider_body;
+    public BoxCollider box_collider_head;
 	public Vector3 pos;
 	public Vector2 accel;
 	public Quaternion rota;
@@ -69,9 +70,10 @@ public class Player {
                 if (c.name.IndexOf("mesh") != -1) { mesh = c.gameObject.GetComponent<SkinnedMeshRenderer>(); }
             }
         }
-		ani["swim"].speed = 5;
-        box_collider = player.GetComponent<BoxCollider>();
-	}
+        ani["swim"].speed = 5;
+        box_collider_body = player.GetComponents<BoxCollider>()[0];
+        box_collider_head = player.GetComponents<BoxCollider>()[1];
+    }
 
 	public void update() {
 		light.set_pos(player.transform.position.x, player.transform.position.z);
