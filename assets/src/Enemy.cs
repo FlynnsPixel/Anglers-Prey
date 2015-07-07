@@ -5,7 +5,8 @@ public class Enemy {
 
 	public GameObject gobj = null;
 	public EnemyAsset asset = null;
-	public Mesh mesh = null;
+    public Mesh mesh = null;
+    public GameObject mesh_obj = null;
 	public Light light = null;
 	public bool light_removed = false;
 	public bool to_be_removed = false;
@@ -13,11 +14,14 @@ public class Enemy {
 	public bool blurred_enemy = false;
     public float player_dist = 9999;
     public bool larger_fish = false;
+    public float energy = 100;
+    public Color colour;
 
 	private Vector3 accel;
 	private float angle_dest = 0;
 	private float max_speed = .04f;
-	private Vector3 init_pos;
+    private Vector3 init_pos;
+    private float size_radius = 1;
 
 	private float angle = 0;
 	private int angle_timer = 0;
@@ -56,6 +60,8 @@ public class Enemy {
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);
         Vector3 p_s = Vector3.Scale(Glb.player.mesh.bounds.size, Glb.player.player.transform.localScale);
         if (s.x > p_s.x || s.z > p_s.z) larger_fish = true;
+
+        size_radius = Mathf.Max(s.x, s.z) / 4.0f;
 
         //ai type
         int type = Random.Range(1, 3);
@@ -104,18 +110,45 @@ public class Enemy {
 			}
 			return;
 		}
-		
-		player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
+
+        if (energy < 100) energy += .04f;
+        Color c = mesh_obj.GetComponent<Renderer>().material.GetColor("_EmissionColor");
+        c.r = colour.r - (energy / 100.0f) * 255.0f;
+        c.g = colour.g - (energy / 100.0f) * 255.0f;
+        c.b = colour.b - (energy / 100.0f) * 255.0f;
+        mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor");
+
+        player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (!blurred_enemy && player_dist < 3) {
-            float e_angle = -(Mathf.Atan2(Glb.player.pos.z - gobj.transform.position.z, Glb.player.pos.x - gobj.transform.position.x) / Math.RADIAN) + 180;
-			float a = Glb.player.angle - e_angle;
-			if (a > -45 && a < 45) {
+		if (!blurred_enemy && player_dist < size_radius) {
+            float a = Glb.player.angle - (angle + 180);
+            if (!larger_fish) {
 				create_blood_state();
 				return;
 			}else {
-				Glb.player.accel = -Glb.player.accel;
-			}
+                //push back player
+                Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                //push back enemy
+                accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
+                accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
+                //50% chance to go into aggressive mode
+                if (Random.value < .5f) {
+                    ai_type = ai_type ^ AI_DEFENSIVE;
+                    ai_type = ai_type | AI_AGGRESSIVE;
+                }
+                //get hit by enemy
+                if (a > -45 && a < 45) {
+                    Glb.player.spin_angle_accel = 5.0f;
+                    Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
+                }else {
+                    if (Glb.player.dashing) energy -= 90; else energy -= 60;
+                    if (energy < 0) {
+                        create_blood_state();
+                        return;
+                    }
+                }
+            }
 		}
 
 		if (light != null) light.set_pos(gobj.transform.position.x, gobj.transform.position.z);
@@ -140,7 +173,7 @@ public class Enemy {
 			angle_dest += Random.Range(-Mathf.PI / 8.0f, Mathf.PI / 8.0f);
 		}
 
-        angle = Math.smooth_angle(angle, angle_dest / Math.RADIAN, turn_speed);
+        //angle = Math.smooth_angle(angle, angle_dest / Math.RADIAN, turn_speed);
         angle_accel = Math.smooth_angle(angle, angle_dest / Math.RADIAN, turn_speed / 3);
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
 		angle_accel *= angle_friction;
@@ -152,8 +185,8 @@ public class Enemy {
 
 		gobj.transform.localEulerAngles = rota_euler + init_rota;
 
-		accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN;
-		accel.z -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN;
+		//accel.x -= Mathf.Cos(angle * Math.RADIAN) * Math.RADIAN;
+		//accel.z -= Mathf.Sin(angle * Math.RADIAN) * Math.RADIAN;
 		accel *= .9f;
 		accel.x = Mathf.Clamp(accel.x, -max_speed, max_speed);
 		accel.z = Mathf.Clamp(accel.z, -max_speed, max_speed);

@@ -75,8 +75,9 @@ public class EnemyManager {
 		foreach (Transform child in new_enemy.gobj.transform) {
 			if (child.name.IndexOf("mesh") != -1) { mesh_obj = child.gameObject; break; }
 		}
-		new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
-		Vector3 s = Vector3.Scale(new_enemy.mesh.bounds.size, new_enemy.gobj.transform.localScale);
+        new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+        new_enemy.mesh_obj = mesh_obj;
+        Vector3 s = Vector3.Scale(new_enemy.mesh.bounds.size, new_enemy.gobj.transform.localScale);
 
 		if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
 
@@ -95,7 +96,8 @@ public class EnemyManager {
 		else if (rand == 1) colour_vec.y = Random.Range(0.0f, 1.0f); 
 		else if (rand == 2) colour_vec.z = Random.Range(0.0f, 1.0f);
 
-		Color colour = new Color(colour_vec.x * 255.0f, colour_vec.y * 255.0f, colour_vec.z * 255.0f);
+        Color colour = new Color(colour_vec.x * 255.0f, colour_vec.y * 255.0f, colour_vec.z * 255.0f);
+        new_enemy.colour = colour;
 		mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", colour);
 
 		//position enemy

@@ -21,12 +21,13 @@ public class Player {
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-	private float max_speed = 4;
+	public float max_speed = 4;
 	private float accel_speed = .1f;
 	private float max_rota = 2.0f;
 	private float max_speed_init;
 	private float accel_speed_init;
-	private float max_rota_init;
+    private float max_rota_init;
+    public float spin_angle_accel = 0;
 
 	public const float FRICTION = .98f;
 	public const float ROTA_ACCEL_SPEED = .2f;
@@ -80,6 +81,8 @@ public class Player {
 			light_size -= (light_size - ((energy / MAX_ENERGY) * INIT_LIGHT_SIZE)) / 20.0f;
 			light_intensity -= (light_intensity - ((energy / MAX_ENERGY) * INIT_LIGHT_INTENSITY)) / 20.0f;
 		}
+        light_size = Mathf.Max(light_size, 8);
+        light_intensity = Mathf.Max(light_intensity, .2f);
 		light.set_attribs(light_size, light_intensity);
 
 		//if (Input.GetKey(KeyCode.W)) {
@@ -103,8 +106,10 @@ public class Player {
 			calc_dash_angle();
 			set_energy(energy - 1);
 		}
-		angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
-		angle_accel *= ROTA_FRICTION;
+        angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
+        angle_accel += spin_angle_accel;
+        spin_angle_accel *= ROTA_FRICTION;
+        angle_accel *= ROTA_FRICTION;
 		angle += angle_accel;
         if (dashing)
             cam_angle = Math.smooth_angle(cam_angle, angle, 10.0f);
@@ -122,7 +127,7 @@ public class Player {
 		rota_euler.z = 0;
 
 		player.transform.position = pos;
-		player.transform.rotation = rota;
+        player.transform.rotation = rota;
 
 		if (Input.GetMouseButton(0)) {
 			mouse_touched = true;
@@ -138,7 +143,7 @@ public class Player {
 			mouse_touched = false;
 		}
 
-		if (Input.GetKeyDown(KeyCode.Space)) {
+		if (spin_angle_accel <= .1f && Input.GetKeyDown(KeyCode.Space)) {
 			if (!dashing) {
 				dash();
 			}
