@@ -63,15 +63,11 @@ public class EnemyManager {
 		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
 		new_enemy.asset = asset;
 
-		//ai type
-		int type = Random.Range(1, 2);
-		if (Random.Range(0.0f, 1.0f) >= .5f) type = type | Enemy.AI_BATCH;
-		new_enemy.ai_type = type;
-
 		//scale enemy
 		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
-		float m = Random.Range(0.0f, 1.0f);
+        float m = Random.Range(0.0f, .2f);
+        if (Random.value < .5f) m += Random.Range(.3f, .5f);
 		if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(18.0f, 20.0f);
         else new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 

@@ -21,8 +21,8 @@ public class Player {
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-    private float max_speed = 8;
-	private float accel_speed = .25f;
+	private float max_speed = 4;
+	private float accel_speed = .1f;
 	private float max_rota = 2.0f;
 	private float max_speed_init;
 	private float accel_speed_init;
@@ -106,17 +106,19 @@ public class Player {
 		angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
 		angle_accel *= ROTA_FRICTION;
 		angle += angle_accel;
-		if (dashing)
-			cam_angle -= (cam_angle - angle) / 10.0f;
-		else
-			cam_angle -= (cam_angle - angle) / 25.0f;
-		Glb.cam.cam_rota.y = -cam_angle - 90;
+        if (dashing)
+            cam_angle = Math.smooth_angle(cam_angle, angle, 10.0f);
+        else
+            cam_angle = Math.smooth_angle(cam_angle, angle, 25.0f);
+        Glb.cam.cam_rota.y = -cam_angle - 90;
 
 		rota.eulerAngles = rota_euler;
 		rota_euler.x -= angle_accel;
 		rota_euler.x = Mathf.Clamp(rota_euler.x, -45, 45);
-		rota_euler.x -= (rota_euler.x) / 20.0f;
-		rota_euler.y = -angle;
+        rota_euler.x -= (rota_euler.x) / 20.0f;
+        //wrap angle from 0-360
+        angle = Math.smooth_angle(angle, angle, 1.0f);
+        rota_euler.y = -angle;
 		rota_euler.z = 0;
 
 		player.transform.position = pos;
@@ -150,7 +152,7 @@ public class Player {
 				max_rota = max_rota_init;
 			}
 		}
-	}
+    }
 
 	public void dash() {
 		dashing = true;
@@ -166,7 +168,7 @@ public class Player {
 		Enemy closest_e = null;
 		float closest_e_angle = 0;
 		foreach (Enemy e in Glb.em.enemies) {
-			if (!e.blurred_enemy && !e.blood_state && !e.to_be_removed && e.player_dist < 8 && e.player_dist < min_dist) { 
+			if (!e.larger_fish && !e.blurred_enemy && !e.blood_state && !e.to_be_removed && e.player_dist < 8 && e.player_dist < min_dist) { 
 				float e_angle = Mathf.Atan2(pos.z - e.gobj.transform.position.z, pos.x - e.gobj.transform.position.x) / Math.RADIAN;
 				float a = (angle % 360) - e_angle;
 				if (a > -90 && a < 90) {

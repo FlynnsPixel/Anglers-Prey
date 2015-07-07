@@ -252,7 +252,7 @@ ModelImporter:
     400242: transform8
     400244: transform9
     4300000: pCone53
-    7400000: Take 001
+    7400000: swim
     9500000: //RootNode
     11100000: //RootNode
     13700000: pCone53
@@ -265,6 +265,10 @@ ModelImporter:
     bakeSimulation: 0
     optimizeGameObjects: 0
     motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
     animationCompression: 1
     animationRotationError: .5
     animationPositionError: .5
@@ -273,7 +277,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     clipAnimations:
     - serializedVersion: 16
-      name: Take 001
+      name: swim
       takeName: Take 001
       firstFrame: 1
       lastFrame: 24
