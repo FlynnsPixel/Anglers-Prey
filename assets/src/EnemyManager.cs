@@ -21,7 +21,7 @@ public class EnemyManager {
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
 	private const int SPAWN_RATE = 10;
-	private const int MAX_ENEMIES = 20;
+    private const int MAX_ENEMIES = 10;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
 	public int fish_eaten = 0;
@@ -61,14 +61,15 @@ public class EnemyManager {
 		//create enemy class and object
 		Enemy new_enemy = new Enemy();
 		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
-		new_enemy.asset = asset;
+        new_enemy.asset = asset;
+        new_enemy.box_collider = new_enemy.gobj.GetComponent<BoxCollider>();
 
 		//scale enemy
 		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
         float m = Random.Range(0.0f, .2f);
         if (Random.value < .5f) m += Random.Range(.3f, .5f);
-		if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(18.0f, 20.0f);
+		if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(10.0f, 12.0f);
         else new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
 		GameObject mesh_obj = null;
@@ -97,7 +98,6 @@ public class EnemyManager {
         else if (rand == 2) colour_vec.z = 1.0f;
 
         Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
-        Debug.Log(colour);
         new_enemy.colour = colour;
 		mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", colour);
 

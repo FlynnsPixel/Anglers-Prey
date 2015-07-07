@@ -5,6 +5,7 @@ public class Player {
 
     public GameObject player;
     public SkinnedMeshRenderer mesh;
+    public BoxCollider box_collider;
 	public Vector3 pos;
 	public Vector2 accel;
 	public Quaternion rota;
@@ -69,6 +70,7 @@ public class Player {
             }
         }
 		ani["swim"].speed = 5;
+        box_collider = player.GetComponent<BoxCollider>();
 	}
 
 	public void update() {

@@ -52,15 +52,15 @@ class LeapListener : Listener {
 					// Get the hand's normal vector and direction
 					Vector normal = hand.PalmNormal;
 					Vector direction = hand.Direction;
-
+                    
 					// Calculate the hand's pitch, roll, and yaw angles
 					float r = Mathf.Clamp(normal.Roll / Math.RADIAN, -45, 45) / (45.0f / Player.ROTA_ACCEL_SPEED);
-					Glb.player.angle_accel += r;
-
-					float p = normal.Pitch / Math.RADIAN;
-					if (p >= -180 && p >= -135) Glb.player.dash();
-
-					if (hand.PalmPosition.z < -50) Glb.player.light_off = true; else Glb.player.light_off = false;
+                    Glb.player.angle_accel += r / 4.0f;
+                    
+                    float p = normal.Pitch / Math.RADIAN;
+                    if (p >= 0 && p <= 45) Glb.player.dash();
+                    
+					if (hand.PalmPosition.z < 50) Glb.player.light_off = true; else Glb.player.light_off = false;
 				}
 			//}
 		}

@@ -10,11 +10,7 @@ public class Intro : MonoBehaviour {
 	}
 
 	void Update() {
-		cam_pos.x -= (cam_pos.x - 12.6f) / 80.0f;
-		cam_pos.y -= (cam_pos.y - 7.5f) / 80.0f;
-		cam_pos.z -= (cam_pos.z - -14.2f) / 200.0f;
+		cam_pos.y += Mathf.Sin(Time.timeSinceLevelLoad * 2.0f) / 60.0f;
 		transform.position = cam_pos;
-
-		cam_pos.y += Mathf.Sin(Time.timeSinceLevelLoad / 1.5f) / 60.0f;
 	}
 }
