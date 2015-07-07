@@ -68,7 +68,6 @@ public class Player {
                 if (c.name.IndexOf("mesh") != -1) { mesh = c.gameObject.GetComponent<SkinnedMeshRenderer>(); }
             }
         }
-        Debug.Log(mesh);
 		ani["swim"].speed = 5;
 	}
 

@@ -92,11 +92,12 @@ public class EnemyManager {
 		rand += Random.Range(1, 3);
 		rand = rand % 3;
 
-		if (rand == 0) colour_vec.x = Random.Range(0.0f, 1.0f); 
-		else if (rand == 1) colour_vec.y = Random.Range(0.0f, 1.0f); 
-		else if (rand == 2) colour_vec.z = Random.Range(0.0f, 1.0f);
+        if (rand == 0) colour_vec.x = 1.0f;
+        else if (rand == 1) colour_vec.y = 1.0f;
+        else if (rand == 2) colour_vec.z = 1.0f;
 
-        Color colour = new Color(colour_vec.x * 255.0f, colour_vec.y * 255.0f, colour_vec.z * 255.0f);
+        Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
+        Debug.Log(colour);
         new_enemy.colour = colour;
 		mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", colour);
 

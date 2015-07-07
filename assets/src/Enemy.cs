@@ -94,29 +94,33 @@ public class Enemy {
 		Glb.gui.scale_rstats();
 	}
 
-	public void update() {
-		if (blood_state) {
-			blood_size -= (blood_size - 22) / 250.0f;
-			blood_intensity -= (blood_intensity) / 250.0f;
-			blood_light.set_attribs(blood_size, blood_intensity);
-			light.set_attribs(light.get_size(), light.get_intensity() - .1f);
-			if (!light_removed && light.get_intensity() <= 0) {
-				light_removed = true;
-				light.remove();
-			}
-			if (blood_intensity <= 0) {
-				to_be_removed = true;
-				blood_light.remove();
-			}
-			return;
-		}
+    public void update() {
+        if (blood_state) {
+            blood_size -= (blood_size - 22) / 250.0f;
+            blood_intensity -= (blood_intensity) / 250.0f;
+            blood_light.set_attribs(blood_size, blood_intensity);
+            light.set_attribs(light.get_size(), light.get_intensity() - .1f);
+            if (!light_removed && light.get_intensity() <= 0) {
+                light_removed = true;
+                light.remove();
+            }
+            if (blood_intensity <= 0) {
+                to_be_removed = true;
+                blood_light.remove();
+            }
+            return;
+        }
 
-        if (energy < 100) energy += .04f;
-        Color c = mesh_obj.GetComponent<Renderer>().material.GetColor("_EmissionColor");
-        c.r = colour.r - (energy / 100.0f) * 255.0f;
-        c.g = colour.g - (energy / 100.0f) * 255.0f;
-        c.b = colour.b - (energy / 100.0f) * 255.0f;
-        mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor");
+        if (energy < 100) {
+            energy += .05f;
+            float energy_c = 1 - (energy / 100.0f);
+            Color c = colour;
+            c.r = Mathf.Clamp(c.r - energy_c, .4f, 1.0f);
+            c.g = Mathf.Clamp(c.g - energy_c, .4f, 1.0f);
+            c.b = Mathf.Clamp(c.b - energy_c, .4f, 1.0f);
+            mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", c);
+            light.set_colour(c);
+        }
 
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
@@ -126,17 +130,6 @@ public class Enemy {
 				create_blood_state();
 				return;
 			}else {
-                //push back player
-                Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
-                Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
-                //push back enemy
-                accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
-                accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
-                //50% chance to go into aggressive mode
-                if (Random.value < .5f) {
-                    ai_type = ai_type ^ AI_DEFENSIVE;
-                    ai_type = ai_type | AI_AGGRESSIVE;
-                }
                 //get hit by enemy
                 if (a > -45 && a < 45) {
                     Glb.player.spin_angle_accel = 5.0f;
@@ -147,6 +140,17 @@ public class Enemy {
                         create_blood_state();
                         return;
                     }
+                }
+                //push back player
+                Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                //push back enemy
+                accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
+                accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
+                //50% chance to go into aggressive mode
+                if (Random.value < .5f) {
+                    ai_type = ai_type ^ AI_DEFENSIVE;
+                    ai_type = ai_type | AI_AGGRESSIVE;
                 }
             }
 		}
