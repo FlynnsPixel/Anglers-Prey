@@ -27,9 +27,9 @@ public class EnemyManager {
 	public int fish_eaten = 0;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(.5f, .425f, .5f), 100);
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(.8f, .8f, 1.2f), 120);
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(1, 1, 1), 80);
+		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 100);
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 120);
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(3, 3, 3), 80);
 		spawn_radius = Glb.map.width / 2;
 	}
 
@@ -72,8 +72,8 @@ public class EnemyManager {
 		bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
 
 		float m = Random.Range(0.0f, 1.0f);
-		if (blurred_enemy) m = Random.Range(15.0f, 25.0f);
-		new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
+		if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(18.0f, 20.0f);
+        else new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
 		GameObject mesh_obj = null;
 		foreach (Transform child in new_enemy.gobj.transform) {

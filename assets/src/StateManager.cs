@@ -14,9 +14,9 @@ public class StateManager : MonoBehaviour {
 		Glb.map.init();
 		Glb.cam.init();
 		Glb.env.init();
+		Glb.player.init();
 		Glb.em.init();
 		Light.init();
-		Glb.player.init();
 		Glb.map.spawn_init_env();
 		Glb.gui.init();
 	}

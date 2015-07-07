@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Player {
 
-	public GameObject player;
+    public GameObject player;
+    public SkinnedMeshRenderer mesh;
 	public Vector3 pos;
 	public Vector2 accel;
 	public Quaternion rota;
@@ -14,21 +15,21 @@ public class Player {
 
 	public const float MAX_ENERGY = 400;
 	private float energy = MAX_ENERGY;
-	private float light_size = 0;
-	private float light_intensity = 0;
+	public float light_size = 0;
+	public float light_intensity = 0;
 
 	private bool mouse_touched = false;
 	private Vector3 mouse_touch_point;
 
-	private float max_speed = 4;
-	private float accel_speed = .1f;
+    private float max_speed = 8;
+	private float accel_speed = .25f;
 	private float max_rota = 2.0f;
 	private float max_speed_init;
 	private float accel_speed_init;
 	private float max_rota_init;
 
 	public const float FRICTION = .98f;
-	public const float ROTA_ACCEL_SPEED = .1f;
+	public const float ROTA_ACCEL_SPEED = .2f;
 	public const float ROTA_FRICTION = .95f;
 
 	private float angle_offset = 0;
@@ -48,7 +49,7 @@ public class Player {
 		player = GameObject.Find("player");
 		pos = player.transform.position;
 		pos.y = -2.0f;
-		rota = player.transform.rotation;
+        rota = player.transform.rotation;
 
 		max_speed_init = max_speed;
 		accel_speed_init = accel_speed;
@@ -59,8 +60,14 @@ public class Player {
 
 		Animation ani = null;
 		foreach (Transform child in player.transform) {
-			if (child.name.IndexOf("ani") != -1) { ani = child.gameObject.GetComponent<Animation>(); break; }
-		}
+            if (child.name.IndexOf("ani") != -1) { ani = child.gameObject.GetComponent<Animation>(); }
+            if (child.name.IndexOf("mesh") != -1) { mesh = child.gameObject.GetComponent<SkinnedMeshRenderer>(); }
+            foreach (Transform c in child.transform) {
+                if (c.name.IndexOf("ani") != -1) { ani = c.gameObject.GetComponent<Animation>(); }
+                if (c.name.IndexOf("mesh") != -1) { mesh = c.gameObject.GetComponent<SkinnedMeshRenderer>(); }
+            }
+        }
+        Debug.Log(mesh);
 		ani["swim"].speed = 5;
 	}
 

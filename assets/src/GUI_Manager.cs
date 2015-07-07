@@ -98,13 +98,13 @@ public class GUI_Manager {
 		}
 
 		string timer_str = "";
-		timer_str += (int)(Time.realtimeSinceStartup / 60.0f);
+		timer_str += (int)(Time.timeSinceLevelLoad / 60.0f);
 		timer_str += ":";
-		string time_seconds = System.Convert.ToString((int)(Time.realtimeSinceStartup % 60));
+		string time_seconds = System.Convert.ToString((int)(Time.timeSinceLevelLoad % 60));
 		if (time_seconds.Length == 1) time_seconds = "0" + time_seconds;
 		timer_str += time_seconds;
 		timer_str += ":";
-		string time_ms = System.Convert.ToString((int)((Time.realtimeSinceStartup % 1.0f) * 100));
+		string time_ms = System.Convert.ToString((int)((Time.timeSinceLevelLoad % 1.0f) * 100));
 		timer_str += time_ms;
 
 		timer_style.normal.textColor = new Color(.5f + (Mathf.Sin(Time.timeSinceLevelLoad * 2.0f) / 2.0f), .5f, Mathf.Cos(Time.timeSinceLevelLoad) / 2.0f, 1);
