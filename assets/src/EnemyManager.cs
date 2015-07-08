@@ -62,8 +62,9 @@ public class EnemyManager {
         Enemy new_enemy = new Enemy();
         new_enemy.gobj = GameObject.Instantiate(asset.gobj);
         new_enemy.asset = asset;
-        new_enemy.box_collider_body = new_enemy.gobj.GetComponents<BoxCollider>()[0];
-        new_enemy.box_collider_head = new_enemy.gobj.GetComponents<BoxCollider>()[1];
+        BoxCollider[] colliders = new_enemy.gobj.GetComponents<BoxCollider>();
+        if (colliders.Length >= 1) new_enemy.box_collider_body = colliders[0];
+        if (colliders.Length >= 2) new_enemy.box_collider_head = colliders[1];
 
         //scale enemy
         bool blurred_enemy = Random.value < asset.blurred_spawn_rate;
@@ -91,8 +92,6 @@ public class EnemyManager {
         else if (rand == 1) colour_vec = new Vector3(0.0f, 1.0f, 0.0f);
         else if (rand == 2) colour_vec = new Vector3(1.0f, 1.0f, 0.0f);
         if (!blurred_enemy && asset == gulper_eel) { colour_vec = new Vector3(1.0f, 0.0f, 0.0f); new_enemy.predator = true; }
-        colour_vec = new Vector3(1.0f, 1.0f, 1.0f);
-        Debug.Log((asset == gulper_eel) + ", " + colour_vec);
 
         Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
         new_enemy.colour = colour;

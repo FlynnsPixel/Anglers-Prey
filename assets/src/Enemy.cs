@@ -129,7 +129,8 @@ public class Enemy {
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
 		if (!blurred_enemy) {
-            if (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
+            if (box_collider_head != null && (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || 
+                                              box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds))) {
                 if (larger_fish) {
                     //get hit by enemy
                     Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
@@ -145,7 +146,14 @@ public class Enemy {
                     create_blood_state();
                     return;
                 }
-            }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_body.bounds) || box_collider_body.bounds.Intersects(Glb.player.box_collider_head.bounds)) {
+            }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
+                //push back player
+                Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                //push back enemy
+                accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 5.0f;
+                accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 5.0f;
+            }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_head.bounds)) {
                 if (larger_fish) {
                     if (Glb.player.dashing) energy -= 90; else energy -= 40;
                     if (energy < 0) {
@@ -159,7 +167,7 @@ public class Enemy {
                     accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 5.0f;
                     accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 5.0f;
 
-                    always_follow = true;
+                    if (predator) always_follow = true; else ai_type = (ai_type ^ AI_AGGRESSIVE) | AI_DEFENSIVE;
                 }else {
                     create_blood_state();
                     return;
