@@ -131,7 +131,7 @@ public class Enemy {
             if (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
                 if (larger_fish) {
                     //get hit by enemy
-                    Glb.player.spin_angle_accel = 5.0f;
+                    Glb.player.spin_angle_accel = 3.0f;
                     Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
                     //push back player
                     Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));

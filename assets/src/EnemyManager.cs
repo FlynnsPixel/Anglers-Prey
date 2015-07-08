@@ -29,7 +29,7 @@ public class EnemyManager {
 	public void init() {
 		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 100);
 		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 120);
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.7f, .7f, .7f), new Vector3(3, 3, 3), 80);
+		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(.55f, .55f, .55f), new Vector3(2.5f, 2.5f, 2.5f), 80);
 		spawn_radius = Glb.map.width / 2;
 	}
 
