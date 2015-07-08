@@ -19,6 +19,7 @@ public class Enemy {
     public float energy = 100;
     public Color colour;
     public bool predator = false;
+    public const float MAX_ENERGY = 100;
 
 	private Vector3 accel;
 	private float angle_dest = 0;
@@ -58,7 +59,7 @@ public class Enemy {
         //initial speeds for enemies
         if (asset == Glb.em.chimaera) max_speed = .04f;
         else if (asset == Glb.em.bio_eel) max_speed = .03f;
-        else if (asset == Glb.em.gulper_eel) max_speed = .085f;
+        else if (asset == Glb.em.gulper_eel) max_speed = .1f;
 
         //check if the created fish is larger than the player
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);
@@ -68,10 +69,9 @@ public class Enemy {
         size_radius = Mathf.Max(s.x, s.z) / 4.0f;
 
         //ai type
-        int type = Random.Range(1, 3);
-        if (larger_fish) type = 2;
-        if (Random.Range(0.0f, 1.0f) >= .5f) type = type | Enemy.AI_BATCH;
-        ai_type = type;
+        ai_type = AI_NONE;
+        if (predator) ai_type = AI_AGGRESSIVE;
+        if (!larger_fish) ai_type = AI_DEFENSIVE;
 
         //apply changes to speed, animations, ect based on scale
         float sc = Mathf.Max(gobj.transform.localScale.x, gobj.transform.localScale.z) / Mathf.Max(asset.max_scale.x, asset.max_scale.z);
@@ -80,7 +80,7 @@ public class Enemy {
         }else {
             max_speed -= Mathf.Clamp(sc / 50.0f, 0, .02f);
             ani["swim"].speed = 1 - (sc / 1.5f);
-            turn_speed += (sc * 100.0f);
+            turn_speed += (sc * 80.0f);
         }
     }
 
@@ -117,7 +117,7 @@ public class Enemy {
 
         if (energy < 100) {
             energy += .05f;
-            float energy_c = 1 - (energy / 200.0f);
+            float energy_c = (MAX_ENERGY / 500.0f) - (energy / 500.0f);
             Color c = colour;
             c.r = Mathf.Clamp(c.r - energy_c, .4f, 1.0f);
             c.g = Mathf.Clamp(c.g - energy_c, .4f, 1.0f);
@@ -135,11 +135,11 @@ public class Enemy {
                     //get hit by enemy
                     Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
                     //push back player
-                    Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
-                    Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
+                    Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
+                    Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
                     //push back enemy
-                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) / 2.0f;
-                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) / 2.0f;
+                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN);
+                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN);
 
                     always_follow = true;
                 }else {
@@ -183,7 +183,7 @@ public class Enemy {
             }
         }
 		if (Glb.player.light_size <= Player.INIT_LIGHT_SIZE / 2.0f || (ai_type & AI_AGGRESSIVE) == AI_AGGRESSIVE) {
-            if (Glb.player.light_size <= Player.INIT_LIGHT_SIZE / 2.0f || always_follow || player_dist <= Glb.player.light_size * .9f) {
+            if (Glb.player.light_size <= Player.INIT_LIGHT_SIZE / 2.0f || always_follow || player_dist <= Glb.player.light_size * 1.5f) {
                 angle_dest = Mathf.Atan2(Glb.player.pos.z - gobj.transform.position.z, Glb.player.pos.x - gobj.transform.position.x) + Mathf.PI;
             }
 		}

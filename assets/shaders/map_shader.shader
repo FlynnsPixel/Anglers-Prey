@@ -76,7 +76,17 @@ Shader "Custom/Map" {
 				half3 bump = (bump1 + bump2) * 0.5;
 				
 				half fresnel = dot(i.v_dir, bump);
-				half4 water = tex2D(reflect_colour, float2(fresnel, fresnel));
+
+				float2 tc = i.uv.xy;
+			  	float2 p = tc;
+			  	p.x += _Time.y / 8.0;
+			  	float len = length(p);
+			  	float dist = sqrt(pow(p, 2) + pow(p, 2)) + .5;
+			  	float ripple = (p / len) * sin((len * 15.0) - (_Time.y * 12.0)) / (dist * 20.0);
+			  	float2 uv = float2(fresnel, fresnel);
+				//half3 col2 = tex2D(reflect_colour, uv).xyz;
+
+				half4 water = tex2D(reflect_colour, uv);
 
 				half4 col = half4(lerp(water.rgb, colour_overlay.rgb, water.rgb) - .2, 1);
 
@@ -108,6 +118,8 @@ Shader "Custom/Map" {
 				col.r = clamp(col.r, 0, .9);
 				col.g = clamp(col.g, 0, .9);
 				col.b = clamp(col.b, 0, .9);
+
+				//col.rgb = col2.rgb;
 
 	            return col;
 	        }

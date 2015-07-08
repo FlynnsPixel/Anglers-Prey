@@ -50,7 +50,8 @@ public class Environment {
 		EnvObj new_obj = new EnvObj();
 		new_obj.gobj = GameObject.Instantiate(asset.gobj);
 
-		float m = Random.Range(0.0f, 1.0f);
+        float m = Random.Range(0.0f, 1.0f);
+        if (asset == rock && Random.value < .2f) m = Random.Range(1.5f, 2.0f);
 		Vector3 scale = (asset.min_scale + ((asset.max_scale - asset.min_scale) * m)) * 2;
 		new_obj.gobj.transform.localScale = scale;
 
