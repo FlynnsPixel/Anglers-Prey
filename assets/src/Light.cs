@@ -202,11 +202,11 @@ public class Light {
 	}
 
 	private static void draw_vertex_circle(Color colour, float size, float intensity, Vector3 pos, Vector3 map_offset, bool negate_colour = false) {
-		//convert light world position + map offset to a center vertex position
-		float wave_scale = Glb.map.material.GetFloat("wave_scale") / 10.0f;
-		float v_x = (((((pos.x * (1 - wave_scale)) + map_offset.x) / Glb.map.width) * 
+        //convert light world position + map offset to a center vertex position
+        float wave_scale = Glb.map.material.GetFloat("wave_scale") / 10.0f;
+		float v_x = (((((pos.x * (1 - wave_scale) * 1.03f) + map_offset.x) / Glb.map.width) * 
 						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
-		float v_z = (((((pos.z * (1 - wave_scale)) + map_offset.z) / Glb.map.height) * 
+		float v_z = (((((pos.z * (1 - wave_scale) * 1.03f) + map_offset.z) / Glb.map.height) * 
 						Glb.map.vertices_per_row)) + (Glb.map.vertices_per_row / 2.0f);
 
 		//divide dist by vertices / 2 / 10 to make draw results the same over different amounts of vertices on the map

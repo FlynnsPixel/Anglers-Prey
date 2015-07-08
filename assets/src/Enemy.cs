@@ -60,6 +60,7 @@ public class Enemy {
         if (asset == Glb.em.chimaera) max_speed = .04f;
         else if (asset == Glb.em.bio_eel) max_speed = .03f;
         else if (asset == Glb.em.gulper_eel) max_speed = .1f;
+        else if (asset == Glb.em.jellyfish) max_speed = .02f;
 
         //check if the created fish is larger than the player
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);
@@ -70,13 +71,13 @@ public class Enemy {
 
         //ai type
         ai_type = AI_NONE;
-        if (predator) ai_type = AI_AGGRESSIVE;
+        if (predator && asset != Glb.em.jellyfish) ai_type = AI_AGGRESSIVE;
         if (!larger_fish) ai_type = AI_DEFENSIVE;
 
         //apply changes to speed, animations, ect based on scale
         float sc = Mathf.Max(gobj.transform.localScale.x, gobj.transform.localScale.z) / Mathf.Max(asset.max_scale.x, asset.max_scale.z);
         Animation ani = gobj.GetComponent<Animation>();
-        if (blurred_enemy) { ai_type = AI_NONE; ani["swim"].speed = .2f; turn_speed = 55.0f;
+        if (blurred_enemy) { ai_type = AI_NONE; ani["swim"].speed = .2f; turn_speed = 200.0f;
         }else {
             max_speed -= Mathf.Clamp(sc / 50.0f, 0, .02f);
             ani["swim"].speed = 1 - (sc / 1.5f);
@@ -127,13 +128,13 @@ public class Enemy {
         }
 
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
-		if (player_dist > Glb.map.width / 1.5f) { to_be_removed = true; return; }
-		if (!blurred_enemy) {
+		if (player_dist > Glb.map.width / 1.2f) { to_be_removed = true; return; }
+		if (!blurred_enemy && !Glb.player.spinning && !Glb.player.invincible) {
             if (box_collider_head != null && (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || 
                                               box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds))) {
                 if (larger_fish) {
                     //get hit by enemy
-                    Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
+                    Glb.player.get_hit(asset.energy_gain, 0);
                     //push back player
                     Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
                     Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
@@ -147,6 +148,8 @@ public class Enemy {
                     return;
                 }
             }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
+                if (asset == Glb.em.jellyfish) Glb.player.get_hit(asset.energy_gain, 0.0f);
+
                 //push back player
                 Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
                 Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
@@ -154,11 +157,15 @@ public class Enemy {
                 accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 5.0f;
                 accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 5.0f;
             }else if (box_collider_body.bounds.Intersects(Glb.player.box_collider_head.bounds)) {
-                if (larger_fish) {
-                    if (Glb.player.dashing) energy -= 90; else energy -= 40;
-                    if (energy < 0) {
-                        create_blood_state();
-                        return;
+                if (larger_fish || asset == Glb.em.jellyfish) {
+                    if (asset != Glb.em.jellyfish) {
+                        if (Glb.player.dashing) energy -= 90; else energy -= 40;
+                        if (energy < 0) {
+                            create_blood_state();
+                            return;
+                        }
+                    }else {
+                        Glb.player.get_hit(asset.energy_gain, .4f);
                     }
                     //push back player
                     Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
@@ -167,7 +174,7 @@ public class Enemy {
                     accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 5.0f;
                     accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 5.0f;
 
-                    if (predator) always_follow = true; else ai_type = (ai_type ^ AI_AGGRESSIVE) | AI_DEFENSIVE;
+                    if (predator && asset != Glb.em.jellyfish) always_follow = true; else ai_type = (ai_type ^ AI_AGGRESSIVE) | AI_DEFENSIVE;
                 }else {
                     create_blood_state();
                     return;
@@ -200,11 +207,13 @@ public class Enemy {
         angle = Math.smooth_angle(angle, angle_dest / Math.RADIAN, turn_speed);
         angle_accel = Math.smooth_angle(angle, angle_dest / Math.RADIAN, turn_speed / 3);
 		angle_accel = Mathf.Clamp(angle_accel, -max_angle_accel, max_angle_accel);
-		angle_accel *= angle_friction;
+        angle_accel *= angle_friction;
 
-        rota_euler.x -= angle_accel;
-		rota_euler.x -= rota_euler.x / 80.0f;
-	    rota_euler.x = Mathf.Clamp(rota_euler.x, -35.0f, 35.0f);
+        if (asset != Glb.em.jellyfish) {
+            rota_euler.x -= angle_accel;
+            rota_euler.x -= rota_euler.x / 80.0f;
+            rota_euler.x = Mathf.Clamp(rota_euler.x, init_rota.x - 35.0f, init_rota.x + 35.0f);
+        }
         rota_euler.y = -angle + 180.0f;
 
 		gobj.transform.localEulerAngles = rota_euler + init_rota;

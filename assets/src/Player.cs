@@ -30,10 +30,12 @@ public class Player {
 	private float accel_speed_init;
     private float max_rota_init;
     public float spin_angle_accel = 0;
+    public bool spinning = false;
 
 	public const float FRICTION = .98f;
 	public const float ROTA_ACCEL_SPEED = .2f;
-	public const float ROTA_FRICTION = .95f;
+    public const float ROTA_FRICTION = .95f;
+    public const float SPIN_ROTA_FRICTION = .88f;
 
 	private float angle_offset = 0;
 	private float last_angle = 0;
@@ -46,7 +48,9 @@ public class Player {
 	public bool dashing = false;
 	private int dash_timer = 0;
 	private int dash_length = 50;
-	private float dash_angle = 0;
+    private float dash_angle = 0;
+    private int invincible_timer = 0;
+    public bool invincible = false;
 
 	public void init() {
 		player = GameObject.Find("player");
@@ -107,11 +111,12 @@ public class Player {
 			}
 		}else {
 			calc_dash_angle();
-			set_energy(energy - 1);
+			set_energy(energy - .4f);
 		}
         angle_accel = Mathf.Clamp(angle_accel, -max_rota, max_rota);
         angle_accel += spin_angle_accel;
-        spin_angle_accel *= ROTA_FRICTION;
+        spin_angle_accel *= SPIN_ROTA_FRICTION;
+        spinning = spin_angle_accel > .01f;
         angle_accel *= ROTA_FRICTION;
 		angle += angle_accel;
         if (dashing)
@@ -160,6 +165,18 @@ public class Player {
 				max_rota = max_rota_init;
 			}
 		}
+        if (invincible) {
+            ++invincible_timer;
+            float i = (Mathf.Cos(Time.timeSinceLevelLoad * 10.0f) / 2.0f) + .5f;
+            if (invincible_timer > 120) {
+                invincible_timer = 0;
+                invincible = false;
+                i = .5f;
+            }
+            Color c = new Color(i, i, i);
+            mesh.material.SetColor("_Color", c);
+            mesh.material.SetColor("_EmissionColor", c);
+        }
     }
 
 	public void dash() {
@@ -196,4 +213,13 @@ public class Player {
 	}
 
 	public float get_energy() { return energy; }
+
+    public void get_hit(float energy_loss, float spin_angle) {
+        if (!invincible) {
+            set_energy(get_energy() - energy_loss);
+            spin_angle_accel += spin_angle;
+            invincible = true;
+            invincible_timer = 0;
+        }
+    }
 }

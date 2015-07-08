@@ -16,23 +16,26 @@ public class EnemyManager {
 
 	public EnemyAsset chimaera;
 	public EnemyAsset bio_eel;
-	public EnemyAsset gulper_eel;
+    public EnemyAsset gulper_eel;
+    public EnemyAsset jellyfish;
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
 	private const int SPAWN_RATE = 10;
-    private const int MAX_ENEMIES = 10;
+    private int max_enemies = 5;
+    private int max_enemy_timer = 0;
     private const int MAX_PREDATORS = 2;
     private int predator_count = 0;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
-	public int fish_eaten = 0;
+    public int fish_eaten = 0;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 100);
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 120);
-		load_asset(ref gulper_eel, "enemies/gulper_eel", .5f, .05f, new Vector3(2.0f, 2.0f, 2.0f), new Vector3(2.5f, 2.5f, 2.5f), 80);
-		spawn_radius = Glb.map.width / 2;
+		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 30);
+		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 40);
+        load_asset(ref gulper_eel, "enemies/gulper_eel", .35f, .05f, new Vector3(2.0f, 2.0f, 2.0f), new Vector3(2.5f, 2.5f, 2.5f), 35);
+        load_asset(ref jellyfish, "enemies/jellyfish", .35f, .05f, new Vector3(1.4f, 1.4f, 1.4f), new Vector3(2.8f, 2.8f, 2.8f), 15);
+        spawn_radius = Glb.map.width / 1.5f;
 	}
 
 	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale, float energy_gain) {
@@ -84,7 +87,7 @@ public class EnemyManager {
         }
         new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
         new_enemy.mesh_obj = mesh_obj;
-        Vector3 s = Vector3.Scale(new_enemy.mesh.bounds.size, new_enemy.gobj.transform.localScale);
+        Vector3 s = Vector3.Scale(new_enemy.box_collider_body.bounds.size, new_enemy.gobj.transform.localScale);
 
         if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
         if (asset == gulper_eel) ++predator_count;
@@ -93,42 +96,41 @@ public class EnemyManager {
         Vector3 colour_vec = Vector3.zero;
         float rand = Random.Range(0, 3);
 
-        if (rand == 0) colour_vec = new Vector3(0.0f, 0.0f, 1.0f);
-        else if (rand == 1) colour_vec = new Vector3(0.0f, 1.0f, 0.0f);
-        else if (rand == 2) colour_vec = new Vector3(1.0f, 1.0f, 0.0f);
-        if (!blurred_enemy && asset == gulper_eel) { colour_vec = new Vector3(1.0f, 0.0f, 0.0f); new_enemy.predator = true; }
+        float c_intensity = 1;
+        if (asset == jellyfish) c_intensity = .4f;
+        if (rand == 0) colour_vec = new Vector3(0.0f, 0.0f, c_intensity);
+        else if (rand == 1) colour_vec = new Vector3(0.0f, c_intensity, 0.0f);
+        else if (rand == 2) colour_vec = new Vector3(c_intensity, c_intensity, 0.0f);
+        if (!blurred_enemy && (asset == gulper_eel || asset == jellyfish)) { colour_vec = new Vector3(1.0f, 0.0f, 0.0f); new_enemy.predator = true; }
 
         Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
         new_enemy.colour = colour;
         new_enemy.set_emission_colour(colour);
 
-		//position enemy
-		pos.y -= s.z;
-		if (blurred_enemy) pos.y -= 2;
-		new_enemy.gobj.transform.position = pos;
+        //position enemy
+        pos.y -= s.z + 1;
+        if (blurred_enemy) pos.y -= 2;
+        new_enemy.gobj.transform.position = pos;
 
-		//init and apply light
-		new_enemy.init();
+        //init and apply light
+        new_enemy.init();
 
-		float size = Mathf.Max(s.x, s.y);
-		float intensity = .75f;
-		if (blurred_enemy) { intensity = .55f; size = size / 3.0f; }
+        float size = Mathf.Max(s.x, s.z);
+        float intensity = .75f;
+        if (blurred_enemy) { intensity = .55f; size /= 3.0f; }
 
-		if (asset == chimaera)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
-		else if (asset == bio_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
-		else if (asset == gulper_eel)
-			Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
+        Light.lights.Add(new_enemy.light = Light.create(pos.x, pos.z, size, intensity, colour_vec.x, colour_vec.y, colour_vec.z, 1));
 
-		enemies.Add(new_enemy);
+        enemies.Add(new_enemy);
 	}
 
 	public void update() {
+        ++max_enemy_timer;
+        if (max_enemy_timer >= 200) { max_enemy_timer = 0; if (max_enemies < 15) ++max_enemies; }
 		++spawn_timer;
 		if (spawn_timer >= SPAWN_RATE) {
 			spawn_timer = 0;
-			if (enemies.Count < MAX_ENEMIES) {
+			if (enemies.Count < max_enemies) {
 				float a = Random.Range(0, Mathf.PI * 2);
 				Vector3 pos = new Vector3(Glb.map.rect.x + (Mathf.Cos(a) * spawn_radius), 0,
 										  Glb.map.rect.y + (Mathf.Sin(a) * spawn_radius));
