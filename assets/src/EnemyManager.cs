@@ -57,10 +57,10 @@ public class EnemyManager {
 		return null;
 	}
 
-	public void create_enemy(EnemyAsset asset, Vector3 pos) {
-		//create enemy class and object
-		Enemy new_enemy = new Enemy();
-		new_enemy.gobj = GameObject.Instantiate(asset.gobj);
+    public void create_enemy(EnemyAsset asset, Vector3 pos) {
+        //create enemy class and object
+        Enemy new_enemy = new Enemy();
+        new_enemy.gobj = GameObject.Instantiate(asset.gobj);
         new_enemy.asset = asset;
         new_enemy.box_collider_body = new_enemy.gobj.GetComponents<BoxCollider>()[0];
         new_enemy.box_collider_head = new_enemy.gobj.GetComponents<BoxCollider>()[1];
@@ -70,37 +70,33 @@ public class EnemyManager {
 
         float m = Random.Range(0.0f, .2f);
         if (Random.value < .5f) m += Random.Range(.3f, .5f);
-		if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(10.0f, 12.0f);
+        if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(10.0f, 12.0f);
         else new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
-		GameObject mesh_obj = null;
-		foreach (Transform child in new_enemy.gobj.transform) {
-			if (child.name.IndexOf("mesh") != -1) { mesh_obj = child.gameObject; break; }
-		}
+        GameObject mesh_obj = null;
+        foreach (Transform child in new_enemy.gobj.transform) {
+            if (child.name.IndexOf("mesh") != -1) { mesh_obj = child.gameObject; break; }
+        }
         new_enemy.mesh = mesh_obj.GetComponent<SkinnedMeshRenderer>().sharedMesh;
         new_enemy.mesh_obj = mesh_obj;
         Vector3 s = Vector3.Scale(new_enemy.mesh.bounds.size, new_enemy.gobj.transform.localScale);
 
-		if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
+        if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
 
-		//gen 0-1 value in exactly 2 channels
-		Vector3 colour_vec = Vector3.zero;
-		float rand = Random.Range(0, 3);
+        //gen 0-1 value in exactly 2 channels
+        Vector3 colour_vec = Vector3.zero;
+        float rand = Random.Range(0, 3);
 
-		if (rand == 0) colour_vec.x = Random.Range(0.0f, 1.0f); 
-		else if (rand == 1) colour_vec.y = Random.Range(0.0f, 1.0f); 
-		else if (rand == 2) colour_vec.z = Random.Range(0.0f, 1.0f);
-
-		rand += Random.Range(1, 3);
-		rand = rand % 3;
-
-        if (rand == 0) colour_vec.x = 1.0f;
-        else if (rand == 1) colour_vec.y = 1.0f;
-        else if (rand == 2) colour_vec.z = 1.0f;
+        if (rand == 0) colour_vec = new Vector3(0.0f, 0.0f, 1.0f);
+        else if (rand == 1) colour_vec = new Vector3(0.0f, 1.0f, 0.0f);
+        else if (rand == 2) colour_vec = new Vector3(1.0f, 1.0f, 0.0f);
+        if (!blurred_enemy && asset == gulper_eel) { colour_vec = new Vector3(1.0f, 0.0f, 0.0f); new_enemy.predator = true; }
+        colour_vec = new Vector3(1.0f, 1.0f, 1.0f);
+        Debug.Log((asset == gulper_eel) + ", " + colour_vec);
 
         Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
         new_enemy.colour = colour;
-		mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", colour);
+        new_enemy.set_emission_colour(colour);
 
 		//position enemy
 		pos.y -= s.z;

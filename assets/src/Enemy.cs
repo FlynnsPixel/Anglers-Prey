@@ -18,6 +18,7 @@ public class Enemy {
     public bool larger_fish = false;
     public float energy = 100;
     public Color colour;
+    public bool predator = false;
 
 	private Vector3 accel;
 	private float angle_dest = 0;
@@ -121,7 +122,7 @@ public class Enemy {
             c.r = Mathf.Clamp(c.r - energy_c, .4f, 1.0f);
             c.g = Mathf.Clamp(c.g - energy_c, .4f, 1.0f);
             c.b = Mathf.Clamp(c.b - energy_c, .4f, 1.0f);
-            mesh_obj.GetComponent<Renderer>().material.SetColor("_EmissionColor", c);
+            set_emission_colour(c);
             light.set_colour(c);
         }
 
@@ -131,7 +132,6 @@ public class Enemy {
             if (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds)) {
                 if (larger_fish) {
                     //get hit by enemy
-                    Glb.player.spin_angle_accel = 3.0f;
                     Glb.player.set_energy(Glb.player.get_energy() - asset.energy_gain);
                     //push back player
                     Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
@@ -156,8 +156,8 @@ public class Enemy {
                     Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
                     Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 16 : 1));
                     //push back enemy
-                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 2.0f;
-                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 2.0f;
+                    accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN) * 5.0f;
+                    accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN) * 5.0f;
 
                     always_follow = true;
                 }else {
@@ -208,4 +208,11 @@ public class Enemy {
 		accel.z = Mathf.Clamp(accel.z, -max_speed, max_speed);
         gobj.transform.position += accel;
 	}
+
+    public void set_emission_colour(Color c) {
+        Material mat;
+        if (asset == Glb.em.gulper_eel) mat = mesh_obj.GetComponent<Renderer>().materials[3];
+        else mat = mesh_obj.GetComponent<Renderer>().material;
+        mat.SetColor("_EmissionColor", c);
+    }
 }
