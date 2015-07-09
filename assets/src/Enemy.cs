@@ -130,7 +130,7 @@ public class Enemy {
         }
 
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
-		if (player_dist > Glb.map.width / 1.2f) { to_be_removed = true; return; }
+		if (player_dist > Glb.map.width / 1.25f) { to_be_removed = true; return; }
 		if (!blurred_enemy && !Glb.player.spinning && !Glb.player.invincible) {
             if (box_collider_head != null && (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || 
                                               box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds))) {
@@ -138,8 +138,8 @@ public class Enemy {
                     //get hit by enemy
                     Glb.player.get_hit(asset.energy_gain, 0);
                     //push back player
-                    Glb.player.accel.x = Mathf.Cos(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
-                    Glb.player.accel.y = Mathf.Sin(Glb.player.angle * Math.RADIAN) / (Glb.player.max_speed / (Glb.player.dashing ? 20 : 1.5f));
+                    Glb.player.accel.x = accel.x * 4.0f;
+                    Glb.player.accel.y = accel.y * 4.0f;
                     //push back enemy
                     accel.x = -Mathf.Cos(Glb.player.angle * Math.RADIAN);
                     accel.z = -Mathf.Sin(Glb.player.angle * Math.RADIAN);

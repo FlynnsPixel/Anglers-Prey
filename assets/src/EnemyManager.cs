@@ -23,11 +23,9 @@ public class EnemyManager {
     public EnemyAsset hammerhead;
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
-	private int spawn_timer = 0;
-    private const int SPAWN_RATE = 1;
-    private int max_enemies = 5;
+    private int max_enemies = 10;
     private int max_enemy_timer = 0;
-    private const int MAX_PREDATORS = 2;
+    private float max_predators = 0;
     private int predator_count = 0;
 	private float total_spawn_rate = 0;
 	private float spawn_radius;
@@ -69,7 +67,7 @@ public class EnemyManager {
 	}
 
     public void create_enemy(EnemyAsset asset, Vector3 pos) {
-        if (predator_count >= MAX_PREDATORS) return;
+        if (asset.predator && predator_count >= max_predators) return;
 
         //create enemy class and object
         Enemy new_enemy = new Enemy();
@@ -84,7 +82,11 @@ public class EnemyManager {
 
         float m = Random.Range(0.0f, .2f);
         if (Random.value < .5f) m += Random.Range(.3f, .5f);
-        if (blurred_enemy) new_enemy.gobj.transform.localScale = asset.min_scale * Random.Range(10.0f, 12.0f);
+        if (blurred_enemy) {
+            float b_scale = Random.Range(10.0f, 12.0f);
+            if (asset == hammerhead || asset == great_white || asset == jellyfish) b_scale = Random.Range(3.0f, 4.0f);
+            new_enemy.gobj.transform.localScale = asset.min_scale * b_scale;
+        }
         else new_enemy.gobj.transform.localScale = asset.min_scale + ((asset.max_scale - asset.min_scale) * m);
 
         GameObject mesh_obj = null;
@@ -119,14 +121,17 @@ public class EnemyManager {
         new_enemy.set_emission_colour(colour);
 
         //position enemy
-        pos.y -= s.z + 1;
+        float depth = s.y;
+        if (asset == jellyfish) depth = s.z;
+        pos.y -= depth + 1;
         if (blurred_enemy) pos.y -= 2;
+        pos.y = Mathf.Max(pos.y, -30.0f);
         new_enemy.gobj.transform.position = pos;
 
         //init and apply light
         new_enemy.init();
 
-        float size = Mathf.Max(s.x, s.z);
+        float size = Mathf.Min(Mathf.Max(s.x, s.z), 50.0f);
         float intensity = .75f;
         if (blurred_enemy) { intensity = .55f; size /= 3.0f; }
 
@@ -137,17 +142,17 @@ public class EnemyManager {
 
 	public void update() {
         ++max_enemy_timer;
-        if (max_enemy_timer >= 200) { max_enemy_timer = 0; if (max_enemies < 15) ++max_enemies; }
-		++spawn_timer;
-		if (spawn_timer >= SPAWN_RATE) {
-			spawn_timer = 0;
-			if (enemies.Count < max_enemies) {
-				float a = Random.Range(0, Mathf.PI * 2);
-				Vector3 pos = new Vector3(Glb.map.rect.x + (Mathf.Cos(a) * spawn_radius), 0,
-										  Glb.map.rect.y + (Mathf.Sin(a) * spawn_radius));
-				create_enemy(get_rand_asset(), pos);
-			}
-		}
+        if (max_enemy_timer >= 200) { max_enemy_timer = 0; if (max_enemies < 15) ++max_enemies; if (max_predators <= 5) max_predators += .5f; }
+        while (true) {
+            if (enemies.Count < max_enemies) {
+                float a = Random.Range(0, Mathf.PI * 2);
+                Vector3 pos = new Vector3(Glb.map.rect.x + (Mathf.Cos(a) * spawn_radius), 0,
+                                            Glb.map.rect.y + (Mathf.Sin(a) * spawn_radius));
+                create_enemy(get_rand_asset(), pos);
+            }else {
+                break;
+            }
+        }
 
 		for (int n = 0; n < enemies.Count; ++n) {
 			Enemy enemy = enemies[n];
