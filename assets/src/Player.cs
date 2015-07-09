@@ -49,7 +49,8 @@ public class Player {
 	private int dash_timer = 0;
 	private int dash_length = 50;
     private float dash_angle = 0;
-    private int invincible_timer = 0;
+    public int invincible_timer = 0;
+    public const int INVINCIBLE_TIME = 120;
     public bool invincible = false;
 
 	public void init() {
@@ -173,7 +174,7 @@ public class Player {
         if (invincible) {
             ++invincible_timer;
             float i = (Mathf.Cos(Time.timeSinceLevelLoad * 10.0f) / 2.0f) + .5f;
-            if (invincible_timer > 120) {
+            if (invincible_timer > INVINCIBLE_TIME) {
                 invincible_timer = 0;
                 invincible = false;
                 i = .5f;

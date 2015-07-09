@@ -15,6 +15,9 @@
 
 			#include "UnityCG.cginc"
 
+			uniform float dmg_intensity;
+			uniform float heal_intensity;
+
 			struct v2f {
 	            float4 pos : SV_POSITION;
 	            float4 colour : COLOR;
@@ -41,11 +44,16 @@
 				float2 tc = i.screen_uv.xy;
 			  	float2 p = tc.xy;
 			  	float len = length(p);
-			  	float dist = sqrt(pow(p, 2) + pow(p, 2)) + .5;
+			  	float dist = sqrt(pow(p.x - .5, 2) + pow(p.y - .5, 2)) + .5;
 			  	float ripple = (p / len) * sin((len * 50.0) - (_Time.y * 6.0)) * .004;
 			  	float2 uv = tc + ripple;
 				half4 col = tex2D(_MainTex, uv);
-				
+
+				if (dist > 1) {
+					col.r += dist - dmg_intensity;
+					col.b += dist - heal_intensity;
+				}
+
 	            return col;
 	        }
 
