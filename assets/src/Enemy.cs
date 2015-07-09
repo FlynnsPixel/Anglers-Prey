@@ -61,6 +61,8 @@ public class Enemy {
         else if (asset == Glb.em.bio_eel) max_speed = .03f;
         else if (asset == Glb.em.gulper_eel) max_speed = .1f;
         else if (asset == Glb.em.jellyfish) max_speed = .02f;
+        else if (asset == Glb.em.hammerhead) max_speed = .14f;
+        else if (asset == Glb.em.great_white) max_speed = .09f;
 
         //check if the created fish is larger than the player
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);

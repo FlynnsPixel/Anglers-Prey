@@ -9,7 +9,8 @@ public class EnemyAsset {
 	public float blurred_spawn_rate = 0;
 	public Vector3 min_scale;
 	public Vector3 max_scale;
-	public float energy_gain;
+    public float energy_gain;
+    public bool predator = false;
 }
 
 public class EnemyManager {
@@ -18,10 +19,12 @@ public class EnemyManager {
 	public EnemyAsset bio_eel;
     public EnemyAsset gulper_eel;
     public EnemyAsset jellyfish;
+    public EnemyAsset great_white;
+    public EnemyAsset hammerhead;
 	public List<EnemyAsset> assets = new List<EnemyAsset>();
 	public List<Enemy> enemies = new List<Enemy>();
 	private int spawn_timer = 0;
-	private const int SPAWN_RATE = 10;
+    private const int SPAWN_RATE = 1;
     private int max_enemies = 5;
     private int max_enemy_timer = 0;
     private const int MAX_PREDATORS = 2;
@@ -31,14 +34,16 @@ public class EnemyManager {
     public int fish_eaten = 0;
 
 	public void init() {
-		load_asset(ref chimaera, "enemies/chimaera", .5f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 30);
-		load_asset(ref bio_eel, "enemies/bio_eel", .5f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 40);
-        load_asset(ref gulper_eel, "enemies/gulper_eel", .35f, .05f, new Vector3(2.0f, 2.0f, 2.0f), new Vector3(2.5f, 2.5f, 2.5f), 35);
-        load_asset(ref jellyfish, "enemies/jellyfish", .35f, .05f, new Vector3(1.4f, 1.4f, 1.4f), new Vector3(2.8f, 2.8f, 2.8f), 15);
+		load_asset(ref chimaera, "enemies/chimaera", 1.0f, .05f, new Vector3(.35f, .275f, .35f), new Vector3(1.5f, 1.275f, 1.5f), 30, false);
+		load_asset(ref bio_eel, "enemies/bio_eel", 1.0f, .25f, new Vector3(.5f, .5f, .8f), new Vector3(2.4f, 2.4f, 3.6f), 40, false);
+        load_asset(ref gulper_eel, "enemies/gulper_eel", .35f, .05f, new Vector3(2.0f, 2.0f, 2.0f), new Vector3(2.5f, 2.5f, 2.5f), 35, true);
+        load_asset(ref jellyfish, "enemies/jellyfish", .35f, .4f, new Vector3(1.4f, 1.4f, 1.4f), new Vector3(2.8f, 2.8f, 2.8f), 15, true);
+        load_asset(ref great_white, "enemies/great_white", .35f, .25f, new Vector3(1.4f, 1.4f, 1.4f), new Vector3(2.0f, 2.0f, 2.0f), 40, true);
+        load_asset(ref hammerhead, "enemies/hammerhead", .35f, .25f, new Vector3(1.4f, 1.4f, 1.4f), new Vector3(2.0f, 2.0f, 2.0f), 40, true);
         spawn_radius = Glb.map.width / 1.5f;
 	}
 
-	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale, float energy_gain) {
+	private void load_asset(ref EnemyAsset obj, string name, float spawn_rate, float blurred_spawn_rate, Vector3 min_scale, Vector3 max_scale, float energy_gain, bool predator) {
 		obj = new EnemyAsset();
 		obj.gobj = (GameObject)Resources.Load(name);
 		foreach (Transform child in obj.gobj.transform) {
@@ -50,7 +55,8 @@ public class EnemyManager {
 		total_spawn_rate += spawn_rate;
 		obj.spawn_rate = total_spawn_rate;
 		obj.blurred_spawn_rate = blurred_spawn_rate;
-		obj.energy_gain = energy_gain;
+        obj.energy_gain = energy_gain;
+        obj.predator = predator;
 		assets.Add(obj);
 	}
 
@@ -90,7 +96,10 @@ public class EnemyManager {
         Vector3 s = Vector3.Scale(new_enemy.box_collider_body.bounds.size, new_enemy.gobj.transform.localScale);
 
         if (blurred_enemy) { mesh_obj.layer = 8; new_enemy.blurred_enemy = true; }
-        if (asset == gulper_eel) ++predator_count;
+        if (asset.predator) {
+            ++predator_count;
+            new_enemy.predator = true;
+        }
 
         //gen 0-1 value in exactly 2 channels
         Vector3 colour_vec = Vector3.zero;
@@ -98,10 +107,12 @@ public class EnemyManager {
 
         float c_intensity = 1;
         if (asset == jellyfish) c_intensity = .4f;
+        else if (asset == great_white || asset == hammerhead) c_intensity = .4f;
+
         if (rand == 0) colour_vec = new Vector3(0.0f, 0.0f, c_intensity);
         else if (rand == 1) colour_vec = new Vector3(0.0f, c_intensity, 0.0f);
         else if (rand == 2) colour_vec = new Vector3(c_intensity, c_intensity, 0.0f);
-        if (!blurred_enemy && (asset == gulper_eel || asset == jellyfish)) { colour_vec = new Vector3(1.0f, 0.0f, 0.0f); new_enemy.predator = true; }
+        if (!blurred_enemy && asset.predator) colour_vec = new Vector3(c_intensity, 0.0f, 0.0f);
 
         Color colour = new Color(colour_vec.x, colour_vec.y, colour_vec.z);
         new_enemy.colour = colour;
@@ -146,7 +157,7 @@ public class EnemyManager {
 				if (enemy.gobj != null) GameObject.Destroy(enemy.gobj);
 				enemies.RemoveAt(n);
 				--n;
-                if (enemy.asset == gulper_eel) --predator_count;
+                if (enemy.asset.predator) --predator_count;
             }
 		}
 
@@ -157,7 +168,7 @@ public class EnemyManager {
 				if (enemy.gobj != null) GameObject.Destroy(enemy.gobj);
 				enemies.RemoveAt(n);
                 --n;
-                if (enemy.asset == gulper_eel) --predator_count;
+                if (enemy.asset.predator) --predator_count;
 			}
 		}
 	}

@@ -77,6 +77,11 @@ public class Player {
         ani["swim"].speed = 5;
         box_collider_body = player.GetComponents<BoxCollider>()[0];
         box_collider_head = player.GetComponents<BoxCollider>()[1];
+
+        AudioClip a = (AudioClip)Resources.Load("musix");
+        AudioSource b = Glb.cam.main.GetComponent<AudioSource>();
+        b.PlayOneShot(a);
+        b.volume = 0;
     }
 
 	public void update() {
