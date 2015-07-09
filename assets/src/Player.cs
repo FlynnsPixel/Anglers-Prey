@@ -53,7 +53,9 @@ public class Player {
     public const int INVINCIBLE_TIME = 120;
     public bool invincible = false;
 
-	public void init() {
+    public AudioClip[] bloopies = new AudioClip[5];
+
+    public void init() {
 		player = GameObject.Find("player");
 		pos = player.transform.position;
 		pos.y = -2.0f;
@@ -79,10 +81,11 @@ public class Player {
         box_collider_body = player.GetComponents<BoxCollider>()[0];
         box_collider_head = player.GetComponents<BoxCollider>()[1];
 
-        AudioClip a = (AudioClip)Resources.Load("musix");
-        AudioSource b = Glb.cam.main.GetComponent<AudioSource>();
-        b.PlayOneShot(a);
-        b.volume = 0;
+        bloopies[0] = (AudioClip)Resources.Load("Bloop1");
+        bloopies[1] = (AudioClip)Resources.Load("Bloop2");
+        bloopies[2] = (AudioClip)Resources.Load("Bloop3");
+        bloopies[3] = (AudioClip)Resources.Load("Bloop4");
+        bloopies[4] = (AudioClip)Resources.Load("Bloop5");
     }
 
 	public void update() {
@@ -186,8 +189,11 @@ public class Player {
     }
 
 	public void dash() {
-		dashing = true;
-		dash_timer = 0;
+        int which_bloopie = Random.Range(0, 4);
+        AudioSource audio = Glb.cam.main.GetComponent<AudioSource>();
+        audio.PlayOneShot(bloopies[which_bloopie]);
+        dashing = true;
+        dash_timer = 0;
 		max_speed *= 8;
 		accel_speed *= 8;
 		max_rota *= 5;

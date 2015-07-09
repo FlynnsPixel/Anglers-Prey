@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayGameButton : MonoBehaviour {
 
-	void OnMouseDown() {
+	void OnMouseUp() {
 		Application.LoadLevel("game");
 	}
 }

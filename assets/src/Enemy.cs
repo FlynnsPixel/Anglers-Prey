@@ -16,10 +16,10 @@ public class Enemy {
 	public bool blurred_enemy = false;
     public float player_dist = 9999;
     public bool larger_fish = false;
-    public float energy = 100;
     public Color colour;
     public bool predator = false;
-    public const float MAX_ENERGY = 100;
+    public float energy = 100;
+    public float max_energy = 100;
 
 	private Vector3 accel;
 	private float angle_dest = 0;
@@ -50,11 +50,19 @@ public class Enemy {
 	public const int AI_AGGRESSIVE		= 1 << 1; 
 	public const int AI_BATCH			= 1 << 2;
 
-	public void init() {
+    public AudioClip[] bloopies = new AudioClip[5];
+    public AudioClip[] intensity = new AudioClip[2];
+    public float timer;
+    public AudioSource enemy_audio;
+    public AudioSource audio;
+
+    public void init() {
         //initial values
 		angle_dest = Random.Range(0, Mathf.PI * 2);
 		init_rota = gobj.transform.localEulerAngles;
         init_pos = gobj.transform.position;
+        enemy_audio = gobj.AddComponent<AudioSource>();
+        audio = Glb.cam.main.GetComponent<AudioSource>();
 
         //initial speeds for enemies
         if (asset == Glb.em.chimaera) max_speed = .04f;
@@ -63,6 +71,10 @@ public class Enemy {
         else if (asset == Glb.em.jellyfish) max_speed = .02f;
         else if (asset == Glb.em.hammerhead) max_speed = .14f;
         else if (asset == Glb.em.great_white) max_speed = .09f;
+
+        if (asset == Glb.em.hammerhead) max_energy = 180;
+        else if (asset == Glb.em.great_white) max_energy = 200;
+        energy = max_energy;
 
         //check if the created fish is larger than the player
         Vector3 s = Vector3.Scale(mesh.bounds.size, gobj.transform.localScale);
@@ -84,6 +96,18 @@ public class Enemy {
             max_speed -= Mathf.Clamp(sc / 50.0f, 0, .02f);
             ani["swim"].speed = 1 - (sc / 1.5f);
             turn_speed += (sc * 80.0f);
+
+            bloopies[0] = (AudioClip)Resources.Load("Bloop1");
+            bloopies[1] = (AudioClip)Resources.Load("Bloop2");
+            bloopies[2] = (AudioClip)Resources.Load("Bloop3");
+            bloopies[3] = (AudioClip)Resources.Load("Bloop4");
+            bloopies[4] = (AudioClip)Resources.Load("Bloop5");
+            intensity[0] = (AudioClip)Resources.Load("Anglers_theme");
+            intensity[1] = (AudioClip)Resources.Load("Enemy_music");
+
+            audio.PlayOneShot(intensity[0]);
+            audio.loop = true;
+            audio.volume = 0.5f;
         }
     }
 
@@ -102,6 +126,8 @@ public class Enemy {
 	}
 
     public void update() {
+        timer = timer + 1 * Time.deltaTime;
+
         if (blood_state) {
             blood_size -= (blood_size - 22) / 250.0f;
             blood_intensity -= (blood_intensity) / 250.0f;
@@ -120,7 +146,7 @@ public class Enemy {
 
         if (energy < 100) {
             energy += .05f;
-            float energy_c = (MAX_ENERGY / 500.0f) - (energy / 500.0f);
+            float energy_c = (max_energy / 500.0f) - (energy / 500.0f);
             Color c = colour;
             c.r = Mathf.Clamp(c.r - energy_c, .4f, 1.0f);
             c.g = Mathf.Clamp(c.g - energy_c, .4f, 1.0f);
@@ -131,6 +157,17 @@ public class Enemy {
 
         player_dist = Mathf.Sqrt(Mathf.Pow(Glb.player.pos.x - gobj.transform.position.x, 2) + Mathf.Pow(Glb.player.pos.z - gobj.transform.position.z, 2));
 		if (player_dist > Glb.map.width / 1.25f) { to_be_removed = true; return; }
+
+		//if (player_dist < Glb.map.half_width || player_dist < Glb.map.half_height) {
+		//	audio.volume = Mathf.Lerp (0.5f, 0.0f, 0.5f);
+		//	audio.PlayOneShot (intensity[1]);
+		//	audio.volume = Mathf.Lerp (0.0f, 0.5f, 0.5f);
+		//}else if (player_dist > Glb.map.half_width || player_dist < Glb.map.half_height) {
+		//	audio.volume = Mathf.Lerp (0.5f, 0.0f, 0.5f);
+		//	audio.PlayOneShot (intensity[0]);
+		//	audio.volume = Mathf.Lerp (0.0f, 0.5f, 0.5f);
+		//}
+
 		if (!blurred_enemy && !Glb.player.spinning && !Glb.player.invincible) {
             if (box_collider_head != null && (box_collider_head.bounds.Intersects(Glb.player.box_collider_head.bounds) || 
                                               box_collider_head.bounds.Intersects(Glb.player.box_collider_body.bounds))) {
